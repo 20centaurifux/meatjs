@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>foo</title>
+
+  <link rel="stylesheet" href="jquery.mobile-1.4.5.min.css">
+  <link rel="stylesheet" href="jquery.blockui.css">
+
+  <style>
+    span.error {color:red; margin:5px; font-style:italic;}
+  </style>
+
+  <script type="text/javascript" src="jquery.min.js"></script>
+
+  <script type="text/javascript">
+    $(document).bind("mobileinit", function()
+    {
+      $.mobile.autoInitializePage = false;
+    });         
+  </script>
+
+  <script type="text/javascript" src="jquery.blockui.js"></script>
+  <script type="text/javascript" src="meat.storage.js"></script>
+  <script type="text/javascript" src="meat.cache.js"></script>
+  <script type="text/javascript" src="meat.rest.js"></script>
+  <script type="text/javascript" src="meat.store.js"></script>
+  <script type="text/javascript" src="jquery.mobile-1.4.5.min.js"></script>
+
+  <script type="text/javascript">
+    var store = null;
+
+    $(document).ready(function()
+    {
+      // initialize store:
+      store = new MeatStore();
+
+      // register page events:
+      $("#page-edit-profile").on("pagebeforeshow", page_profile_loading);
+      $("#page-reset-password").on("pagebeforeshow", page_reset_password_loading);
+      $("#page-change-password").on("pagebeforeshow", page_change_password_loading);
+      $("#page-authentication").on("pagebeforeshow", page_authentication_loading);
+      $("#page-new-account").on("pagebeforeshow", page_new_account_loading);
+
+      // set start page:
+      openStartPage();
+    });
+
+    function openStartPage()
+    {
+      var hash = "page-library";
+      var credentials = store.getCredentials();
+
+      if(!store.configured())
+      {
+        hash = "page-authentication";
+      }
+
+      window.location.hash = hash;
+      $.mobile.initializePage();
+    }
+
+    function openNavigation()
+    {
+      $("body").pagecontainer("change", "#page-navigation", {changeHash:false});
+    }
+
+    function getFailureMessage(response)
+    {
+      var message = "An unexpected failure occured, please try again later.";
+
+      if(response.responseJSON && response.responseJSON["message"])
+      {
+        message = response.responseJSON["message"];
+      }
+      else if(response.status == 403)
+      {
+        message = "Authentication failed.";
+      }
+
+      return message;
+    }
+
+    function findInvalidField(response)
+    {
+      if(response.responseJSON && response.responseJSON["field"])
+      {
+        return response.responseJSON["field"];
+      }
+
+      return null;
+    }
+
+    /*
+     *  authentication page:
+     */
+    function page_authentication_loading()
+    {
+      var credentials = store.getCredentials();
+
+      $("#page-authentication").find(".error").hide();
+
+      if(store.configured())
+      {
+        $("#text-authentication-username").val(credentials.Username);
+        $("#text-authentication-password").val(credentials.Password);
+        $("#link-authentication-back").show();
+        $("#link-authentication-connect").text("Reconnect");
+        $("#link-authentication-new-account").hide();
+      }
+      else
+      {
+        $("#link-authentication-back").hide();
+        $("#link-authentication-connect").text("Login");
+        $("#link-authentication-new-account").show();
+      }
+    }
+
+    function link_authentication_connect_tapped()
+    {
+      $(document).blockUI("show");
+
+      $("#page-authentication").find(".error").hide();
+
+      var username = $("#text-authentication-username").val();
+      var password = $("#text-authentication-password").val();
+
+      store.changeCredentials(username, password)
+        .done(function(profile)
+        {
+          if(store.configured())
+          {
+            $("body").pagecontainer("change", "#page-logged-in", {changeHash:false});
+          }
+          else
+          {
+            store.setConfigured();
+            $("body").pagecontainer("change", "#page-library", {changeHash:false});
+          }
+        })
+        .fail(function(response)
+        {
+          var text;
+
+          if(response.status == 404)
+          {
+            text = "User account not found. Please check entered username.";
+          }
+          else if(response.status == 403)
+          {
+            text = "Invalid username or password.";
+          }
+          else
+          {
+            text = getFailureMessage(response);
+          }
+
+          $("#page-authentication").find(".error").first().text("*" + text).show();
+        })
+        .always(function()
+        {
+          $(document).blockUI("hide")
+        });
+    }
+
+    /*
+     *  password reset page:
+     */
+    function page_reset_password_loading()
+    {
+      $(document).blockUI("show");
+
+      $("#page-reset-password").find(".error").hide();
+
+      // test password reset timeout:
+      var expired = store.lastPasswordResetTimeoutExpired(120);
+
+      if(expired)
+      {
+        $("#link-reset-password").prop("disabled", false).removeClass("ui-disabled");
+        $("#text-reset-password-username").textinput("enable");
+        $("#text-reset-password-email").textinput("enable");
+        $("#p-reset-password-timeout").hide();
+      }
+      else
+      {
+        $("#link-reset-password").prop("disabled", true).addClass("ui-disabled");
+        $("#text-reset-password-username").textinput("disable");
+        $("#text-reset-password-email").textinput("disable");
+        $("#p-reset-password-timeout").show();
+      }
+
+      // try to fill username & email field:
+      store.getOwnProfile()
+        .done(function(profile)
+        {
+          $("#text-reset-password-username").val(profile["username"]);
+          $("#text-reset-password-email").val(profile["email"]);
+          $("#text-reset-password-username").textinput("disable");
+        })
+        .fail(function()
+        {
+          $("#text-reset-password-username").val("");
+          $("#text-reset-password-email").val("");
+        })
+        .always(function()
+        {
+          $(document).blockUI("hide");
+        });
+    }
+
+    function link_reset_password_tapped()
+    {
+      $(document).blockUI("show");
+
+      $("#page-reset-password").find(".error").hide();
+
+      var username = $("#text-reset-password-username").val();
+      var email = $("#text-reset-password-email").val();
+
+      store.requestPassword(username, email)
+        .done(function(profile)
+        {
+          $("body").pagecontainer("change", "#page-password-sent", {changeHash:false});
+        })
+        .fail(function(response)
+        {
+          var field = findInvalidField(response);
+
+          if(response.status == 422 || field == "email")
+          {
+            $("#page-reset-password").find('.error[data-field="email"]').text("*The specified mail address is invalid.").show();
+          }
+          else if(response.status == 404)
+          {
+            $("#page-reset-password").find('.error[data-field="username"]').text("*User not found.").show();
+          }
+          else
+          {
+            $("#page-reset-password").find(".error").first().text("*" + getFailureMessage(response)).show();
+          }
+        })
+        .always(function()
+        {
+          $(document).blockUI("hide")
+        });
+    }
+
+    /*
+     *  register new account page:
+     */
+    function page_new_account_loading()
+    {
+      $("#page-new-account").find(".error").hide();
+
+      var expired = store.lastAccountRequestTimeoutExpired(60);
+
+      if(expired)
+      {
+        $("#link-new-account").prop("disabled", false).removeClass("ui-disabled");
+        $("#text-new-account-username").val("").textinput("enable");
+        $("#text-new-account-email").val("").textinput("enable");
+        $("#p-new-account-wait").hide();
+      }
+      else
+      {
+        $("#link-new-account").prop("disabled", true).addClass("ui-disabled");
+        $("#text-new-account-username").textinput("disable");
+        $("#text-new-account-email").textinput("disable");
+        $("#p-new-account-wait").show();
+      }
+    }
+
+    function link_new_account_tapped()
+    {
+      $(document).blockUI("show");
+
+      $("#page-new-account").find(".error").hide();
+
+      var username = $("#text-new-account-username").val();
+      var email = $("#text-new-account-email").val();
+
+      store.requestAccount(username, email)
+        .done(function()
+        {
+          $("body").pagecontainer("change", "#page-account-registered", {changeHash:false});
+        })
+        .fail(function(response)
+        {
+          var field = findInvalidField(response);
+          var text;
+
+          if(field == "email")
+          {
+            text = "Please check the entered mail address.";
+          }
+          else if(field == "username")
+          {
+            text = "Please enter a name with a maximum length of 32 characters.";
+          }
+          else if(response.status == 409)
+          {
+            message = "Username or mail address already in use."
+          }
+          else
+          {
+            message = getFailureMessage(response);
+          }
+
+          if(field)
+          {
+            $("#page-new-account").find('span[data-field="' + field + '"]').text("*" + text).show();
+          }
+          else
+          {
+            $("#page-new-account").find(".error").first().text("*" + message).show();
+          }
+        })
+        .always(function()
+        {
+          $(document).blockUI("hide");
+        });
+    }
+
+    /*
+     *  edit profile page:
+     */
+    function page_profile_loading()
+    {
+      $(document).blockUI("show");
+
+      $("#page-edit-profile").find(".error").hide();
+
+      store.getOwnProfile()
+        .done(function(profile)
+        {
+          $("#text-profile-email").val(profile["email"]);
+          $("#text-profile-firstname").val(profile["firstname"]);
+          $("#text-profile-lastname").val(profile["lastname"]);
+          $("#select-profile-language").val(profile["language"]);
+          $("#select-profile-sex").val(profile["gender"]).selectmenu("refresh");
+          $("#checkbox-profile-protected").prop("checked", profile["protected"]).checkboxradio("refresh");
+        }).fail(function(response)
+        {
+          $("#page-edit-profile").find(".error").first().text("*Couldn't load profile, please try again.").show();
+        }).always(function()
+        {
+          $(document).blockUI("hide");
+        });
+    }
+
+    function link_profile_save_tapped()
+    {
+      $(document).blockUI("show");
+
+      store.updateProfile($("#text-profile-email").val(),
+                          $("#text-profile-firstname").val(),
+                          $("#text-profile-lastname").val(),
+                          $("#select-profile-language").val(),
+                          $("#select-profile-sex").val(),
+                          $("#checkbox-profile-protected").is(":checked"))
+        .done(function(profile)
+        {
+          $("#page-edit-profile").find(".error").hide();
+        })
+        .fail(function(response)
+        {
+          var field = findInvalidField(response);
+          var text;
+
+          if(field == "email")
+          {
+            text = "Please check the entered mail address.";
+          }
+          else if(field == "firstname" || field == "lastname")
+          {
+            text = "Please enter a name with a maximum length of 32 characters.";
+          }
+          else
+          {
+            message = getFailureMessage(response);
+          }
+
+          if(field)
+          {
+            $("#page-edit-profile").find('span[data-field="' + field + '"]').text("*" + text).show();
+          }
+          else
+          {
+            $("#pagedit-profile").find(".error").first().text("*" + message).show();
+          }
+        })
+        .always(function()
+        {
+          $(document).blockUI("hide");
+        });
+    }
+
+    /*
+     *  change password page:
+     */
+    function page_change_password_loading()
+    {
+      $("#page-change-password").find(".error").hide();
+    }
+
+    function link_change_password_tapped()
+    {
+      $(document).blockUI("show");
+
+      var new_password1 = $("#text-change-password-new1").val();
+      var new_password2 = $("#text-change-password-new2").val();
+
+      $("#page-change-password").find(".error").hide();
+
+      store.updatePassword(new_password1, new_password2)
+        .done(function(profile)
+        {
+          $("#page-change-password").find(".error").hide();
+          $("body").pagecontainer("change", "#page-password-changed", {changeHash:false});
+        })
+        .fail(function(response)
+        {
+          var field = findInvalidField(response);
+          var text;
+
+          if(field == "new_password1")
+          {
+            text = "Your password should be between 8 and 32 characters.";
+          }
+          else if(field == "new_password2")
+          {
+            text = "Both passwords have to be equal.";
+          }
+          else
+          {
+            text = getFailureMessage(response);
+          }
+
+          if(field)
+          {
+            $("#page-change-password").find('span[data-field="' + field + '"]').text("*" + text).show();
+          }
+          else
+          {
+            $("#page-change-password").find(".error").first().text("*" + text).show();
+          }
+        })
+        .always(function()
+        {
+          $(document).blockUI("hide");
+        });
+    }
+
+  </script>
+</head>
+
+<body>
+
+<div id="page-navigation" data-role="page">
+  <div role="main" class="ui-content">
+    <ul data-role="listview">
+      <li><a href="#page-library">Library</a></li>
+      <li><a href="#">Random</a></li>
+      <li><a href="#">Popular</a></li>
+      <li><a href="#">Favorites</a></li>
+      <li><a href="#">Messages</a></li>
+      <li><a href="#page-edit-profile">My Profile</a></li>
+      <li><a href="#page-change-password">Change password</a></li>
+      <li><a href="#page-authentication">Reconnect</a></li>
+      <li><a href="#">About</a></li>
+    </ul>
+  </div>
+</div>
+
+<div data-role="page" id="page-authentication">
+  <div data-role="header">
+    <a id="link-authentication-back" href="#" data-rel="back" data-icon="back">Back</a>
+    <h1>Login</h1>
+    <a href="javascript:link_authentication_connect_tapped()" id="link-authentication-connect" data-icon="user" data-theme="b">Reconnect</a>
+  </div>
+ 
+  <div role="main" class="ui-content">
+    <span class="error"></span>
+
+    <label for="text-authentication-username">Username:</label>
+    <input name="text-authentication-username" id="text-authentication-username" value="" type="text">
+
+    <label for="text-authentication-password">Password:</label>
+    <input name="text-authentication-password" id="text-authentication-password" value="" type="password" autocomplete="off">
+
+    <a href="#page-reset-password" data-icon="action" data-role="button">Forgot password</a>
+    <a id="link-authentication-new-account" href="#page-new-account" data-icon="user" data-role="button">New user account</a>
+  </div>
+</div>
+
+<div data-role="dialog" id="page-logged-in">
+  <div data-role="header">
+    <h1>Logged in</h1>
+  </div>
+
+  <div role="main" class="ui-content">
+    Logged in successfully. Have fun!
+    <a href="#" data-rel="back" data-icon="back" data-role="button">Back</a>
+  </div>
+</div>
+
+<div data-role="page" id="page-reset-password">
+  <div data-role="header">
+    <a href="#" data-rel="back" data-icon="back">Back</a>
+    <h1>Reset password</h1>
+    <a href="javascript:link_reset_password_tapped()" id="link-reset-password" data-icon="mail" data-theme="b">Mail</a>
+  </div>
+ 
+  <div role="main" class="ui-content">
+    <p>
+      If you should have forgot your password please enter your username and the corresponding mail address. By
+      tapping the <strong>Mail</strong> button you'll receive a link for resetting your password.
+    </p>
+
+    <p id="p-reset-password-timeout" style="display:none;">
+      <strong>Please wait until requesting a new password.</strong>
+    </p>
+
+    <span class="error"></span>
+
+    <label for="text-reset-password-username">Username:</label>
+    <input name="text-reset-password-username" id="text-reset-password-username" value="" type="text" disabled="disabled">
+    <span class="error" data-field="username"></span>
+
+    <label for="text-reset-password-email">Mail address:</label>
+    <input name="text-reset-password-email" id="text-reset-password-email" value="" type="text">
+    <span class="error" data-field="email"></span>
+  </div>
+</div>
+
+<div data-role="dialog" id="page-password-sent">
+  <div data-role="header">
+    <h1>Password reset</h1>
+  </div>
+
+  <div role="main" class="ui-content">
+    You should receive a mail with instructions in the next few minutes. Please stay patient :)
+    <a href="#" data-rel="back" data-icon="back" data-role="button">Back</a>
+  </div>
+</div>
+
+<div data-role="page" id="page-new-account">
+  <div data-role="header">
+    <a href="#" data-rel="back" data-icon="back">Back</a>
+    <h1>Registration</h1>
+    <a href="javascript:link_new_account_tapped()" id="link-new-account" data-icon="user" data-theme="b">Register</a>
+  </div>
+ 
+  <div role="main" class="ui-content">
+    <p>
+      To register a new user account enter a username and mail address. Then tap the <strong>Register</strong> button.
+    </p>
+
+    <p id="p-new-account-timeout" style="display:none;">
+      <strong>Please wait until registering an additional user account.</strong>
+    </p>
+
+    <span class="error"></span>
+
+    <label for="text-new-account-username">Username:</label>
+    <input name="text-new-account-username" id="text-new-account-username" value="" type="text">
+    <span class="error" data-field="username"></span>
+
+    <label for="text-new-account-email">Mail address:</label>
+    <input name="text-new-account-email" id="text-new-account-email" value="" type="text">
+    <span class="error" data-field="email"></span>
+  </div>
+</div>
+
+<div data-role="dialog" id="page-account-registered">
+  <div data-role="header">
+    <h1>Account registered</h1>
+  </div>
+
+  <div role="main" class="ui-content">
+    Your account has been registered successfully. You'll receive an activiation mail within
+    the next few minutes. Please stay patient :)
+    <a href="#" data-rel="back" data-icon="back" data-role="button">Back</a>
+  </div>
+</div>
+
+<div data-role="page" id="page-change-password">
+  <div data-role="header">
+    <a href="#" data-rel="back" data-icon="back">Back</a>
+    <h1>Change password</h1>
+    <a href="javascript:link_change_password_tapped()" id="link-change-password" data-icon="edit" data-theme="b">Change</a>
+  </div>
+ 
+  <div role="main" class="ui-content">
+    <span class="error"></span>
+
+    <label for="text-change-password-new1">New password:</label>
+    <input name="text-change-password-new1" id="text-change-password-new1" value="" type="password">
+    <span class="error" data-field="new_password1"></span>
+
+    <label for="text-change-password-new2">Repeat new password:</label>
+    <input name="text-change-password-new2" id="text-change-password-new2" value="" type="password">
+    <span class="error" data-field="new_password2"></span>
+  </div>
+</div>
+
+<div data-role="dialog" id="page-password-changed">
+  <div data-role="header">
+    <h1>New Password</h1>
+  </div>
+
+  <div role="main" class="ui-content">
+    Your password has been changed successfully.
+    <a href="#" data-rel="back" data-icon="back" data-role="button">Back</a>
+  </div>
+</div>
+
+<div data-role="page" id="page-edit-profile">
+  <div data-role="header" data-position="fixed">
+    <a href="#" data-rel="back" data-icon="back">Back</a>
+    <h1>Edit profile</h1>
+    <a href="javascript:link_profile_save_tapped()" id="link-profile-save" data-icon="edit" data-theme="b">Save</a>
+  </div>
+ 
+  <div role="main" class="ui-content">
+    <form novalidate>
+      <span class="error"></span>
+
+      <label for="text-profile-email">Mail address:</label>
+      <input name="email" id="text-profile-email" value="" type="text">
+      <span class="error" data-field="email"></span>
+
+      <label for="text-profile-firstname">Firstname:</label>
+      <input name="firstname" id="text-profile-firstname" value="" type="text">
+      <span class="error" data-field="firstname"></span>
+
+      <label for="text-profile-lastname">Lastname:</label>
+      <input name="lastname" id="text-profile-lastname" value="" type="text">
+      <span class="error" data-field="lastname"></span>
+
+      <label for="select-profile-language">Language:</label>
+      <select name="language" id="select-profile-language" data-mini="true">
+        <option value="en">English</option>
+      </select>
+
+      <label for="select-profile-sex">Sex:</label>
+      <select name="gender" id="select-profile-sex" data-mini="true">
+        <option value="">Unknown</option>
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+        <option value="trans man">Trans man</option>
+        <option value="trans woman">Tran Woman</option>
+      </select>
+
+      <fieldset data-role="controlgroup">
+        <legend>Protected:</legend>
+        <label for="checkbox-profile-protected">Only allow friends to contact me.</label>
+        <input name="checkbox-profile-protected" id="checkbox-profile-protected" type="checkbox">
+      </fieldset>
+    </form>
+  </div>
+</div>
+
+<div data-role="page" id="page-change-avatar">
+  <div data-role="header">
+    <h1>Change avatar</h1>
+  </div>
+ 
+  <div role="main" class="ui-content">
+    @TODO
+  </div>
+</div>
+
+<div data-role="page" id="page-library" data-position="fixed">
+  <div data-role="header">
+    <a href='javascript:openNavigation();' data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
+    <h1>Library</h1>
+  </div>
+ 
+  <div role="main" class="ui-content">
+    This is your library.
+  </div>
+</div>
+
+</body>
+</html>
