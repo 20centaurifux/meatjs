@@ -453,6 +453,26 @@
         });
     }
 
+    function loadImages(ul)
+    {
+      var client = store.createClient();
+
+      $(ul).find("li").each(function()
+      {
+        var filename = $(this).data("filename");
+        var img = $(this).find("img").first();
+
+        client.getThumbnail(filename)
+          .success(function(thumbnail)
+          {
+            $(img).attr("src", thumbnail);
+          })
+          .fail(function(r)
+          {
+            // TODO: display error picture
+          });
+      });
+    }
   </script>
 </head>
 
