@@ -48,12 +48,12 @@
         var client = this.createClient();
 
         client.getOwnProfile()
-    .success(function(profile)
-    {
-      cache.setJSON("user.Profile", profile, 300);
-      d.resolve(profile);
-    })
-    .fail(d.reject);
+          .success(function(profile)
+          {
+            cache.setJSON("user.Profile", profile, 300);
+            d.resolve(profile);
+          })
+          .fail(d.reject);
       }
       else if(profile != null)
       {
