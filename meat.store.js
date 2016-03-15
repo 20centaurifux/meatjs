@@ -2,6 +2,7 @@
   {
     var cache = $(options).prop('Cache') || new MeatCache();
     var storage = $(options).prop('Storage') || LocalMeatStorage;
+    var store = this;
 
     this.createClient = function()
     {
@@ -34,7 +35,7 @@
 
       cache.remove("user.Profile");
 
-      return this.getOwnProfile();
+      return store.getOwnProfile();
     }
 
     this.getOwnProfile = function()
@@ -45,7 +46,7 @@
 
       if(profile == null)
       {
-        var client = this.createClient();
+        var client = store.createClient();
 
         client.getOwnProfile()
           .success(function(profile)
@@ -69,7 +70,7 @@
 
   this.updateProfile = function(email, firstname, lastname, language, sex, protected)
   {
-    var p = this.createClient().updateProfile(email, firstname, lastname, sex, language, protected);
+    var p = store.createClient().updateProfile(email, firstname, lastname, sex, language, protected);
 
     p.done(function(profile)
     {
@@ -83,7 +84,7 @@
   {
     var d = $.Deferred();
 
-    this.createClient().updatePassword(storage.load("user.Password"), new_password1, new_password2)
+    store.createClient().updatePassword(storage.load("user.Password"), new_password1, new_password2)
       .success(function(response)
       {
         storage.store("user.Password", new_password1);
@@ -99,7 +100,7 @@
   {
     var d = $.Deferred();
 
-    this.createClient().requestAccount(username, email)
+    store.createClient().requestAccount(username, email)
       .success(function(response)
       {
         storage.storeInt("app.LastAccountRequest", new Date().getTime());
@@ -119,7 +120,7 @@
   {
     var d = $.Deferred();
 
-    this.createClient().requestPassword(username, email)
+    store.createClient().requestPassword(username, email)
       .success(function(response)
       {
         storage.storeInt("app.LastPasswordReset", new Date().getTime());
@@ -148,5 +149,19 @@
     }
 
     return expired;
+  }
+
+  this.getObjects = function(page)
+  {
+    var d = $.Deferred();
+
+    store.createClient().getObjects(page, 2)
+      .success(function(response)
+      {
+        d.resolve(response);
+      })
+      .fail(d.reject);
+
+    return d.promise();
   }
 }
