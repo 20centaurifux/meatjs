@@ -93,7 +93,7 @@
         })
         .fail(function(r)
         {
-          // TODO: display error picture
+          $('img[data-source="' + image["source"] + '"]').attr("src", "images/image-missing.png");
         });
     }
   };
