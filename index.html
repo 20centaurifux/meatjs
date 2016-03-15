@@ -26,6 +26,7 @@
   <script type="text/javascript" src="meat.cache.js"></script>
   <script type="text/javascript" src="meat.rest.js"></script>
   <script type="text/javascript" src="meat.store.js"></script>
+  <script type="text/javascript" src="jquery.library.js"></script>
   <script type="text/javascript" src="jquery.mobile-1.4.5.min.js"></script>
 
   <script type="text/javascript">
@@ -42,6 +43,7 @@
       $("#page-change-password").on("pagebeforeshow", page_change_password_loading);
       $("#page-authentication").on("pagebeforeshow", page_authentication_loading);
       $("#page-new-account").on("pagebeforeshow", page_new_account_loading);
+      $("#page-library").on("pagebeforeshow", page_library_loading);
 
       // set start page:
       openStartPage();
@@ -453,25 +455,18 @@
         });
     }
 
-    function loadImages(ul)
+    /*
+     * library:
+     */
+    function page_library_loading()
     {
-      var client = store.createClient();
+        $("#library-listview").library({pageSize: 5, onLoad: store.getObjects});
+        $("#library-listview").library("update");
+    }
 
-      $(ul).find("li").each(function()
-      {
-        var filename = $(this).data("filename");
-        var img = $(this).find("img").first();
-
-        client.getThumbnail(filename)
-          .success(function(thumbnail)
-          {
-            $(img).attr("src", thumbnail);
-          })
-          .fail(function(r)
-          {
-            // TODO: display error picture
-          });
-      });
+    function loadNextPage()
+    {
+        $("#library-listview").library("nextPage");
     }
   </script>
 </head>
@@ -700,7 +695,10 @@
   </div>
  
   <div role="main" class="ui-content">
-    This is your library.
+    <ul id="library-listview" data-role="listview" data-inset="true">
+    </ul>
+
+    <button onclick="loadNextPage();">more</button>
   </div>
 </div>
 
