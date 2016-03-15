@@ -53,6 +53,8 @@
       }
       else
       {
+        var compare = $(this).data("options").onCompare || function(image, li) { parseInt(image["created_on"]["$date"], 10) > parseInt(li.data("timestamp"), 10) };
+
         // insert new image:
         var html = '<li data-source="' + image["source"] + '" data-timestamp="' + image["created_on"]["$date"] + '">' +
                    '<a href="#"><img data-source="' + image["source"] + '"src="#" alt="">' +
@@ -66,7 +68,7 @@
 
         $(this).find("li").each(function()
         {
-          if(parseInt(image["created_on"]["$date"], 10) > parseInt($(this).data("timestamp"), 10))
+          if(compare(image, $(this)))
           {
             $(html).insertBefore(this);
             inserted = true;
@@ -98,7 +100,7 @@
 
   function createLibrary(obj, options)
   {
-    $(obj).data("options", $.extend({pageSize: 10, tail: 0, onLoad: null}, options));
+    $(obj).data("options", $.extend({pageSize: 10, tail: 0, onLoad: null, onCompare: null}, options));
     $(obj).data("images", new Array());
   }
 
