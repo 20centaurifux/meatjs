@@ -57,7 +57,7 @@
 
         // insert new image:
         var html = '<li data-source="' + image["source"] + '" data-timestamp="' + image["created_on"]["$date"] + '">' +
-                   '<a href="#"><img data-source="' + image["source"] + '"src="#" alt="">' +
+                   '<a href="#"><img data-source="' + image["source"] + '"src="images/image-loader.gif" alt="">' +
                    '<h2>' + image["source"] + '</h2>' +
                    '<p data-field="timestamp"><strong>Created on:</strong> ' + new Date(image["created_on"]["$date"]).toLocaleString() + '</p>' +
                    '<p data-field="comments"><strong>Comments:</strong> ' + image["comments_n"] + '</p>' +
