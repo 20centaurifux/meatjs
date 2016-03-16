@@ -49,7 +49,7 @@
       {
         // update details of already inserted image:
         $(li).find('p[data-field="comments"]').html('<strong>Comments:</strong> ' + image["comments_n"]);
-        $(li).find('p[data-field="score"]').html('<strong>Score:</strong> ' + image["score"]["up"] + ' up, ' + image["score"]["down"] + ' down');
+        $(li).find('p[data-field="score"]').html('<strong>Score:</strong> ' + image["score"]["up"] + ' up, ' + image["score"]["down"] + ' down, ' + image["score"]["fav"] + ' favs');
       }
       else
       {
@@ -61,7 +61,7 @@
                    '<h2>' + image["source"] + '</h2>' +
                    '<p data-field="timestamp"><strong>Created on:</strong> ' + new Date(image["created_on"]["$date"]).toLocaleString() + '</p>' +
                    '<p data-field="comments"><strong>Comments:</strong> ' + image["comments_n"] + '</p>' +
-                   '<p data-field="score"><strong>Score:</strong> ' + image["score"]["up"] + ' up, ' + image["score"]["down"] + ' down</p>' +
+                   '<p data-field="score"><strong>Score:</strong> ' + image["score"]["up"] + ' up, ' + image["score"]["down"] + ' down, ' + image["score"]["fav"] + ' favs</p>' +
                    '</a></li>';
 
         var inserted = false;
