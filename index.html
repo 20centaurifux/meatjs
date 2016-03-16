@@ -460,7 +460,12 @@
      */
     function page_library_loading()
     {
-        $("#library-listview").library({pageSize: 5, onLoad: store.getObjects});
+        $("#library-listview").library(
+        {
+          pageSize: 5,
+          onLoad: store.getObjects,
+          onCompare: function(image, li) { return parseInt(image["created_on"]["$date"], 10) > parseInt(li.data("timestamp"), 10) }
+        });
         $("#library-listview").library("update");
     }
 

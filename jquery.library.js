@@ -53,7 +53,7 @@
       }
       else
       {
-        var compare = $(this).data("options").onCompare || function(image, li) { parseInt(image["created_on"]["$date"], 10) > parseInt(li.data("timestamp"), 10) };
+        var compare = $(this).data("options").onCompare;
 
         // insert new image:
         var html = '<li data-source="' + image["source"] + '" data-timestamp="' + image["created_on"]["$date"] + '">' +
@@ -66,14 +66,17 @@
 
         var inserted = false;
 
-        $(this).find("li").each(function()
+        if(compare)
         {
-          if(compare(image, $(this)))
+          $(this).find("li").each(function()
           {
-            $(html).insertBefore(this);
-            inserted = true;
-          }
-        });
+            if(compare(image, $(this)))
+            {
+              $(html).insertBefore(this);
+              inserted = true;
+            }
+          });
+        }
 
         if(!inserted)
         {
