@@ -98,6 +98,11 @@
         {
           $('img[data-source="' + image["source"] + '"]').attr("src", "images/image-missing.png");
         });
+    },
+    clear: function()
+    {
+      $(this).find("li").remove();
+      $(this).listview("refresh");
     }
   };
 
