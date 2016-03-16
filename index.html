@@ -462,14 +462,20 @@
     {
         $("#library-listview").library(
         {
-          pageSize: 5,
+          pageSize: 10,
           onLoad: store.getObjects,
           onCompare: function(image, li) { return parseInt(image["created_on"]["$date"], 10) > parseInt(li.data("timestamp"), 10) }
         });
+
         $("#library-listview").library("update");
     }
 
-    function loadNextPage()
+    function libraryRefresh()
+    {
+        $("#library-listview").library("update");
+    }
+
+    function libraryNextPage()
     {
         $("#library-listview").library("nextPage");
     }
@@ -697,13 +703,14 @@
   <div data-role="header" data-position="fixed">
     <a href='javascript:openNavigation();' data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
     <h1>Library</h1>
+    <a href='javascript:libraryRefresh();' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
   </div>
  
   <div role="main" class="ui-content">
     <ul id="library-listview" data-role="listview" data-inset="true">
     </ul>
 
-    <button onclick="loadNextPage();">more</button>
+    <button onclick="libraryNextPage();">more</button>
   </div>
 </div>
 
