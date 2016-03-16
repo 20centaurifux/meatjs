@@ -45,6 +45,7 @@
       $("#page-new-account").on("pagebeforeshow", page_new_account_loading);
       $("#page-library").on("pagebeforeshow", page_library_loading);
       $("#page-random").on("pagebeforeshow", page_random_loading);
+      $("#page-popular").on("pagebeforeshow", page_popular_loading);
 
       // set start page:
       openStartPage();
@@ -500,6 +501,31 @@
         $("#random-listview").library("clear");
         $("#random-listview").library("update");
     }
+
+    /*
+     * popular:
+     */
+    function page_popular_loading()
+    {
+        $("#popular-listview").library(
+        {
+          pageSize: 10,
+          onLoad: store.getPopular
+        });
+
+        $("#popular-listview").library("update");
+    }
+
+    function popularRefresh()
+    {
+        $("#popular-listview").library("clear");
+        $("#popular-listview").library("update");
+    }
+
+    function popularNextPage()
+    {
+        $("#popular-listview").library("nextPage");
+    }
   </script>
 </head>
 
@@ -510,7 +536,7 @@
     <ul data-role="listview">
       <li><a href="#page-library">Library</a></li>
       <li><a href="#page-random">Random</a></li>
-      <li><a href="#">Popular</a></li>
+      <li><a href="#page-popular">Popular</a></li>
       <li><a href="#">Favorites</a></li>
       <li><a href="#">Messages</a></li>
       <li><a href="#page-edit-profile">My Profile</a></li>
@@ -745,6 +771,21 @@
   <div role="main" class="ui-content">
     <ul id="random-listview" data-role="listview" data-inset="true">
     </ul>
+  </div>
+</div>
+
+<div data-role="page" id="page-popular" data-position="fixed">
+  <div data-role="header" data-position="fixed">
+    <a href='javascript:openNavigation();' data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
+    <h1>Popular</h1>
+    <a href='javascript:popularRefresh();' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
+  </div>
+ 
+  <div role="main" class="ui-content">
+    <ul id="popular-listview" data-role="listview" data-inset="true">
+    </ul>
+
+    <button onclick="popularNextPage();">more</button>
   </div>
 </div>
 

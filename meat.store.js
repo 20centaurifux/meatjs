@@ -178,4 +178,18 @@
 
     return d.promise();
   }
+
+  this.getPopular = function(page, pageSize)
+  {
+    var d = $.Deferred();
+
+    store.createClient().getPopularObjects(page, pageSize)
+      .success(function(response)
+      {
+        d.resolve(response);
+      })
+      .fail(d.reject);
+
+    return d.promise();
+  }
 }
