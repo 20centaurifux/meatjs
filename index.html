@@ -466,7 +466,7 @@
         {
           pageSize: 10,
           onLoad: store.getObjects,
-          onCompare: function(image, li) { return parseInt(image["created_on"]["$date"], 10) > parseInt(li.data("timestamp"), 10) }
+          onCompare: function(a, b) { return a["created_on"]["$date"] > b["created_on"]["$date"] }
         });
 
         $("#library-listview").library("update");
@@ -490,7 +490,7 @@
         $("#random-listview").library(
         {
           pageSize: 10,
-          onLoad: function(page, pageSize) { return store.getRandom(pageSize); }
+          onLoad: function(page, pageSize) { return store.getRandom(pageSize); },
         });
 
         $("#random-listview").library("update");
@@ -510,7 +510,14 @@
         $("#popular-listview").library(
         {
           pageSize: 10,
-          onLoad: store.getPopular
+          onLoad: store.getPopular,
+          onCompare: function(a, b)
+          {
+            var score_a = a["score"]["up"] - a["score"]["down"] + a["score"]["fav"];
+            var score_b = b["score"]["up"] - b["score"]["down"] + b["score"]["fav"];
+
+            return score_a > score_b || a["created_on"]["$date"] > b["created_on"]["$date"]
+          }
         });
 
         $("#popular-listview").library("update");
@@ -785,7 +792,7 @@
     <ul id="popular-listview" data-role="listview" data-inset="true">
     </ul>
 
-    <button onclick="popularNextPage();">more</button>
+   <button onclick="popularNextPage();">more</button>
   </div>
 </div>
 
