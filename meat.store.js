@@ -151,11 +151,25 @@
     return expired;
   }
 
-  this.getObjects = function(page)
+  this.getObjects = function(page, pageSize)
   {
     var d = $.Deferred();
 
-    store.createClient().getObjects(page, 2)
+    store.createClient().getObjects(page, pageSize)
+      .success(function(response)
+      {
+        d.resolve(response);
+      })
+      .fail(d.reject);
+
+    return d.promise();
+  }
+
+  this.getRandom = function(pageSize)
+  {
+    var d = $.Deferred();
+
+    store.createClient().getRandomObjects(pageSize)
       .success(function(response)
       {
         d.resolve(response);

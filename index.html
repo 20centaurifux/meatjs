@@ -44,6 +44,7 @@
       $("#page-authentication").on("pagebeforeshow", page_authentication_loading);
       $("#page-new-account").on("pagebeforeshow", page_new_account_loading);
       $("#page-library").on("pagebeforeshow", page_library_loading);
+      $("#page-random").on("pagebeforeshow", page_random_loading);
 
       // set start page:
       openStartPage();
@@ -479,6 +480,26 @@
     {
         $("#library-listview").library("nextPage");
     }
+
+    /*
+     * random:
+     */
+    function page_random_loading()
+    {
+        $("#random-listview").library(
+        {
+          pageSize: 10,
+          onLoad: function(page, pageSize) { return store.getRandom(pageSize); }
+        });
+
+        $("#random-listview").library("update");
+    }
+
+    function randomRefresh()
+    {
+        $("#random-listview").library("clear");
+        $("#random-listview").library("update");
+    }
   </script>
 </head>
 
@@ -488,7 +509,7 @@
   <div role="main" class="ui-content">
     <ul data-role="listview">
       <li><a href="#page-library">Library</a></li>
-      <li><a href="#">Random</a></li>
+      <li><a href="#page-random">Random</a></li>
       <li><a href="#">Popular</a></li>
       <li><a href="#">Favorites</a></li>
       <li><a href="#">Messages</a></li>
@@ -711,6 +732,19 @@
     </ul>
 
     <button onclick="libraryNextPage();">more</button>
+  </div>
+</div>
+
+<div data-role="page" id="page-random" data-position="fixed">
+  <div data-role="header" data-position="fixed">
+    <a href='javascript:openNavigation();' data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
+    <h1>Random</h1>
+    <a href='javascript:randomRefresh();' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
+  </div>
+ 
+  <div role="main" class="ui-content">
+    <ul id="random-listview" data-role="listview" data-inset="true">
+    </ul>
   </div>
 </div>
 
