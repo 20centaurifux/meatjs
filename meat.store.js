@@ -156,10 +156,7 @@
     var d = $.Deferred();
 
     store.createClient().getObjects(page, pageSize)
-      .success(function(response)
-      {
-        d.resolve(response);
-      })
+      .success(d.resolve)
       .fail(d.reject);
 
     return d.promise();
@@ -170,10 +167,7 @@
     var d = $.Deferred();
 
     store.createClient().getRandomObjects(pageSize)
-      .success(function(response)
-      {
-        d.resolve(response);
-      })
+      .success(d.resolve)
       .fail(d.reject);
 
     return d.promise();
@@ -184,10 +178,7 @@
     var d = $.Deferred();
 
     store.createClient().getPopularObjects(page, pageSize)
-      .success(function(response)
-      {
-        d.resolve(response);
-      })
+      .success(d.resolve)
       .fail(d.reject);
 
     return d.promise();
