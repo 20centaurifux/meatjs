@@ -457,6 +457,19 @@
         });
     }
 
+    function updateLibraries(ids, objects)
+    {
+      $(ids).each(function()
+      {
+        var el = $("#" + this);
+
+        $(objects).each(function()
+        {
+          $(el).library("touch", this, false);
+        });
+      });
+    }
+
     /*
      * library:
      */
@@ -465,8 +478,17 @@
         $("#library-listview").library(
         {
           pageSize: 10,
-          onLoad: store.getObjects,
-          onCompare: function(a, b) { return a["created_on"]["$date"] > b["created_on"]["$date"] }
+          onLoad: function(page, pageSize)
+          {
+            return store.getObjects(page, pageSize).done(function (objects)
+            {
+              updateLibraries(["popular-listview"], objects);
+            });
+          },
+          onCompare: function(a, b)
+          {
+            return a["created_on"]["$date"] > b["created_on"]["$date"]
+          }
         });
 
         $("#library-listview").library("update");
@@ -490,7 +512,13 @@
         $("#random-listview").library(
         {
           pageSize: 10,
-          onLoad: function(page, pageSize) { return store.getRandom(pageSize); },
+          onLoad: function(page, pageSize)
+          {
+            return store.getRandom(pageSize).done(function (objects)
+            {
+              updateLibraries(["library-listview", "popular-listview"], objects);
+            });
+          }
         });
 
         $("#random-listview").library("update");
@@ -510,7 +538,13 @@
         $("#popular-listview").library(
         {
           pageSize: 10,
-          onLoad: store.getPopular,
+          onLoad: function(page, pageSize)
+          {
+            return store.getPopular(page, pageSize).done(function (objects)
+            {
+              updateLibraries(["library-listview"], objects);
+            });
+          },
           onCompare: function(a, b)
           {
             var score_a = a["score"]["up"] - a["score"]["down"] + a["score"]["fav"];
