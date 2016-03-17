@@ -47,9 +47,42 @@
       $("#page-random").on("pagebeforeshow", page_random_loading);
       $("#page-popular").on("pagebeforeshow", page_popular_loading);
 
-      // set start page:
+      // setup scrolling & open start page:
+      setupScrolling();
       openStartPage();
     });
+
+    function setupScrolling()
+    {
+      var scrollTop = 0;
+
+      $(document).on("scrollstart", function()
+      {
+        scrollTop = $(window).scrollTop();
+      });
+
+      $(document).on("scrollstop", function()
+      {
+        var height = $(window).height();
+        var top = $(window).scrollTop();
+
+        if(top > scrollTop && $(window).scrollTop() == $(document).height() - $(window).height())
+        {
+          var pageId = $("body").pagecontainer("getActivePage").attr("id");
+
+          switch(pageId)
+          {
+            case "page-library":
+              $("#library-listview").library("nextPage");
+              break;
+
+            case "page-popular":
+              $("#popular-listview").library("nextPage");
+              break;
+          }
+        }
+      });
+    }
 
     function openStartPage()
     {
@@ -499,11 +532,6 @@
         $("#library-listview").library("update");
     }
 
-    function libraryNextPage()
-    {
-        $("#library-listview").library("nextPage");
-    }
-
     /*
      * random:
      */
@@ -559,13 +587,7 @@
 
     function popularRefresh()
     {
-        $("#popular-listview").library("clear");
         $("#popular-listview").library("update");
-    }
-
-    function popularNextPage()
-    {
-        $("#popular-listview").library("nextPage");
     }
   </script>
 </head>
@@ -797,8 +819,6 @@
   <div role="main" class="ui-content">
     <ul id="library-listview" data-role="listview" data-inset="true">
     </ul>
-
-    <button onclick="libraryNextPage();">more</button>
   </div>
 </div>
 
@@ -825,9 +845,6 @@
   <div role="main" class="ui-content">
     <ul id="popular-listview" data-role="listview" data-inset="true">
     </ul>
-
-   <button onclick="popularNextPage();">more</button>
-  </div>
 </div>
 
 </body>
