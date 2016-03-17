@@ -8,7 +8,7 @@
     },
     nextPage: function()
     {
-      var page = parseInt($(this).data("options").tail, 10);
+      var page = parseInt($(this).data("jquery.library.options").tail, 10);
       var library = this;
 
       methods.loadPage.apply(this, [page + 1])
@@ -16,19 +16,19 @@
         {
           if(images.length > 0)
           {
-            $(library).data("options").tail++;
+            $(library).data("jquery.library.options").tail++;
           }
         });
     },
     loadPage: function(page)
     {
-      var f = $(this).data("options").onLoad;
+      var f = $(this).data("jquery.library.options").onLoad;
 
       if(f)
       {
         var library = this;
 
-        return f(page, $(library).data("options").pageSize)
+        return f(page, $(this).data("jquery.library.options").pageSize)
           .done(function(images)
           {
             $(images).each(function()
@@ -53,9 +53,9 @@
         $(li).find('span[data-field="down"]').html(image["score"]["down"]);
         $(li).find('span[data-field="fav"]').html(image["score"]["fav"]);
       }
-      else
+      else if(insert)
       {
-        var compare = $(this).data("options").onCompare;
+        var compare = $(this).data("jquery.library.options").onCompare;
 
         // insert new image:
         var html = '<li data-source="' + image["source"] + '" data-timestamp="' + image["created_on"]["$date"] + '">' +
@@ -125,17 +125,26 @@
 
   function createLibrary(obj, options)
   {
-    $(obj).data("options", $.extend({pageSize: 10, tail: 0, onLoad: null, onCompare: null}, options));
-    $(obj).data("images", new Array());
+    $(obj).data("jquery.library", true);
+    $(obj).data("jquery.library.options", $.extend({pageSize: 10, tail: 0, onLoad: null, onCompare: null}, options));
   }
 
   $.fn.library = function(args)
   {
     if(methods[args])
     {
+      var parameters = Array.prototype.slice.call(arguments, 1);
+
       this.each(function()
       {
-        return methods[args].apply(this, Array.prototype.slice.call(arguments, 1));
+        if($(this).data("jquery.library"))
+        {
+          return methods[args].apply(this, parameters);
+        }
+        else
+        {
+          return null;
+        }
       });
     }
     else if(typeof args === 'object' || !args)
