@@ -10,6 +10,7 @@
 
   <style>
     span.error {color:red; margin:5px; font-style:italic;}
+    img.image  {border-style:dotted; border-width:1px;}
   </style>
 
   <script type="text/javascript" src="jquery.min.js"></script>
@@ -47,8 +48,12 @@
       $("#page-random").on("pagebeforeshow", page_random_loading);
       $("#page-popular").on("pagebeforeshow", page_popular_loading);
 
-      // setup scrolling & open start page:
+      // register window events:
+      $(window).on("orientationchange", window_orientationchange);
+
+      // setup scrolling, image scaling & open start page:
       setupScrolling();
+      setupScaling();
       openStartPage();
     });
 
@@ -82,6 +87,24 @@
           }
         }
       });
+    }
+
+    function setupScaling()
+    {
+      $("#image-source").on("load", function()
+      {
+        scaleImage();
+      });
+    }
+
+    function window_orientationchange()
+    {
+      var pageId = $("body").pagecontainer("getActivePage").attr("id");
+
+      if(pageId == "page-image")
+      {
+        scaleImage();
+      }
     }
 
     function openStartPage()
@@ -521,7 +544,8 @@
           onCompare: function(a, b)
           {
             return a["created_on"]["$date"] > b["created_on"]["$date"]
-          }
+          },
+          onSelect: openImage
         });
 
         $("#library-listview").library("update");
@@ -546,7 +570,8 @@
             {
               updateLibraries(["library-listview", "popular-listview"], objects);
             });
-          }
+          },
+          onSelect: openImage
         });
 
         $("#random-listview").library("update");
@@ -579,7 +604,8 @@
             var score_b = b["score"]["up"] - b["score"]["down"] + b["score"]["fav"];
 
             return score_a > score_b || a["created_on"]["$date"] > b["created_on"]["$date"]
-          }
+          },
+          onSelect: openImage
         });
 
         $("#popular-listview").library("update");
@@ -588,6 +614,37 @@
     function popularRefresh()
     {
         $("#popular-listview").library("update");
+    }
+
+    /*
+     * image details page:
+     */
+    function scaleImage()
+    {
+      var maxHeight = $(window).height() - 60 + "px";
+      var maxWidth = $(window).width() - 60 + "px";
+
+      $("#image-source").css({"max-height": maxHeight, "max-width": maxWidth});
+    }
+
+    function openImage(image)
+    {
+      $(document).blockUI("show");
+
+      store.createClient().getImage(image)
+        .done(function(data)
+        {
+          $("#image-source").attr("src", data);
+          $("body").pagecontainer("change", "#page-image");
+        })
+        .fail(function(result)
+        {
+          // TODO
+        })
+        .always(function()
+        {
+          $(document).blockUI("hide");
+        });
     }
   </script>
 </head>
@@ -845,6 +902,20 @@
   <div role="main" class="ui-content">
     <ul id="popular-listview" data-role="listview" data-inset="true">
     </ul>
+  </div>
+</div>
+
+<div data-role="page" id="page-image" data-position="fixed">
+  <div data-role="header" data-position="fixed">
+    <a href="#" data-rel="back" data-icon="back">Back</a>
+    <h1>Image</h1>
+  </div>
+
+  <div role="main" class="ui-content">
+    <div style="width:100%; text-align:center;">
+      <img id="image-source" class="image" src="" alt="image">
+    </div>
+  </div>
 </div>
 
 </body>
