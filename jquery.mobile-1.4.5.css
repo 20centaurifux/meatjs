@@ -1010,7 +1010,7 @@ html .ui-bar-a .ui-btn:visited,
 html .ui-body-a .ui-btn:visited,
 html body .ui-group-theme-a .ui-btn:visited,
 html head + body .ui-btn.ui-btn-a:visited {
-	background-color: 			#f6f6f6 /*{a-bup-background-color}*/;
+	background-color: 			#ededed /*{a-bup-background-color}*/;
 	border-color:	 		#ddd /*{a-bup-border}*/;
 	color: 					#333 /*{a-bup-color}*/;
 	text-shadow: 0 /*{a-bup-shadow-x}*/ 1px /*{a-bup-shadow-y}*/ 0 /*{a-bup-shadow-radius}*/ #f3f3f3 /*{a-bup-shadow-color}*/;
@@ -1073,23 +1073,6 @@ html .ui-body-a .ui-radio-on:after,
 html body .ui-group-theme-a .ui-radio-on:after,
 .ui-btn.ui-radio-on.ui-btn-a:after {
 	border-color:			#3388cc /*{a-active-background-color}*/;
-}
-/* Focus */
-.ui-page-theme-a .ui-btn:focus,
-html .ui-bar-a .ui-btn:focus,
-html .ui-body-a .ui-btn:focus,
-html body .ui-group-theme-a .ui-btn:focus,
-html head + body .ui-btn.ui-btn-a:focus,
-/* Focus buttons and text inputs with div wrap */
-.ui-page-theme-a .ui-focus,
-html .ui-bar-a .ui-focus,
-html .ui-body-a .ui-focus,
-html body .ui-group-theme-a .ui-focus,
-html head + body .ui-btn-a.ui-focus,
-html head + body .ui-body-a.ui-focus {
-	-webkit-box-shadow: 0 0 12px 	#3388cc /*{a-active-background-color}*/;
-	-moz-box-shadow: 0 0 12px 		#3388cc /*{a-active-background-color}*/;
-	box-shadow: 0 0 12px 			#3388cc /*{a-active-background-color}*/;
 }
 /* B
 -----------------------------------------------------------------------------------------------------------*/
@@ -1235,23 +1218,6 @@ html .ui-body-b .ui-radio-on:after,
 html body .ui-group-theme-b .ui-radio-on:after,
 .ui-btn.ui-radio-on.ui-btn-b:after {
 	border-color:			#22aadd /*{b-active-background-color}*/;
-}
-/* Focus */
-.ui-page-theme-b .ui-btn:focus,
-html .ui-bar-b .ui-btn:focus,
-html .ui-body-b .ui-btn:focus,
-html body .ui-group-theme-b .ui-btn:focus,
-html head + body .ui-btn.ui-btn-b:focus,
-/* Focus buttons and text inputs with div wrap */
-.ui-page-theme-b .ui-focus,
-html .ui-bar-b .ui-focus,
-html .ui-body-b .ui-focus,
-html body .ui-group-theme-b .ui-focus,
-html head + body .ui-btn-b.ui-focus,
-html head + body .ui-body-b.ui-focus {
-	-webkit-box-shadow: 0 0 12px 	#22aadd /*{b-active-background-color}*/;
-	-moz-box-shadow: 0 0 12px 		#22aadd /*{b-active-background-color}*/;
-	box-shadow: 0 0 12px 			#22aadd /*{b-active-background-color}*/;
 }
 /* Structure */
 /* Disabled
