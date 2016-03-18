@@ -58,7 +58,7 @@
         var compare = $(this).data("jquery.library.options").onCompare;
 
         // insert new image:
-        var html = '<li data-source="' + image["source"] + '" data-timestamp="' + image["created_on"]["$date"] + '">' +
+        var el = $('<li data-source="' + image["source"] + '" data-timestamp="' + image["created_on"]["$date"] + '">' +
                    '<a href="#"><img data-source="' + image["source"] + '"src="images/image-loader.gif" alt="">' +
                    '<h2>' + image["source"] + '</h2>' +
                    '<p><strong>Created on: </strong>' +
@@ -69,7 +69,7 @@
                    '<span data-field="up">' + image["score"]["up"] + '</span> up,' +
                    '<span data-field="down">' + image["score"]["down"] + '</span> down, ' +
                    '<span data-field="fav">' + image["score"]["fav"] + '</span> favs</p>' +
-                   '</a></li>';
+                   '</a></li>');
 
         var inserted = false;
 
@@ -97,7 +97,17 @@
 
         if(!inserted)
         {
-          $(this).append(html);
+          $(this).append(el);
+
+          var onSelect = $(this).data("jquery.library.options").onSelect;
+
+          if(onSelect)
+          {
+            el.on("click", function()
+            {
+              onSelect(($(this).data("source")));
+            });
+          }
         }
       }
 
