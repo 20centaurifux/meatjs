@@ -1,8 +1,13 @@
 var MeatCache = function(options)
 {
   var storage = $(options).prop('Storage') || LocalMeatStorage;
-  var autoGC = $(options).prop('AutoGC') || LocalMeatStorage;
+  var autoGC = parseInt($(options).prop('AutoGC'), 10);
   var step = 0;
+
+  if(isNaN(autoGC))
+  {
+    autoGC = 10;
+  }
 
   var runAutoGC = function()
   {
