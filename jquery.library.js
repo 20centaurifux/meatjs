@@ -43,7 +43,7 @@
     touch: function(image, insert)
     {
       // test if image has already been inserted:
-      var li = $(this).find('li[data-source="' + image["source"] + '"]').first();
+      var li = $(this).find('li[data-guid="' + image["guid"] + '"]').first();
 
       if(li.get(0))
       {
@@ -58,7 +58,7 @@
         var compare = $(this).data("jquery.library.options").onCompare;
 
         // insert new image:
-        var el = $('<li data-source="' + image["source"] + '" data-timestamp="' + image["created_on"]["$date"] + '">' +
+        var el = $('<li data-guid="' + image["guid"] + '" data-source="' + image["source"] + '" data-timestamp="' + image["created_on"]["$date"] + '">' +
                    '<a href="#"><img data-source="' + image["source"] + '"src="images/image-loader.gif" alt="">' +
                    '<h2>' + image["source"] + '</h2>' +
                    '<p><strong>Created on: </strong>' +
@@ -79,6 +79,7 @@
           {
             var obj = {};
 
+            obj["guid"] = $(this).data("guid");
             obj["source"] = $(this).data("source");
             obj["created_on"] = {"$data": $(this).data("timestamp")}
             obj["comments_n"] = parseInt($(li).find('span[data-field="comments_n"]').text(), 10);
@@ -105,7 +106,7 @@
           {
             el.on("click", function()
             {
-              onSelect(($(this).data("source")));
+              onSelect($(this).data("guid"));
             });
           }
         }

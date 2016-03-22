@@ -153,34 +153,50 @@
 
   this.getObjects = function(page, pageSize)
   {
-    var d = $.Deferred();
-
-    store.createClient().getObjects(page, pageSize)
-      .success(d.resolve)
-      .fail(d.reject);
-
-    return d.promise();
+    return store.createClient().getObjects(page, pageSize).promise();
   }
 
   this.getRandom = function(pageSize)
   {
-    var d = $.Deferred();
-
-    store.createClient().getRandomObjects(pageSize)
-      .success(d.resolve)
-      .fail(d.reject);
-
-    return d.promise();
+    return store.createClient().getRandomObjects(pageSize).promise();
   }
 
   this.getPopular = function(page, pageSize)
   {
-    var d = $.Deferred();
+    return store.createClient().getPopularObjects(page, pageSize).promise();
+  }
 
-    store.createClient().getPopularObjects(page, pageSize)
-      .success(d.resolve)
-      .fail(d.reject);
+  this.getObject = function(guid)
+  {
+    return store.createClient().getObject(guid).promise();
+  }
 
-    return d.promise();
+  this.getFavorites = function()
+  {
+    return store.createClient().getFavorites().promise();
+  }
+
+  this.favor = function(guid, favor)
+  {
+    var client = store.createClient();
+
+    return client.favor(guid, favor).then(function() { return client.getObject(guid) });
+  }
+
+  this.getVote = function(guid)
+  {
+    return store.createClient().getVote(guid).promise();
+  }
+
+  this.like = function(guid, like)
+  {
+    var client = store.createClient();
+
+    return client.vote(guid, like).then(function() { return client.getObject(guid) });
+  }
+
+  this.getImage = function(source)
+  {
+    return store.createClient().getImage(source).promise();
   }
 }

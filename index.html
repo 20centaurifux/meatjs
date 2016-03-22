@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>foo</title>
 
-  <link rel="stylesheet" href="jquery.mobile-1.4.5.min.css">
+  <link rel="stylesheet" href="jquery.mobile-1.4.5.css">
   <link rel="stylesheet" href="jquery.blockui.css">
+  <link rel="stylesheet" href="jqm-icon-pack-fa.css">
 
   <style>
     span.error {color:red; margin:5px; font-style:italic;}
@@ -526,6 +527,11 @@
       });
     }
 
+    function updateAllLibraries(objects)
+    {
+      updateLibraries(["library-listview", "popular-listview"], objects);
+    }
+
     /*
      * library:
      */
@@ -627,19 +633,142 @@
       $("#image-source").css({"max-height": maxHeight, "max-width": maxWidth});
     }
 
-    function openImage(image)
+    function openImage(guid)
     {
+      var guidExists = function(objects, guid)
+      {
+        var contains = false;
+
+        $(objects).each(function()
+        {
+          if(this["guid"] == guid)
+          {
+            contains = true;
+          }
+        });
+
+        return contains;
+      };
+
       $(document).blockUI("show");
 
-      store.createClient().getImage(image)
-        .done(function(data)
+      $.when(store.getObject(guid), store.getVote(guid), store.getFavorites())
+        .done(function(obj, vote, favorites)
         {
-          $("#image-source").attr("src", data);
-          $("body").pagecontainer("change", "#page-image");
+          obj = obj[0];
+          vote = vote[0];
+          favorites = favorites[0];
+
+          updateAllLibraries();
+
+          store.getImage(obj["source"])
+            .done(function(data)
+            {
+              // update image:
+              $("#image-source").attr("src", data);
+
+              // update details:
+              $("#image-score-up").text(obj["score"]["up"]);
+              $("#image-score-down").text(obj["score"]["down"]);
+              $("#image-score-favorite").text(obj["score"]["fav"]);
+
+              // setup buttons:
+              if(vote["up"] == null)
+              {
+                $("#image-button-like").prop("disabled", false).removeClass("ui-disabled");
+                $("#image-button-dislike").prop("disabled", false).removeClass("ui-disabled");
+              }
+              else
+              {
+                $("#image-button-like").prop("disabled", true).addClass("ui-disabled");
+                $("#image-button-dislike").prop("disabled", true).addClass("ui-disabled");
+              }
+
+              $("#image-button-favorite .ui-icon").removeClass("ui-icon-star ui-icon-star-o");
+
+              var favorite = guidExists(favorites, guid);
+
+              $("#image-button-favorite")
+                .removeClass("ui-icon-star ui-icon-star-o")
+                .attr("data-icon", favorite ? "star" : "star-o")
+                .addClass(favorite ? "ui-icon-star" : "ui-icon-star-o")
+                .trigger("refresh");
+
+              if(guidExists(favorites, guid))
+              {
+                $("#image-button-favorite").attr("data-icon", "star");
+              }
+              else
+              {
+                $("#image-button-favorite").attr("data-icon", "star-o");
+              }
+
+              // assign guid to buttons:
+              $("#image-action-buttons").find("button").data("guid", obj["guid"]);
+
+              // open page:
+              $("body").pagecontainer("change", "#page-image");
+            })
+            .fail(function(result)
+            {
+              // TODO
+            })
+            .always(function()
+            {
+              $(document).blockUI("hide");
+            })
         })
         .fail(function(result)
         {
           // TODO
+          $(document).blockUI("hide");
+        })
+    }
+
+    function button_like_tapped(guid, like)
+    {
+      $(document).blockUI("show");
+
+      store.like(guid, like)
+        .done(function(image)
+        {
+          updateAllLibraries([image]);
+
+          // update like/dislike buttons:
+          $("#image-button-like").prop("disabled", true).addClass("ui-disabled");
+          $("#image-button-dislike").prop("disabled", true).addClass("ui-disabled");
+
+          // update displayed details:
+          $("#image-score-up").text(image["score"]["up"]);
+          $("#image-score-down").text(image["score"]["down"]);
+          $("#image-score-favorite").text(image["score"]["fav"]);
+        })
+        .always(function()
+        {
+          $(document).blockUI("hide");
+        });
+    }
+
+    function button_favor_tapped(guid, favor)
+    {
+      $(document).blockUI("show");
+
+      store.favor(guid, favor)
+        .done(function(image)
+        {
+          updateAllLibraries([image]);
+
+          // update favorite button:
+          $("#image-button-favorite")
+            .removeClass("ui-icon-star ui-icon-star-o")
+            .attr("data-icon", favor ? "star" : "star-o")
+            .addClass(favor ? "ui-icon-star" : "ui-icon-star-o")
+            .trigger("refresh");
+
+          // update displayed details:
+          $("#image-score-up").text(image["score"]["up"]);
+          $("#image-score-down").text(image["score"]["down"]);
+          $("#image-score-favorite").text(image["score"]["fav"]);
         })
         .always(function()
         {
@@ -900,8 +1029,8 @@
   </div>
  
   <div role="main" class="ui-content">
-    <ul id="popular-listview" data-role="listview" data-inset="true">
-    </ul>
+  <ul id="popular-listview" data-role="listview" data-inset="true">
+  </ul>
   </div>
 </div>
 
@@ -913,8 +1042,29 @@
 
   <div role="main" class="ui-content">
     <div style="width:100%; text-align:center;">
-      <img id="image-source" class="image" src="" alt="image">
+      <div>
+        <img id="image-source" class="image" src="" alt="image">
+
+        <p style="font-size:small;">
+          <strong><span id="image-score-up">0</span></strong> people <strong> liked </strong> this image <br />
+          <strong><span id="image-score-down">0</span></strong> people <strong> disliked </strong> this image <br />
+          <strong><span id="image-score-favorite">0</span></strong> people <strong> favorited </strong> this image <br />
+        </p>
+      </div>
     </div>
+
+    <div style="width:100%; text-align:center;">
+      <div id="image-action-buttons" data-role="controlgroup" data-type="horizontal" data-mini="true" data-shadow="false">
+        <button id="image-button-like" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="thumbs-up" onclick="button_like_tapped($(this).data('guid'), true);">Like</button>
+        <button id="image-button-dislike" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="thumbs-o-down" onclick="button_like_tapped($(this).data('guid'), false);">Dislike</button>
+        <button id="image-button-favorite" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="star-o" onclick="button_favor_tapped($(this).data('guid'), $(this).attr('data-icon') == 'star-o');">Favorite</button>
+        <!--<button data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="mail-forward">Recommend</button>
+        <button data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="pencil">Comment</button>-->
+      </div>
+    </div>
+
+    <ul id="popular-listview" data-role="listview" data-inset="true">
+    </ul>
   </div>
 </div>
 
