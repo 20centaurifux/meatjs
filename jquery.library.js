@@ -130,6 +130,15 @@
           $('img[data-source="' + image["source"] + '"]').attr("src", "images/image-missing.png");
         });
     },
+    remove: function(image)
+    {
+      var li = $(this).find('li[data-guid="' + image["guid"] + '"]').first();
+
+      if(li.get(0))
+      {
+        $(li).remove();
+      }
+    },
     clear: function()
     {
       $(this).find("li").remove();
