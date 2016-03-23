@@ -522,14 +522,14 @@
 
         $(objects).each(function()
         {
-          $(el).library("touch", this, false);
+          $(el).library("touch", this, false, true);
         });
       });
     }
 
     function updateAllLibraries(objects)
     {
-      updateLibraries(["library-listview", "popular-listview"], objects);
+      updateLibraries(["library-listview", "random-listview", "popular-listview"], objects);
     }
 
     /*
@@ -549,7 +549,7 @@
           },
           onCompare: function(a, b)
           {
-            return a["created_on"]["$date"] > b["created_on"]["$date"]
+            return b["created_on"]["$date"] - a["created_on"]["$date"]
           },
           onSelect: openImage
         });
@@ -609,7 +609,7 @@
             var score_a = a["score"]["up"] - a["score"]["down"] + a["score"]["fav"];
             var score_b = b["score"]["up"] - b["score"]["down"] + b["score"]["fav"];
 
-            return score_a > score_b || a["created_on"]["$date"] > b["created_on"]["$date"]
+            return score_b - score_a || b["created_on"]["$data"] - a["created_on"]["$data"];
           },
           onSelect: openImage
         });

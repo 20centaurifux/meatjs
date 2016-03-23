@@ -1,5 +1,34 @@
 (function($)
 {
+  var buildObject = function(li)
+  {
+    var obj = {};
+
+    obj["guid"] = $(li).data("guid");
+    obj["source"] = $(li).data("source");
+    obj["created_on"] = {"$date": $(li).data("timestamp")}
+    obj["comments_n"] = parseInt($(li).find('span[data-field="comments_n"]').text(), 10);
+    obj["score"] = {}
+    obj["score"]["up"] = parseInt($(li).find('span[data-field="up"]').text(), 10);
+    obj["score"]["down"] = parseInt($(li).find('span[data-field="down"]').text(), 10);
+    obj["score"]["fav"] = parseInt($(li).find('span[data-field="fav"]').text(), 10);
+
+    return obj;
+  }
+
+  var bindEvents = function(library, li)
+  {
+    var onSelect = $(library).data("jquery.library.options").onSelect;
+
+    if(onSelect)
+    {
+      $(li).on("click", function()
+      {
+        onSelect($(this).data("guid"));
+      });
+    }
+  }
+
   var methods =
   {
     update: function()
@@ -8,7 +37,7 @@
     },
     nextPage: function()
     {
-      var page = parseInt($(this).data("jquery.library.options").tail, 10);
+      var page = $(this).data("jquery.library.options").tail;
       var library = this;
 
       methods.loadPage.apply(this, [page + 1])
@@ -33,21 +62,26 @@
           {
             $(images).each(function()
             {
-              methods.touch.apply(library, [this, true]);
+              methods.touch.apply(library, [this, true, false]);
             });
+
+            if($(library).data("jquery.library.options").onCompare)
+            {
+              methods.sort.apply(library);
+            }
           });
       }
 
       return null;
     },
-    touch: function(image, insert)
+    touch: function(image, insert, sort)
     {
       // test if image has already been inserted:
       var li = $(this).find('li[data-guid="' + image["guid"] + '"]').first();
 
       if(li.get(0))
       {
-        // update details of already inserted image:
+        // image found => update details:
         $(li).find('span[data-field="comments_n"]').html(image["comments_n"]);
         $(li).find('span[data-field="up"]').html(image["score"]["up"]);
         $(li).find('span[data-field="down"]').html(image["score"]["down"]);
@@ -55,8 +89,6 @@
       }
       else if(insert)
       {
-        var compare = $(this).data("jquery.library.options").onCompare;
-
         // insert new image:
         var el = $('<li data-guid="' + image["guid"] + '" data-source="' + image["source"] + '" data-timestamp="' + image["created_on"]["$date"] + '">' +
                    '<a href="#"><img data-source="' + image["source"] + '"src="images/image-loader.gif" alt="">' +
@@ -71,50 +103,21 @@
                    '<span data-field="fav">' + image["score"]["fav"] + '</span> favs</p>' +
                    '</a></li>');
 
-        var inserted = false;
-
-        if(compare)
-        {
-          $(this).find("li").each(function()
-          {
-            var obj = {};
-
-            obj["guid"] = $(this).data("guid");
-            obj["source"] = $(this).data("source");
-            obj["created_on"] = {"$data": $(this).data("timestamp")}
-            obj["comments_n"] = parseInt($(li).find('span[data-field="comments_n"]').text(), 10);
-            obj["score"] = {}
-            obj["score"]["up"] = parseInt($(li).find('span[data-field="up"]').text(), 10);
-            obj["score"]["down"] = parseInt($(li).find('span[data-field="down"]').text(), 10);
-            obj["score"]["fav"] = parseInt($(li).find('span[data-field="fav"]').text(), 10);
-
-            if(compare(image, obj))
-            {
-              $(html).insertBefore(this);
-              inserted = true;
-            }
-          });
-        }
-
-        if(!inserted)
-        {
-          $(this).append(el);
-
-          var onSelect = $(this).data("jquery.library.options").onSelect;
-
-          if(onSelect)
-          {
-            el.on("click", function()
-            {
-              onSelect($(this).data("guid"));
-            });
-          }
-        }
+        $(this).append(el);
+        bindEvents(this, el);
       }
 
+      // sort list:
+      var compare = $(this).data("jquery.library.options").onCompare;
+
+      if(sort && compare)
+      {
+        methods.sort.apply(this);
+      }
+
+      // redraw listview control & load thumbnail:
       $(this).listview("refresh");
 
-      // load thumbnail:
       var client = new MeatStore().createClient();
 
       client.getThumbnail(image["source"])
@@ -131,6 +134,29 @@
     {
       $(this).find("li").remove();
       $(this).listview("refresh");
+    },
+    sort: function()
+    {
+      var compare = $(this).data("jquery.library.options").onCompare;
+
+      if(compare)
+      {
+        var items = $(this).find("li").get();
+        var library = this;
+
+        items.sort(function(a, b)
+        {
+          return compare(buildObject(a), buildObject(b));
+        });
+
+        $(this).find("li").remove();
+
+        $.each(items, function(i, li)
+        {
+          $(library).append(li);
+          bindEvents(library, li);
+        });
+      }
     }
   };
 
