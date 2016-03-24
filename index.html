@@ -48,6 +48,7 @@
       $("#page-library").on("pagebeforeshow", page_library_loading);
       $("#page-random").on("pagebeforeshow", page_random_loading);
       $("#page-popular").on("pagebeforeshow", page_popular_loading);
+      $("#page-favorites").on("pagebeforeshow", page_favorites_loading);
 
       // register window events:
       $(window).on("orientationchange", window_orientationchange);
@@ -529,7 +530,7 @@
 
     function updateAllLibraries(objects)
     {
-      updateLibraries(["library-listview", "random-listview", "popular-listview"], objects);
+      updateLibraries(["library-listview", "random-listview", "popular-listview", "favorites-listview"], objects);
     }
 
     /*
@@ -542,9 +543,9 @@
           pageSize: 10,
           onLoad: function(page, pageSize)
           {
-            return store.getObjects(page, pageSize).done(function (objects)
+            return store.getObjects(page, pageSize).done(function(objects)
             {
-              updateLibraries(["popular-listview"], objects);
+              updateLibraries(["popular-listview", "favorites-listview"], objects);
             });
           },
           onCompare: function(a, b)
@@ -572,9 +573,9 @@
           pageSize: 10,
           onLoad: function(page, pageSize)
           {
-            return store.getRandom(pageSize).done(function (objects)
+            return store.getRandom(pageSize).done(function(objects)
             {
-              updateLibraries(["library-listview", "popular-listview"], objects);
+              updateLibraries(["library-listview", "popular-listview", "favorites-listview"], objects);
             });
           },
           onSelect: openImage
@@ -601,7 +602,7 @@
           {
             return store.getPopular(page, pageSize).done(function (objects)
             {
-              updateLibraries(["library-listview"], objects);
+              updateLibraries(["library-listview", "favorites-listview"], objects);
             });
           },
           onCompare: function(a, b)
@@ -620,6 +621,36 @@
     function popularRefresh()
     {
         $("#popular-listview").library("update");
+    }
+
+    /*
+     * favorites:
+     */
+    function page_favorites_loading()
+    {
+        $("#favorites-listview").library(
+        {
+          onLoad: function(page, pageSize)
+          {
+            return store.getFavorites().done(function(objects)
+            {
+              updateLibraries(["library-listview", "popular-listview"], objects);
+            });
+          },
+          onCompare: function(a, b)
+          {
+            return b["created_on"]["$date"] - a["created_on"]["$date"]
+          },
+          onSelect: openImage
+        });
+
+        $("#favorites-listview").library("update");
+    }
+
+    function favoritesRefresh()
+    {
+        $("#favorites-listview").library("clear");
+        $("#favorites-listview").library("update");
     }
 
     /*
@@ -756,7 +787,16 @@
       store.favor(guid, favor)
         .done(function(image)
         {
-          updateAllLibraries([image]);
+          updateLibraries(["library-listview", "random-listview", "popular-listview"], [image]);
+
+          if(favor)
+          {
+            $("#favorites-listview").library("touch", image, true, true);
+          }
+          else
+          {
+            $("#favorites-listview").library("remove", image);
+          }
 
           // update favorite button:
           $("#image-button-favorite")
@@ -786,7 +826,7 @@
       <li><a href="#page-library">Library</a></li>
       <li><a href="#page-random">Random</a></li>
       <li><a href="#page-popular">Popular</a></li>
-      <li><a href="#">Favorites</a></li>
+      <li><a href="#page-favorites">Favorites</a></li>
       <li><a href="#">Messages</a></li>
       <li><a href="#page-edit-profile">My Profile</a></li>
       <li><a href="#page-change-password">Change password</a></li>
@@ -1030,6 +1070,19 @@
  
   <div role="main" class="ui-content">
   <ul id="popular-listview" data-role="listview" data-inset="true">
+  </ul>
+  </div>
+</div>
+
+<div data-role="page" id="page-favorites" data-position="fixed">
+  <div data-role="header" data-position="fixed">
+    <a href='javascript:openNavigation();' data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
+    <h1>Favorites</h1>
+    <a href='javascript:favoritesRefresh();' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
+  </div>
+ 
+  <div role="main" class="ui-content">
+  <ul id="favorites-listview" data-role="listview" data-inset="true">
   </ul>
   </div>
 </div>
