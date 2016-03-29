@@ -3,6 +3,7 @@ var MeatCache = function(options)
   var storage = $(options).prop('Storage') || LocalMeatStorage;
   var autoGC = parseInt($(options).prop('AutoGC'), 10);
   var step = 0;
+  var cache = this;
 
   if(isNaN(autoGC))
   {
@@ -15,7 +16,7 @@ var MeatCache = function(options)
 
     if(autoGC > 0 && step >= autoGC)
     {
-      this.gc();
+      cache.gc();
       step = 0;
     }
   };
@@ -37,7 +38,7 @@ var MeatCache = function(options)
 
   this.setJSON = function(key, json, lifetime, flags)
   {
-    this.set(key, JSON.stringify(json), lifetime, flags);
+    cache.set(key, JSON.stringify(json), lifetime, flags);
   };
 
   this.get = function(key)
@@ -74,7 +75,7 @@ var MeatCache = function(options)
 
   this.getJSON = function(key)
   {
-    return eval("(" + this.get(key) + ")");
+    return eval("(" + cache.get(key) + ")");
   };
 
   this.remove = function(key)
