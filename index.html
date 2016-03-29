@@ -29,6 +29,7 @@
   <script type="text/javascript" src="meat.rest.js"></script>
   <script type="text/javascript" src="meat.store.js"></script>
   <script type="text/javascript" src="jquery.library.js"></script>
+  <script type="text/javascript" src="jquery.friends.js"></script>
   <script type="text/javascript" src="jquery.mobile-1.4.5.min.js"></script>
 
   <script type="text/javascript">
@@ -48,6 +49,7 @@
       $("#page-library").on("pagebeforeshow", page_library_loading);
       $("#page-random").on("pagebeforeshow", page_random_loading);
       $("#page-popular").on("pagebeforeshow", page_popular_loading);
+      $("#page-friends").on("pagebeforeshow", page_friends_loading);
       $("#page-favorites").on("pagebeforeshow", page_favorites_loading);
 
       // register window events:
@@ -815,6 +817,55 @@
           $(document).blockUI("hide");
         });
     }
+
+    /*
+     * friends page: 
+     */
+    function page_friends_loading()
+    {
+      $("#page-friends").friends(
+      {
+        onGetProfile: store.getOwnProfile,
+        onSearch: store.searchUsers,
+        onGetFriends: function()
+        {
+          var d = $.Deferred();
+
+          store.getOwnProfile()
+            .done(function(profile)
+            {
+              var friends = new Array();
+              var failed = false;
+
+              for(var i = 0; i < profile["following"].length && !failed; i++)
+              {
+                store.getProfile(profile["following"][i])
+                  .done(function(friend)
+                  {
+                    friends.push(friend);
+                  })
+                  .fail(function(response)
+                  {
+                    failed = true;
+                    d.reject(response);
+                  });
+              };
+
+              if(!failed)
+              {
+                d.resolve(friends);
+              }
+            })
+            .fail(d.reject);
+
+          return d.promise();
+        },
+        onChangeFriendship: store.follow,
+        onGetAvatar: store.getAvatar
+      });
+
+      $("#page-friends").friends("open");
+    }
   </script>
 </head>
 
@@ -827,6 +878,7 @@
       <li><a href="#page-random">Random</a></li>
       <li><a href="#page-popular">Popular</a></li>
       <li><a href="#page-favorites">Favorites</a></li>
+      <li><a href="#page-friends">Friends</a></li>
       <li><a href="#">Messages</a></li>
       <li><a href="#page-edit-profile">My Profile</a></li>
       <li><a href="#page-change-password">Change password</a></li>
@@ -1069,8 +1121,8 @@
   </div>
  
   <div role="main" class="ui-content">
-  <ul id="popular-listview" data-role="listview" data-inset="true">
-  </ul>
+    <ul id="popular-listview" data-role="listview" data-inset="true">
+    </ul>
   </div>
 </div>
 
@@ -1082,8 +1134,18 @@
   </div>
  
   <div role="main" class="ui-content">
-  <ul id="favorites-listview" data-role="listview" data-inset="true">
-  </ul>
+    <ul id="favorites-listview" data-role="listview" data-inset="true">
+    </ul>
+  </div>
+</div>
+
+<div data-role="page" id="page-friends" data-position="fixed">
+  <div data-role="header" data-position="fixed">
+    <a href='javascript:openNavigation();' data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
+    <h1>Friends</h1>
+  </div>
+ 
+  <div data-role="main" class="ui-content" id="div-friends">
   </div>
 </div>
 
@@ -1119,6 +1181,7 @@
     <ul id="popular-listview" data-role="listview" data-inset="true">
     </ul>
   </div>
+
 </div>
 
 </body>
