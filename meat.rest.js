@@ -174,6 +174,11 @@ MeatREST.prototype.getImage = function(filename)
   return this.requestText("GET", "/images/" + encodeURIComponent(filename));
 }
 
+MeatREST.prototype.getAvatar = function(username)
+{
+  return this.requestText("GET", "/rest/user/" + encodeURIComponent(username) + "/avatar");
+}
+
 MeatREST.prototype.request = function(method, type, path, data)
 {
   return $.ajax(
