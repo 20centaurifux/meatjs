@@ -68,6 +68,37 @@
     return d.promise();
   }
 
+  this.getProfile = function(username)
+  {
+      var d = $.Deferred();
+
+      var key = "user.Other." + username.toLowerCase();
+      var profile = cache.getJSON(key);
+
+      if(profile == null)
+      {
+        var client = store.createClient();
+
+        client.getProfile(username)
+          .success(function(profile)
+          {
+            cache.setJSON(key, profile, 300);
+            d.resolve(profile);
+          })
+          .fail(d.reject);
+      }
+      else if(profile != null)
+      {
+        d.resolve(profile);
+      }
+      else
+      {
+        d.reject(profile);
+    }
+
+    return d.promise();
+  }
+
   this.updateProfile = function(email, firstname, lastname, language, sex, protected)
   {
     var p = store.createClient().updateProfile(email, firstname, lastname, sex, language, protected);
@@ -198,5 +229,27 @@
   this.getImage = function(source)
   {
     return store.createClient().getImage(source).promise();
+  }
+
+  this.searchUsers = function(query)
+  {
+    return store.createClient().searchUsers(query).promise();
+  }
+
+  this.follow = function(username, follow)
+  {
+    var client = store.createClient();
+
+    return client.follow(username, follow).then(function()
+    {
+      cache.remove("user.Profile");
+
+      return store.getOwnProfile();
+    });
+  }
+
+  this.getAvatar = function(username)
+  {
+    return store.createClient().getAvatar(username).promise();
   }
 }
