@@ -129,10 +129,7 @@
       var obj = this;
       var opts = $(this).data("jquery.friends.options");
 
-      if($(this).find("form").is(":visible"))
-      {
-        methods.searchMode.apply(this, [false]);
-      }
+      methods.searchMode.apply(this, [false]);
 
       if(opts.onGetProfile && opts.onGetFriends)
       {
@@ -154,6 +151,10 @@
             });
 
             ul.listview("refresh");
+          })
+          .fail(function(response)
+          {
+            // TODO
           })
           .always(function()
           {
