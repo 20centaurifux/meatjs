@@ -211,7 +211,7 @@
   {
     var client = store.createClient();
 
-    return client.favor(guid, favor).then(function() { return client.getObject(guid) });
+    return client.favor(guid, favor).then(function() { return client.getObject(guid); });
   }
 
   this.getVote = function(guid)
@@ -223,7 +223,7 @@
   {
     var client = store.createClient();
 
-    return client.vote(guid, like).then(function() { return client.getObject(guid) });
+    return client.vote(guid, like).then(function() { return client.getObject(guid); });
   }
 
   this.getImage = function(source)
@@ -251,5 +251,17 @@
   this.getAvatar = function(username)
   {
     return store.createClient().getAvatar(username).promise();
+  }
+
+  this.getComments = function(guid, page, pageSize)
+  {
+    return store.createClient().getComments(guid, page, pageSize);
+  }
+
+  this.addComment = function(guid, text)
+  {
+    var client = store.createClient();
+
+    return store.createClient().addComment(guid, text).then(function() { return client.getObject(guid); });
   }
 }
