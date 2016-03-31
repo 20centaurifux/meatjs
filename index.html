@@ -30,6 +30,7 @@
   <script type="text/javascript" src="meat.store.js"></script>
   <script type="text/javascript" src="jquery.library.js"></script>
   <script type="text/javascript" src="jquery.friends.js"></script>
+  <script type="text/javascript" src="jquery.comments.js"></script>
   <script type="text/javascript" src="jquery.mobile-1.4.5.min.js"></script>
 
   <script type="text/javascript">
@@ -87,6 +88,10 @@
 
             case "page-popular":
               $("#popular-listview").library("nextPage");
+              break;
+
+            case "page-image":
+              $("#comments-listview").comments("nextPage");
               break;
           }
         }
@@ -692,8 +697,13 @@
           vote = vote[0];
           favorites = favorites[0];
 
-          updateAllLibraries();
+          // update image in all libraries:
+          updateAllLibraries(obj);
 
+          // disable all buttons:
+          $("#image-action-buttons").find("button").prop("disabled", true).addClass("ui-disabled");
+
+          // load image:
           store.getImage(obj["source"])
             .done(function(data)
             {
@@ -706,38 +716,70 @@
               $("#image-score-favorite").text(obj["score"]["fav"]);
 
               // setup buttons:
-              if(vote["up"] == null)
+              if(!obj["locked"])
               {
-                $("#image-button-like").prop("disabled", false).removeClass("ui-disabled");
-                $("#image-button-dislike").prop("disabled", false).removeClass("ui-disabled");
+                if(vote["up"] == null)
+                {
+                  $("#image-button-like").prop("disabled", false).removeClass("ui-disabled");
+                  $("#image-button-dislike").prop("disabled", false).removeClass("ui-disabled");
+                }
+                else
+                {
+                  $("#image-button-like").prop("disabled", true).addClass("ui-disabled");
+                  $("#image-button-dislike").prop("disabled", true).addClass("ui-disabled");
+                }
+
+                $("#image-button-favorite .ui-icon").removeClass("ui-icon-star ui-icon-star-o");
+
+                var favorite = guidExists(favorites, guid);
+
+                $("#image-button-favorite")
+                  .removeClass("ui-icon-star ui-icon-star-o")
+                  .attr("data-icon", favorite ? "star" : "star-o")
+                  .addClass(favorite ? "ui-icon-star" : "ui-icon-star-o")
+                  .trigger("refresh");
+
+                if(guidExists(favorites, guid))
+                {
+                  $("#image-button-favorite").attr("data-icon", "star");
+                }
+                else
+                {
+                  $("#image-button-favorite").attr("data-icon", "star-o");
+                }
+
+                $("#image-button-favorite").prop("disabled", false).removeClass("ui-disabled");
+                $("#image-button-write-comment").prop("disabled", false).removeClass("ui-disabled");
+
+                // assign guid to buttons:
+                $("#image-action-buttons").find("button").data("guid", obj["guid"]);
               }
-              else
+
+              // comments:
+              $("#comments-listview").comments(
               {
-                $("#image-button-like").prop("disabled", true).addClass("ui-disabled");
-                $("#image-button-dislike").prop("disabled", true).addClass("ui-disabled");
-              }
+                pageSize: 10,
+                onLoad: function(page, pageSize)
+                {
+                  return store.getComments(guid, page, pageSize);
+                }
+              });
 
-              $("#image-button-favorite .ui-icon").removeClass("ui-icon-star ui-icon-star-o");
+              $("#button-add-comment").prop("disabled", true).addClass("ui-disabled").data("guid", obj["guid"]);
 
-              var favorite = guidExists(favorites, guid);
-
-              $("#image-button-favorite")
-                .removeClass("ui-icon-star ui-icon-star-o")
-                .attr("data-icon", favorite ? "star" : "star-o")
-                .addClass(favorite ? "ui-icon-star" : "ui-icon-star-o")
-                .trigger("refresh");
-
-              if(guidExists(favorites, guid))
+              $("#textarea-comment").off("keyup").on("keyup", function()
               {
-                $("#image-button-favorite").attr("data-icon", "star");
-              }
-              else
-              {
-                $("#image-button-favorite").attr("data-icon", "star-o");
-              }
+                if($("#textarea-comment").val().length > 0)
+                {
+                  $("#button-add-comment").prop("disabled", false).removeClass("ui-disabled").button("refresh");
+                }
+                else
+                {
+                  $("#button-add-comment").prop("disabled", true).addClass("ui-disabled").button("refresh");
+                }
+              }).val("");
 
-              // assign guid to buttons:
-              $("#image-action-buttons").find("button").data("guid", obj["guid"]);
+              $("#form-add-comment").hide();
 
               // open page:
               $("body").pagecontainer("change", "#page-image");
@@ -756,6 +798,11 @@
           // TODO
           $(document).blockUI("hide");
         })
+    }
+
+    function refreshImage()
+    {
+      $("#comments-listview").comments("update");
     }
 
     function button_like_tapped(guid, like)
@@ -789,7 +836,7 @@
       store.favor(guid, favor)
         .done(function(image)
         {
-          updateLibraries(["library-listview", "random-listview", "popular-listview"], [image]);
+          updateLibraries(["library-listview", "random-listview", "popular-listview", "favorites-listview"], [image]);
 
           if(favor)
           {
@@ -811,6 +858,36 @@
           $("#image-score-up").text(image["score"]["up"]);
           $("#image-score-down").text(image["score"]["down"]);
           $("#image-score-favorite").text(image["score"]["fav"]);
+        })
+        .always(function()
+        {
+          $(document).blockUI("hide");
+        });
+    }
+
+    function button_write_comment_tapped()
+    {
+      $("#form-add-comment").show();
+      $("#textarea-comment").val("").focus();
+      $("#button-add-comment").prop("disabled", true).addClass("ui-disabled").button("refresh");
+    }
+
+    function button_add_comment_tapped(btn)
+    {
+      var guid = $(btn).data("guid");
+      var text = $("#textarea-comment").val();
+
+      $(document).blockUI("show");
+
+      store.addComment(guid, text)
+        .done(function(image)
+        {
+          $("#textarea-comment").val("");
+          $("#form-add-comment").hide();
+
+          updateLibraries(["library-listview", "random-listview", "popular-listview", "favorites-listview"], [image]);
+
+          $("#comments-listview").comments("update");
         })
         .always(function()
         {
@@ -1150,9 +1227,10 @@
 </div>
 
 <div data-role="page" id="page-image" data-position="fixed">
-  <div data-role="header" data-position="fixed">
+  <div data-role="header" data-position="fixed" data-tap-toggle="false">
     <a href="#" data-rel="back" data-icon="back">Back</a>
     <h1>Image</h1>
+    <a href='javascript:refreshImage();' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
   </div>
 
   <div role="main" class="ui-content">
@@ -1173,12 +1251,20 @@
         <button id="image-button-like" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="thumbs-up" onclick="button_like_tapped($(this).data('guid'), true);">Like</button>
         <button id="image-button-dislike" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="thumbs-o-down" onclick="button_like_tapped($(this).data('guid'), false);">Dislike</button>
         <button id="image-button-favorite" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="star-o" onclick="button_favor_tapped($(this).data('guid'), $(this).attr('data-icon') == 'star-o');">Favorite</button>
-        <!--<button data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="mail-forward">Recommend</button>
-        <button data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="pencil">Comment</button>-->
+        <!--<button data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="mail-forward">Recommend</button>-->
+        <button id="image-button-write-comment" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="pencil" onclick="button_write_comment_tapped();">Comment</button>
       </div>
     </div>
 
-    <ul id="popular-listview" data-role="listview" data-inset="true">
+    <form id="form-add-comment">
+      <div align="right">
+        <input type="button" data-icon="delete" data-iconpos="notext" onclick="$(this).closest('form').hide();" />
+      </div>
+      <textarea name="comment" id="textarea-comment"></textarea>
+      <input type="button" id="button-add-comment" value="Add comment" onclick="button_add_comment_tapped(this);" />
+    </form>
+
+    <ul id="comments-listview" data-role="listview" data-inset="true">
     </ul>
   </div>
 
