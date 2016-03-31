@@ -911,27 +911,12 @@
           store.getOwnProfile()
             .done(function(profile)
             {
-              var friends = new Array();
-              var failed = false;
-
-              for(var i = 0; i < profile["following"].length && !failed; i++)
-              {
-                store.getProfile(profile["following"][i])
-                  .done(function(friend)
-                  {
-                    friends.push(friend);
-                  })
-                  .fail(function(response)
-                  {
-                    failed = true;
-                    d.reject(response);
-                  });
-              };
-
-              if(!failed)
-              {
-                d.resolve(friends);
-              }
+              $.when.apply($, $.map(profile["following"], function(friend) { return store.getProfile(friend); }))
+                .done(function()
+                {
+                  d.resolve(arguments);
+                })
+                .fail(d.reject);
             })
             .fail(d.reject);
 
