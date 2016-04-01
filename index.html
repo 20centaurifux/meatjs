@@ -100,10 +100,7 @@
 
     function setupScaling()
     {
-      $("#image-source").on("load", function()
-      {
-        scaleImage();
-      });
+      $("#image-source").on("load", scaleImage);
     }
 
     function window_orientationchange()
@@ -565,11 +562,6 @@
         $("#library-listview").library("update");
     }
 
-    function libraryRefresh()
-    {
-        $("#library-listview").library("update");
-    }
-
     /*
      * random:
      */
@@ -588,12 +580,6 @@
           onSelect: openImage
         });
 
-        $("#random-listview").library("update");
-    }
-
-    function randomRefresh()
-    {
-        $("#random-listview").library("clear");
         $("#random-listview").library("update");
     }
 
@@ -625,11 +611,6 @@
         $("#popular-listview").library("update");
     }
 
-    function popularRefresh()
-    {
-        $("#popular-listview").library("update");
-    }
-
     /*
      * favorites:
      */
@@ -651,12 +632,6 @@
           onSelect: openImage
         });
 
-        $("#favorites-listview").library("update");
-    }
-
-    function favoritesRefresh()
-    {
-        $("#favorites-listview").library("clear");
         $("#favorites-listview").library("update");
     }
 
@@ -803,11 +778,6 @@
           // TODO
           $(document).blockUI("hide");
         })
-    }
-
-    function refreshImage()
-    {
-      $("#comments-listview").comments("update");
     }
 
     function button_like_tapped(guid, like)
@@ -1158,7 +1128,7 @@
   <div data-role="header" data-position="fixed">
     <a href='javascript:openNavigation();' data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
     <h1>Library</h1>
-    <a href='javascript:libraryRefresh();' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
+    <a href='javascript:$("#library-listview").library("update");' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
   </div>
  
   <div role="main" class="ui-content">
@@ -1171,7 +1141,7 @@
   <div data-role="header" data-position="fixed">
     <a href='javascript:openNavigation();' data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
     <h1>Random</h1>
-    <a href='javascript:randomRefresh();' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
+    <a href='javascript:$("#random-listview").library("clear").library("update");' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
   </div>
  
   <div role="main" class="ui-content">
@@ -1184,7 +1154,7 @@
   <div data-role="header" data-position="fixed">
     <a href='javascript:openNavigation();' data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
     <h1>Popular</h1>
-    <a href='javascript:popularRefresh();' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
+    <a href='javascript:$("#popular-listview").library("clear").library("update");' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
   </div>
  
   <div role="main" class="ui-content">
@@ -1197,7 +1167,7 @@
   <div data-role="header" data-position="fixed">
     <a href='javascript:openNavigation();' data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
     <h1>Favorites</h1>
-    <a href='javascript:favoritesRefresh();' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
+    <a href='javascript:$("#favorites-listview").library("update");' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
   </div>
  
   <div role="main" class="ui-content">
@@ -1220,7 +1190,7 @@
   <div data-role="header" data-position="fixed" data-tap-toggle="false">
     <a href="#" data-rel="back" data-icon="back">Back</a>
     <h1>Image</h1>
-    <a href='javascript:refreshImage();' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
+    <a href='javascript:$("#comments-listview").comments("update");' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
   </div>
 
   <div role="main" class="ui-content">
