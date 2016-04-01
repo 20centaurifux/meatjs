@@ -665,10 +665,15 @@
      */
     function scaleImage()
     {
-      var maxHeight = $(window).height() - 60 + "px";
-      var maxWidth = $(window).width() - 60 + "px";
+      $("#image-source").hide();
 
-      $("#image-source").css({"max-height": maxHeight, "max-width": maxWidth});
+      setTimeout(function()
+      {
+        var maxHeight = $(window).height() - 60 + "px";
+        var maxWidth = $(window).width() - 60 + "px";
+
+        $("#image-source").css({"max-height": maxHeight, "max-width": maxWidth}).fadeIn();
+      }, 50);
     }
 
     function openImage(guid)
