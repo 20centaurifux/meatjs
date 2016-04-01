@@ -181,11 +181,13 @@
     {
       var parameters = Array.prototype.slice.call(arguments, 1);
 
-      this.each(function()
+      return this.each(function()
       {
         if($(this).data("jquery.library"))
         {
-          return methods[args].apply(this, parameters);
+          methods[args].apply(this, parameters);
+
+          return this;
         }
         else
         {

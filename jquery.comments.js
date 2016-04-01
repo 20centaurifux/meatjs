@@ -5,6 +5,8 @@
     update: function()
     {
       methods.loadPage.apply(this, [0]);
+
+      return this;
     },
     nextPage: function()
     {
@@ -19,6 +21,8 @@
             $(comments).data("jquery.comments.options").tail++;
           }
         });
+
+      return this;
     },
     loadPage: function(page)
     {
@@ -110,7 +114,7 @@
     {
       var parameters = Array.prototype.slice.call(arguments, 1);
 
-      this.each(function()
+      return this.each(function()
       {
         if($(this).data("jquery.comments"))
         {

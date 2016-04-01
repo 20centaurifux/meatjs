@@ -123,6 +123,8 @@
             $(document).blockUI("hide");
           });
       }
+
+      return this;
     },
     open: function()
     {
@@ -161,6 +163,8 @@
             $(document).blockUI("hide");
           });
       }
+
+      return this;
     },
     searchMode: function(active)
     {
@@ -202,6 +206,8 @@
       {
         form.hide();
       }
+
+      return this;
     },
     toggleSearchMode: function()
     {
@@ -213,6 +219,8 @@
       {
         methods.open.apply(this);
       }
+
+      return this;
     }
   };
 
@@ -278,7 +286,7 @@
     {
       var parameters = Array.prototype.slice.call(arguments, 1);
 
-      this.each(function()
+      return this.each(function()
       {
         if($(this).data("jquery.friends"))
         {
