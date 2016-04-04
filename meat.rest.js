@@ -13,11 +13,6 @@ MeatREST.prototype.requestPassword = function(username, email)
   return $.post(this.opts.Server + "/rest/user/" + encodeURIComponent(username) + "/password/reset", {username: username, email: email});
 }
 
-MeatREST.prototype.buildAvatarUrl = function(username)
-{
-  return this.opts.Server + "/rest/user/" + encodeURIComponent(username) + "/avatar";
-}
-
 MeatREST.prototype.setAuthData = function(username, password)
 {
   this.opts.Username = username;
@@ -174,9 +169,47 @@ MeatREST.prototype.getImage = function(filename)
   return this.requestText("GET", "/images/" + encodeURIComponent(filename));
 }
 
+MeatREST.prototype.getOwnAvatar = function()
+{
+  return this.requestText("GET", "/rest/user/" + encodeURIComponent(this.opts.Username) + "/avatar");
+}
+
 MeatREST.prototype.getAvatar = function(username)
 {
   return this.requestText("GET", "/rest/user/" + encodeURIComponent(username) + "/avatar");
+}
+
+MeatREST.prototype.uploadAvatar = function(file)
+{
+  var d = $.Deferred();
+  var reader = new FileReader();
+  var url = this.opts.Server + "/rest/user/" + encodeURIComponent(this.opts.Username) + "/avatar";
+  var headers = {"Authorization": "Basic " + btoa(this.opts.Username + ":" + this.opts.Password)};
+
+  reader.onload = function(e)
+  {
+    var form = new FormData();
+
+    form.append("file", file);
+    form.append("filename", file.name);
+
+    $.ajax(
+    {
+      type: "POST",
+      url: url,
+      async: true,
+      processData: false,
+      headers: headers,
+      contentType: false,
+      data: form
+    })
+      .success(d.resolve)
+      .fail(d.reject);
+  }
+
+  reader.readAsArrayBuffer(file);
+
+  return d;
 }
 
 MeatREST.prototype.request = function(method, type, path, data)
