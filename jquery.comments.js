@@ -34,6 +34,8 @@
         var client = new MeatStore().createClient();
         var users = new Array();
 
+        $.mobile.loading("show");
+
         return f(page, $(this).data("jquery.comments.options").pageSize)
           .done(function(comments)
           {
@@ -92,6 +94,10 @@
                   $(ul).find('img[data-source="' + username + '"]').attr("src", "images/image-missing.png");
                 });
             });
+          })
+          .always(function()
+          {
+            $.mobile.loading("hide");
           });
       }
 

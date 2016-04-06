@@ -55,6 +55,8 @@
 
       if(f)
       {
+        $.mobile.loading("show");
+
         var library = this;
 
         return f(page, $(this).data("jquery.library.options").pageSize)
@@ -69,6 +71,10 @@
             {
               methods.sort.apply(library);
             }
+          })
+          .always(function()
+          {
+            $.mobile.loading("hide");
           });
       }
 

@@ -105,7 +105,7 @@
       $("#image-source").on("load", scaleImage);
     }
 
-    function window_orientationchange()
+    function window_resize()
     {
       var pageId = $("body").pagecontainer("getActivePage").attr("id");
 
@@ -608,24 +608,24 @@
      */
     function page_library_loading()
     {
-        $("#library-listview").library(
+      $("#library-listview").library(
+      {
+        pageSize: 10,
+        onLoad: function(page, pageSize)
         {
-          pageSize: 10,
-          onLoad: function(page, pageSize)
+          return store.getObjects(page, pageSize).done(function(objects)
           {
-            return store.getObjects(page, pageSize).done(function(objects)
-            {
-              updateLibraries(["popular-listview", "favorites-listview"], objects);
-            });
-          },
-          onCompare: function(a, b)
-          {
-            return b["created_on"]["$date"] - a["created_on"]["$date"]
-          },
-          onSelect: openImage
-        });
+            updateLibraries(["popular-listview", "favorites-listview"], objects);
+          });
+        },
+        onCompare: function(a, b)
+        {
+          return b["created_on"]["$date"] - a["created_on"]["$date"]
+        },
+        onSelect: openImage
+      });
 
-        $("#library-listview").library("update");
+      $("#library-listview").library("update");
     }
 
     /*
@@ -731,7 +731,7 @@
         return contains;
       };
 
-      $(document).blockUI("show");
+      $.mobile.loading("show");
 
       $.when(store.getObject(guid), store.getVote(guid), store.getFavorites())
         .done(function(obj, vote, favorites)
@@ -833,19 +833,19 @@
             })
             .always(function()
             {
-              $(document).blockUI("hide");
+              $.mobile.loading("hide");
             })
         })
         .fail(function(result)
         {
-          // TODO
           $(document).blockUI("hide");
+          $.mobile.loading("hide");
         })
     }
 
     function button_like_tapped(guid, like)
     {
-      $(document).blockUI("show");
+      $.mobile.loading("show");
 
       store.like(guid, like)
         .done(function(image)
@@ -863,13 +863,13 @@
         })
         .always(function()
         {
-          $(document).blockUI("hide");
+          $.mobile.loading("hide");
         });
     }
 
     function button_favor_tapped(guid, favor)
     {
-      $(document).blockUI("show");
+      $.mobile.loading("show");
 
       store.favor(guid, favor)
         .done(function(image)
@@ -899,7 +899,7 @@
         })
         .always(function()
         {
-          $(document).blockUI("hide");
+          $.mobile.loading("hide");
         });
     }
 
@@ -915,7 +915,9 @@
       var guid = $(btn).data("guid");
       var text = $("#textarea-comment").val();
 
-      $(document).blockUI("show");
+      $.mobile.loading("show");
+
+      $("#form-add-comment").hide();
 
       store.addComment(guid, text)
         .done(function(image)
@@ -929,7 +931,7 @@
         })
         .always(function()
         {
-          $(document).blockUI("hide");
+          $.mobile.loading("hide");
         });
     }
 
