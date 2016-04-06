@@ -84,10 +84,10 @@
             // load thumbnails:
             $(users).each(function(i, username)
             {
-              client.getThumbnail(username)
-                .success(function(thumbnail)
+              client.getAvatar(username)
+                .success(function(avatar)
                 {
-                  $(ul).find('img[data-source="' + username + '"]').attr("src", thumbnail);
+                  $(ul).find('img[data-source="' + username + '"]').attr("src", avatar);
                 })
                 .fail(function(r)
                 {
