@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>foo</title>
+  <title>Loading...</title>
 
   <link rel="stylesheet" href="jquery.mobile-1.4.5.css">
   <link rel="stylesheet" href="jquery.blockui.css">
@@ -58,10 +58,12 @@
       $(window).on("resize", window_resize);
       $(window).on("navigate", window_navigate);
 
-      // setup scrolling, image scaling & open start page:
+      // setup scrolling & image scaling:
       setupScrolling();
       setupScaling();
-      openStartPage();
+
+      // initialize jquery mobile:
+      $.mobile.initializePage();
     });
 
     function setupScrolling()
@@ -118,20 +120,6 @@
     function window_navigate()
     {
       $(document).blockUI("hide");
-    }
-
-    function openStartPage()
-    {
-      var hash = "page-library";
-      var credentials = store.getCredentials();
-
-      if(!store.configured())
-      {
-        hash = "page-authentication";
-      }
-
-      window.location.hash = hash;
-      $.mobile.initializePage();
     }
 
     function openNavigation()
@@ -608,24 +596,31 @@
      */
     function page_library_loading()
     {
-      $("#library-listview").library(
+      if(store.configured())
       {
-        pageSize: 10,
-        onLoad: function(page, pageSize)
+        $("#library-listview").library(
         {
-          return store.getObjects(page, pageSize).done(function(objects)
+          pageSize: 10,
+          onLoad: function(page, pageSize)
           {
-            updateLibraries(["popular-listview", "favorites-listview"], objects);
-          });
-        },
-        onCompare: function(a, b)
-        {
-          return b["created_on"]["$date"] - a["created_on"]["$date"]
-        },
-        onSelect: openImage
-      });
+            return store.getObjects(page, pageSize).done(function(objects)
+            {
+              updateLibraries(["popular-listview", "favorites-listview"], objects);
+            });
+          },
+          onCompare: function(a, b)
+          {
+            return b["created_on"]["$date"] - a["created_on"]["$date"]
+          },
+          onSelect: openImage
+        });
 
-      $("#library-listview").library("update");
+        $("#library-listview").library("update");
+      }
+      else
+      {
+        $("body").pagecontainer("change", "#page-authentication", {changeHash:false});
+      }
     }
 
     /*
@@ -973,6 +968,111 @@
 
 <body>
 
+<div data-role="page" id="page-library" data-position="fixed">
+  <div data-role="header" data-position="fixed">
+    <a href='javascript:openNavigation();' data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
+    <h1>Library</h1>
+    <a href='javascript:$("#library-listview").library("update");' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
+  </div>
+ 
+  <div role="main" class="ui-content">
+    <ul id="library-listview" data-role="listview" data-inset="true">
+    </ul>
+  </div>
+</div>
+
+<div data-role="page" id="page-random" data-position="fixed">
+  <div data-role="header" data-position="fixed">
+    <a href='javascript:openNavigation();' data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
+    <h1>Random</h1>
+    <a href='javascript:$("#random-listview").library("clear").library("update");' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
+  </div>
+ 
+  <div role="main" class="ui-content">
+    <ul id="random-listview" data-role="listview" data-inset="true">
+    </ul>
+  </div>
+</div>
+
+<div data-role="page" id="page-popular" data-position="fixed">
+  <div data-role="header" data-position="fixed">
+    <a href='javascript:openNavigation();' data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
+    <h1>Popular</h1>
+    <a href='javascript:$("#popular-listview").library("clear").library("update");' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
+  </div>
+ 
+  <div role="main" class="ui-content">
+    <ul id="popular-listview" data-role="listview" data-inset="true">
+    </ul>
+  </div>
+</div>
+
+<div data-role="page" id="page-favorites" data-position="fixed">
+  <div data-role="header" data-position="fixed">
+    <a href='javascript:openNavigation();' data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
+    <h1>Favorites</h1>
+    <a href='javascript:$("#favorites-listview").library("update");' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
+  </div>
+ 
+  <div role="main" class="ui-content">
+    <ul id="favorites-listview" data-role="listview" data-inset="true">
+    </ul>
+  </div>
+</div>
+
+<div data-role="page" id="page-friends" data-position="fixed">
+  <div data-role="header" data-position="fixed">
+    <a href='javascript:openNavigation();' data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
+    <h1>Friends</h1>
+  </div>
+ 
+  <div data-role="main" class="ui-content" id="div-friends">
+  </div>
+</div>
+
+<div data-role="page" id="page-image" data-position="fixed">
+  <div data-role="header" data-position="fixed" data-tap-toggle="false">
+    <a href="#" data-rel="back" data-icon="back">Back</a>
+    <h1>Image</h1>
+    <a href='javascript:$("#comments-listview").comments("update");' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
+  </div>
+
+  <div role="main" class="ui-content">
+    <div style="width:100%; text-align:center;">
+      <div>
+        <img id="image-source" class="image" src="" alt="image">
+
+        <p style="font-size:small;">
+          <strong><span id="image-score-up">0</span></strong> people <strong> liked </strong> this image <br />
+          <strong><span id="image-score-down">0</span></strong> people <strong> disliked </strong> this image <br />
+          <strong><span id="image-score-favorite">0</span></strong> people <strong> favorited </strong> this image <br />
+        </p>
+      </div>
+    </div>
+
+    <div style="width:100%; text-align:center;">
+      <div id="image-action-buttons" data-role="controlgroup" data-type="horizontal" data-mini="true" data-shadow="false">
+        <button id="image-button-like" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="thumbs-up" onclick="button_like_tapped($(this).data('guid'), true);">Like</button>
+        <button id="image-button-dislike" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="thumbs-o-down" onclick="button_like_tapped($(this).data('guid'), false);">Dislike</button>
+        <button id="image-button-favorite" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="star-o" onclick="button_favor_tapped($(this).data('guid'), $(this).attr('data-icon') == 'star-o');">Favorite</button>
+        <!--<button data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="mail-forward">Recommend</button>-->
+        <button id="image-button-write-comment" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="pencil" onclick="button_write_comment_tapped();">Comment</button>
+      </div>
+    </div>
+
+    <form id="form-add-comment">
+      <div align="right">
+        <input type="button" data-icon="delete" data-iconpos="notext" onclick="$(this).closest('form').hide();" />
+      </div>
+      <textarea name="comment" id="textarea-comment"></textarea>
+      <input type="button" id="button-add-comment" value="Add comment" onclick="button_add_comment_tapped(this);" />
+    </form>
+
+    <ul id="comments-listview" data-role="listview" data-inset="true">
+    </ul>
+  </div>
+</div>
+
 <div id="page-navigation" data-role="page">
   <div role="main" class="ui-content">
     <ul data-role="listview">
@@ -1201,112 +1301,6 @@
       <input name="filename" id="file-avatar" type="file" accept="image/*;capture=camera;" onchange="javascript:file_avatar_changed()">
     </form>
   </div>
-</div>
-
-<div data-role="page" id="page-library" data-position="fixed">
-  <div data-role="header" data-position="fixed">
-    <a href='javascript:openNavigation();' data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
-    <h1>Library</h1>
-    <a href='javascript:$("#library-listview").library("update");' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
-  </div>
- 
-  <div role="main" class="ui-content">
-    <ul id="library-listview" data-role="listview" data-inset="true">
-    </ul>
-  </div>
-</div>
-
-<div data-role="page" id="page-random" data-position="fixed">
-  <div data-role="header" data-position="fixed">
-    <a href='javascript:openNavigation();' data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
-    <h1>Random</h1>
-    <a href='javascript:$("#random-listview").library("clear").library("update");' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
-  </div>
- 
-  <div role="main" class="ui-content">
-    <ul id="random-listview" data-role="listview" data-inset="true">
-    </ul>
-  </div>
-</div>
-
-<div data-role="page" id="page-popular" data-position="fixed">
-  <div data-role="header" data-position="fixed">
-    <a href='javascript:openNavigation();' data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
-    <h1>Popular</h1>
-    <a href='javascript:$("#popular-listview").library("clear").library("update");' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
-  </div>
- 
-  <div role="main" class="ui-content">
-    <ul id="popular-listview" data-role="listview" data-inset="true">
-    </ul>
-  </div>
-</div>
-
-<div data-role="page" id="page-favorites" data-position="fixed">
-  <div data-role="header" data-position="fixed">
-    <a href='javascript:openNavigation();' data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
-    <h1>Favorites</h1>
-    <a href='javascript:$("#favorites-listview").library("update");' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
-  </div>
- 
-  <div role="main" class="ui-content">
-    <ul id="favorites-listview" data-role="listview" data-inset="true">
-    </ul>
-  </div>
-</div>
-
-<div data-role="page" id="page-friends" data-position="fixed">
-  <div data-role="header" data-position="fixed">
-    <a href='javascript:openNavigation();' data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
-    <h1>Friends</h1>
-  </div>
- 
-  <div data-role="main" class="ui-content" id="div-friends">
-  </div>
-</div>
-
-<div data-role="page" id="page-image" data-position="fixed">
-  <div data-role="header" data-position="fixed" data-tap-toggle="false">
-    <a href="#" data-rel="back" data-icon="back">Back</a>
-    <h1>Image</h1>
-    <a href='javascript:$("#comments-listview").comments("update");' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
-  </div>
-
-  <div role="main" class="ui-content">
-    <div style="width:100%; text-align:center;">
-      <div>
-        <img id="image-source" class="image" src="" alt="image">
-
-        <p style="font-size:small;">
-          <strong><span id="image-score-up">0</span></strong> people <strong> liked </strong> this image <br />
-          <strong><span id="image-score-down">0</span></strong> people <strong> disliked </strong> this image <br />
-          <strong><span id="image-score-favorite">0</span></strong> people <strong> favorited </strong> this image <br />
-        </p>
-      </div>
-    </div>
-
-    <div style="width:100%; text-align:center;">
-      <div id="image-action-buttons" data-role="controlgroup" data-type="horizontal" data-mini="true" data-shadow="false">
-        <button id="image-button-like" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="thumbs-up" onclick="button_like_tapped($(this).data('guid'), true);">Like</button>
-        <button id="image-button-dislike" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="thumbs-o-down" onclick="button_like_tapped($(this).data('guid'), false);">Dislike</button>
-        <button id="image-button-favorite" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="star-o" onclick="button_favor_tapped($(this).data('guid'), $(this).attr('data-icon') == 'star-o');">Favorite</button>
-        <!--<button data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="mail-forward">Recommend</button>-->
-        <button id="image-button-write-comment" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="pencil" onclick="button_write_comment_tapped();">Comment</button>
-      </div>
-    </div>
-
-    <form id="form-add-comment">
-      <div align="right">
-        <input type="button" data-icon="delete" data-iconpos="notext" onclick="$(this).closest('form').hide();" />
-      </div>
-      <textarea name="comment" id="textarea-comment"></textarea>
-      <input type="button" id="button-add-comment" value="Add comment" onclick="button_add_comment_tapped(this);" />
-    </form>
-
-    <ul id="comments-listview" data-role="listview" data-inset="true">
-    </ul>
-  </div>
-
 </div>
 
 </body>
