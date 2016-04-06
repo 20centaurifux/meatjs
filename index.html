@@ -484,23 +484,26 @@
     {
       var file = $("#file-avatar").get(0).files[0];
 
-      $(document).blockUI("show");
-      $("#page-change-avatar").find(".error").hide();
-
-      if(file)
+      if(file != null)
       {
-        store.createClient().uploadAvatar(file)
-          .done(function(result)
-          {
-          })
-          .fail(function(result)
-          {
-            $("#page-change-avatar").find(".error").first().text("*" + getFailureMessage(result)).show();
-          })
-          .always(function()
-          {
-            $(document).blockUI("hide");
-          });
+        $(document).blockUI("show");
+        $("#page-change-avatar").find(".error").hide();
+
+        if(file)
+        {
+          store.createClient().uploadAvatar(file)
+            .done(function(result)
+            {
+            })
+            .fail(function(result)
+            {
+              $("#page-change-avatar").find(".error").first().text("*" + getFailureMessage(result)).show();
+            })
+            .always(function()
+            {
+              $(document).blockUI("hide");
+            });
+        }
       }
     }
 
