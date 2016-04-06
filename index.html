@@ -55,7 +55,8 @@
       $("#page-favorites").on("pagebeforeshow", page_favorites_loading);
 
       // register window events:
-      $(window).on("orientationchange", window_orientationchange);
+      $(window).on("resize", window_resize);
+      $(window).on("navigate", window_navigate);
 
       // setup scrolling, image scaling & open start page:
       setupScrolling();
@@ -112,6 +113,11 @@
       {
         scaleImage();
       }
+    }
+
+    function window_navigate()
+    {
+      $(document).blockUI("hide");
     }
 
     function openStartPage()
@@ -700,15 +706,10 @@
      */
     function scaleImage()
     {
-      $("#image-source").hide();
+      var maxHeight = $(window).height() - 60 + "px";
+      var maxWidth = $(window).width() - 60 + "px";
 
-      setTimeout(function()
-      {
-        var maxHeight = $(window).height() - 60 + "px";
-        var maxWidth = $(window).width() - 60 + "px";
-
-        $("#image-source").css({"max-height": maxHeight, "max-width": maxWidth}).fadeIn();
-      }, 50);
+      $("#image-source").css({"max-height": maxHeight, "max-width": maxWidth});
     }
 
     function openImage(guid)
