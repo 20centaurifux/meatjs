@@ -10,17 +10,26 @@
     },
     nextPage: function()
     {
-      var page = $(this).data("jquery.comments.options").tail;
       var comments = this;
 
-      methods.loadPage.apply(this, [page + 1])
-        .done(function(result)
-        {
-          if(result.length > 0)
+      if(!$(comments).data("jquery.comments.options").endOfStream)
+      {
+        var page = $(this).data("jquery.comments.options").tail;
+        var comments = this;
+
+        methods.loadPage.apply(this, [page + 1])
+          .done(function(result)
           {
-            $(comments).data("jquery.comments.options").tail++;
-          }
-        });
+            if(result.length > 0)
+            {
+              $(comments).data("jquery.comments.options").tail++;
+            }
+            else
+            {
+              $(comments).data("jquery.comments.options").endOfStream = true;
+            }
+          });
+      }
 
       return this;
     },
@@ -108,7 +117,7 @@
   function createComments(obj, options)
   {
     $(obj).data("jquery.comments", true);
-    $(obj).data("jquery.comments.options", $.extend({pageSize: 10, tail: 0, onLoad: null}, options));
+    $(obj).data("jquery.comments.options", $.extend({pageSize: 10, tail: 0, endOfStream: false, onLoad: null}, options));
 
     $(obj).find("li").remove();
     $(obj).listview();
