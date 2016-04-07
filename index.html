@@ -80,7 +80,7 @@
         var height = $(window).height();
         var top = $(window).scrollTop();
 
-        if(top > scrollTop && $(window).scrollTop() == $(document).height() - $(window).height())
+        if(top > scrollTop && $(window).scrollTop() >= $(document).height() - $(window).height())
         {
           var pageId = $("body").pagecontainer("getActivePage").attr("id");
 
