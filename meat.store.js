@@ -2,6 +2,7 @@
   {
     var cache = $(options).prop('Cache') || new MeatCache();
     var storage = $(options).prop('Storage') || LocalMeatStorage;
+    var avatarTimestamp = new Date().getTime();
     var store = this;
 
     this.createClient = function()
@@ -250,7 +251,26 @@
 
   this.getAvatar = function(username)
   {
+    if(username.toLowerCase() == storage.load("user.Username").toLowerCase())
+    {
+      return store.getOwnAvatar();
+    }
+
     return store.createClient().getAvatar(username).promise();
+  }
+
+  this.getOwnAvatar = function()
+  {
+    return store.createClient().getOwnAvatar(avatarTimestamp).promise();
+  }
+
+  this.uploadAvatar = function(file)
+  {
+      return store.createClient().uploadAvatar(file).promise()
+        .done(function()
+        {
+          avatarTimestamp = new Date().getTime();
+        });
   }
 
   this.getComments = function(guid, page, pageSize)

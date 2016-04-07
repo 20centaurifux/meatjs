@@ -39,8 +39,8 @@
 
       if(f)
       {
+        var opts = $(this).data("jquery.comments.options");
         var ul = this;
-        var client = new MeatStore().createClient();
         var users = new Array();
 
         $.mobile.loading("show");
@@ -90,19 +90,22 @@
 
             $(ul).listview("refresh");
 
-            // load thumbnails:
-            $(users).each(function(i, username)
+            // load avatars:
+            if(opts.onGetAvatar)
             {
-              client.getAvatar(username)
-                .success(function(avatar)
-                {
-                  $(ul).find('img[data-source="' + username + '"]').attr("src", avatar);
-                })
-                .fail(function(r)
-                {
-                  $(ul).find('img[data-source="' + username + '"]').attr("src", "images/image-missing.png");
-                });
-            });
+              $(users).each(function(i, username)
+              {
+                opts.onGetAvatar(username)
+                  .done(function(avatar)
+                  {
+                    $(ul).find('img[data-source="' + username + '"]').attr("src", avatar);
+                  })
+                  .fail(function(r)
+                  {
+                    $(ul).find('img[data-source="' + username + '"]').attr("src", "images/image-missing.png");
+                  });
+              });
+            }
           })
           .always(function()
           {
@@ -117,7 +120,7 @@
   function createComments(obj, options)
   {
     $(obj).data("jquery.comments", true);
-    $(obj).data("jquery.comments.options", $.extend({pageSize: 10, tail: 0, endOfStream: false, onLoad: null}, options));
+    $(obj).data("jquery.comments.options", $.extend({pageSize: 10, tail: 0, endOfStream: false, onLoad: null, onGetAvatar: null}, options));
 
     $(obj).find("li").remove();
     $(obj).listview();

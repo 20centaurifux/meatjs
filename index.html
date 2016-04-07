@@ -466,7 +466,7 @@
       $("#image-avatar").hide();
       $("#page-change-avatar").find(".error").hide();
 
-      store.createClient().getOwnAvatar()
+      store.getOwnAvatar()
         .done(function(image)
         {
           $("#image-avatar").attr("src", image).fadeIn();
@@ -491,9 +491,10 @@
 
         if(file)
         {
-          store.createClient().uploadAvatar(file)
+          store.uploadAvatar(file)
             .done(function(result)
             {
+              // TODO
             })
             .fail(function(result)
             {
@@ -803,7 +804,8 @@
                 onLoad: function(page, pageSize)
                 {
                   return store.getComments(guid, page, pageSize);
-                }
+                },
+                onGetAvatar: store.getAvatar
               });
 
               $("#button-add-comment").prop("disabled", true).addClass("ui-disabled").data("guid", obj["guid"]);

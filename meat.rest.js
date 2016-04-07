@@ -169,9 +169,9 @@ MeatREST.prototype.getImage = function(filename)
   return this.requestText("GET", "/images/" + encodeURIComponent(filename));
 }
 
-MeatREST.prototype.getOwnAvatar = function()
+MeatREST.prototype.getOwnAvatar = function(timestamp)
 {
-  return this.requestText("GET", "/rest/user/" + encodeURIComponent(this.opts.Username) + "/avatar");
+  return this.requestText("GET", "/rest/user/" + encodeURIComponent(this.opts.Username) + "/avatar?timestamp=" + timestamp);
 }
 
 MeatREST.prototype.getAvatar = function(username)
