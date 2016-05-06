@@ -20,6 +20,9 @@
     $(document).bind("mobileinit", function()
     {
       $.mobile.autoInitializePage = false;
+      $.mobile.toolbar.prototype.options.updatePagePadding = false;
+      $.mobile.toolbar.prototype.options.hideDuringFocus = "";
+      $.mobile.toolbar.prototype.options.tapToggle = false;
     });         
   </script>
 
@@ -31,6 +34,7 @@
   <script type="text/javascript" src="jquery.library.js"></script>
   <script type="text/javascript" src="jquery.friends.js"></script>
   <script type="text/javascript" src="jquery.comments.js"></script>
+  <script type="text/javascript" src="jquery.messages.js"></script>
   <script type="text/javascript" src="jquery.mobile-1.4.5.min.js"></script>
 
   <script type="text/javascript">
@@ -53,6 +57,7 @@
       $("#page-popular").on("pagebeforeshow", page_popular_loading);
       $("#page-friends").on("pagebeforeshow", page_friends_loading);
       $("#page-favorites").on("pagebeforeshow", page_favorites_loading);
+      $("#page-messages").on("pagebeforeshow", page_messages_loading);
 
       // register window events:
       $(window).on("resize", window_resize);
@@ -968,6 +973,37 @@
 
       $("#page-friends").friends("open");
     }
+
+    /*
+     * messages:
+     */
+    function page_messages_loading()
+    {
+      $("#messages-listview").messages(
+      {
+        pageSize: 10,
+        onLoad: store.getMessages,
+        onGetThumbnail: function(source)
+        {
+          return store.createClient().getThumbnail(source);
+        },
+        onGetAvatar: store.getAvatar,
+        onSelect: function(type, id)
+        {
+          if(type == "image")
+          {
+            openImage(id);
+          }
+          else if(type == "comment")
+          {
+            id = id.split(",");
+            openImage(id[0]);
+          }
+        }
+      });
+
+      $("#messages-listview").messages("update");
+    }
   </script>
 </head>
 
@@ -1036,7 +1072,7 @@
 </div>
 
 <div data-role="page" id="page-image" data-position="fixed">
-  <div data-role="header" data-position="fixed" data-tap-toggle="false">
+  <div data-role="header" data-position="fixed">
     <a href="#" data-rel="back" data-icon="back">Back</a>
     <h1>Image</h1>
     <a href='javascript:$("#comments-listview").comments("update");' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
@@ -1078,6 +1114,19 @@
   </div>
 </div>
 
+<div data-role="page" id="page-messages" data-position="fixed">
+  <div data-role="header" data-position="fixed">
+    <a href='javascript:openNavigation();' data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
+    <h1>Messages</h1>
+    <a href='javascript:$("#messages-listview").messages("clear").messages("update");' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
+  </div>
+ 
+  <div role="main" class="ui-content">
+    <ul id="messages-listview" data-role="listview" data-inset="true">
+    </ul>
+  </div>
+</div>
+
 <div id="page-navigation" data-role="page">
   <div role="main" class="ui-content">
     <ul data-role="listview">
@@ -1086,7 +1135,7 @@
       <li><a href="#page-popular">Popular</a></li>
       <li><a href="#page-favorites">Favorites</a></li>
       <li><a href="#page-friends">Friends</a></li>
-      <li><a href="#">Messages</a></li>
+      <li><a href="#page-messages">Messages</a></li>
       <li><a href="#page-edit-profile">My Profile</a></li>
       <li><a href="#page-change-avatar">Change avatar</a></li>
       <li><a href="#page-change-password">Change password</a></li>
