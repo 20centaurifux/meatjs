@@ -282,6 +282,11 @@
   {
     var client = store.createClient();
 
-    return store.createClient().addComment(guid, text).then(function() { return client.getObject(guid); });
+    return client.addComment(guid, text).then(function() { return client.getObject(guid); });
+  }
+
+  this.getMessages = function(pageSize)
+  {
+    return store.createClient().getMessages(pageSize);
   }
 }
