@@ -156,7 +156,7 @@ MeatREST.prototype.getRecommendations = function(page, pageSize)
 
 MeatREST.prototype.recommend = function(guid, receivers)
 {
-  return this.requestJSON("GET", "/rest/object/" + encodeURIComponent(guid) + "/recommend", {receivers: receivers.join()});
+  return this.requestJSON("PUT", "/rest/object/" + encodeURIComponent(guid) + "/recommend", {receivers: receivers.join()});
 }
 
 MeatREST.prototype.getThumbnail = function(filename)
