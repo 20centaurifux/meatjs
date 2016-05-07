@@ -25,15 +25,15 @@
     // build list element:
     var friend = $.inArray(user["username"], profile["following"]) > -1;
 
-    var li = $('<li data-username="' + user["username"] + '">' +
-               '<img data-source="' + user["username"] + '" src="images/image-loader.gif" alt="">' +
+    var li = $('<li data-username="' + user["username"].escapeQuotes() + '">' +
+               '<img data-source="' + user["username"].escapeQuotes() + '" src="images/image-loader.gif" alt="">' +
                '<div style="float:right;"><span style="font-size:smaller; font-weight:bold;">Follow</span> <select data-mini="true">' +
                '<option value="no">No</option>' +
                '<option value="yes">Yes</option>' +
                '</select></div>' +
                '<div style="float:left;"><h2>' + user["username"] + '</h2></div>' +
                '<div style="clear:both;"></div>' +
-               fullname +
+               fullname.escapeHTML() +
                '</li>');
 
     var sel = li.find("select");

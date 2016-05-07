@@ -96,9 +96,9 @@
       else if(insert)
       {
         // insert new image:
-        var el = $('<li data-guid="' + image["guid"] + '" data-source="' + image["source"] + '" data-timestamp="' + image["created_on"]["$date"] + '">' +
-                   '<a href="#"><img data-source="' + image["source"] + '"src="images/image-loader.gif" alt="">' +
-                   '<h2>' + image["source"] + '</h2>' +
+        var el = $('<li data-guid="' + image["guid"] + '" data-source="' + image["source"].escapeQuotes() + '" data-timestamp="' + image["created_on"]["$date"] + '">' +
+                   '<a href="#"><img data-source="' + image["source"].escapeQuotes() + '"src="images/image-loader.gif" alt="">' +
+                   '<h2>' + image["source"].escapeHTML() + '</h2>' +
                    '<p><strong>Created on: </strong>' +
                    '<span data-field="date">' + new Date(image["created_on"]["$date"]).toLocaleString() + '</span></p>' +
                    '<p><strong>Comments: </strong>' +
@@ -129,11 +129,11 @@
       client.getThumbnail(image["source"])
         .success(function(thumbnail)
         {
-          $('img[data-source="' + image["source"] + '"]').attr("src", thumbnail);
+          $('img[data-source="' + image["source"].escapeQuotes() + '"]').attr("src", thumbnail);
         })
         .fail(function(r)
         {
-          $('img[data-source="' + image["source"] + '"]').attr("src", "images/image-missing.png");
+          $('img[data-source="' + image["source"].escapeQuotes() + '"]').attr("src", "images/image-missing.png");
         });
     },
     remove: function(image)

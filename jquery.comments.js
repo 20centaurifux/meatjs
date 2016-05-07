@@ -57,10 +57,10 @@
               {
                 var author = comment["user"]["username"];
                 var el = $('<li data-id="' + comment["id"] + '" data-timestamp="' + comment["created_on"]["$date"] + '">' +
-                           '<img data-source="' + author + '" src="images/image-loader.gif" alt="">' +
-                           '<p>' + comment["text"] + '</p>' +
-                           '<p>' +new Date(comment["created_on"]["$date"]).toLocaleString() + '</strong>' +
-                           ' by <strong>' + author + '</strong></p>' +
+                           '<img data-source="' + author.escapeQuotes() + '" src="images/image-loader.gif" alt="">' +
+                           '<p>' + comment["text"].escapeHTML() + '</p>' +
+                           '<p>' + new Date(comment["created_on"]["$date"]).toLocaleString() + '</strong>' +
+                           ' by <strong>' + author.escapeHTML() + '</strong></p>' +
                            '</li>');
 
                 var inserted = false;
@@ -98,11 +98,11 @@
                 opts.onGetAvatar(username)
                   .done(function(avatar)
                   {
-                    $(ul).find('img[data-source="' + username + '"]').attr("src", avatar);
+                    $(ul).find('img[data-source="' + username.escapeQuotes() + '"]').attr("src", avatar);
                   })
                   .fail(function(r)
                   {
-                    $(ul).find('img[data-source="' + username + '"]').attr("src", "images/image-missing.png");
+                    $(ul).find('img[data-source="' + username.escapeQuotes() + '"]').attr("src", "images/image-missing.png");
                   });
               });
             }

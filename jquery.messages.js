@@ -52,11 +52,11 @@
                     var text = msg["target"]["text"];
 
                     el = $('<li data-id="' + msg["id"] + '" data-destination="' + image["guid"] + ',' + msg["target"]["id"] + '" data-type="comment">' +
-                           '<a href="#"><img data-source="' + image["source"] + '"src="images/image-loader.gif" alt="">' +
-                           '<h2>' + image["source"] + '</h2>' +
+                           '<a href="#"><img data-source="' + image["source"].escapeQuotes() + '"src="images/image-loader.gif" alt="">' +
+                           '<h2>' + image["source"].escapeHTML() + '</h2>' +
                            '<p>' + new Date(msg["created_on"]["$date"]).toLocaleString() + '</p>' +
-                           '<p><em>' + text + '</em></p>' +
-                           '<p>commented by <strong>' + author + '</strong></p>' +
+                           '<p><em>' + text.escapeHTML() + '</em></p>' +
+                           '<p>commented by <strong>' + author.escapeHTML() + '</strong></p>' +
                            '</a></li>');
                   }
                   else if(msg["type"] == "voted-object")
@@ -64,19 +64,19 @@
                     var liked = msg["target"]["voting"];
 
                     el = $('<li data-id="' + msg["id"] + '" data-destination="' + image["guid"] + '" data-type="image">' +
-                           '<a href="#"><img data-source="' + image["source"] + '"src="images/image-loader.gif" alt="">' +
-                           '<h2>' + image["source"] + '</h2>' +
+                           '<a href="#"><img data-source="' + image["source"].escapeQuotes() + '"src="images/image-loader.gif" alt="">' +
+                           '<h2>' + image["source"].escapeHTML() + '</h2>' +
                            '<p>' + new Date(msg["created_on"]["$date"]).toLocaleString() + '</p>' +
-                           '<p>' + author + ' <strong>' + (liked ? 'liked' : 'disliked') + '</strong> this picture.</p>' +
+                           '<p>' + author.escapeHTML() + ' <strong>' + (liked ? 'liked' : 'disliked') + '</strong> this picture.</p>' +
                            '</a></li>');                     
                   }
                   else
                   {
                     el = $('<li data-id="' + msg["id"] + '" data-destination="' + image["guid"] + '" data-type="image">' +
-                           '<a href="#"><img data-source="' + image["source"] + '"src="images/image-loader.gif" alt="">' +
-                           '<h2>' + image["source"] + '</h2>' +
+                           '<a href="#"><img data-source="' + image["source"].escapeQuotes() + '"src="images/image-loader.gif" alt="">' +
+                           '<h2>' + image["source"].escapeHTML() + '</h2>' +
                            '<p>' + new Date(msg["created_on"]["$date"]).toLocaleString() + '</p>' +
-                           '<p><strong>' + author + ' </strong> recommended this picture to you.</p>' +
+                           '<p><strong>' + author.escapeHTML() + ' </strong> recommended this picture to you.</p>' +
                            '</a></li>'); 
                   }
 
@@ -89,11 +89,11 @@
                     opts.onGetThumbnail(image["source"])
                       .success(function(thumbnail)
                       {
-                        $(el).find('img[data-source="' + image["source"] + '"]').attr("src", thumbnail);
+                        $(el).find('img[data-source="' + image["source"].escapeQuotes() + '"]').attr("src", thumbnail);
                       })
                       .fail(function(r)
                       {
-                        $(el).find('img[data-source="' + image["source"] + '"]').attr("src", "images/image-missing.png");
+                        $(el).find('img[data-source="' + image["source"].escapeQuotes() + '"]').attr("src", "images/image-missing.png");
                       });
                   }
                 }
@@ -103,8 +103,8 @@
                   var source = msg["source"];
 
                   el = $('<li data-id="' + msg["id"] + '">' +
-                         '<img data-source="' + source["username"] + '"src="images/image-loader.gif" alt="">' +
-                         '<h2>' + source["username"] + '</h2>' +
+                         '<img data-source="' + source["username"].escapeQuotes() + '"src="images/image-loader.gif" alt="">' +
+                         '<h2>' + source["username"].escapeHTML() + '</h2>' +
                          '<p>' + new Date(msg["created_on"]["$date"]).toLocaleString() + '</p>' +
                          '<p>is now <strong>' + msg["type"] + '</strong> you.</p>' +
                          '</li>');
@@ -117,11 +117,11 @@
                     opts.onGetAvatar(source["username"])
                       .done(function(avatar)
                       {
-                        $(el).find('img[data-source="' + source["username"] + '"]').attr("src", avatar);
+                        $(el).find('img[data-source="' + source["username"].escapeQuotes() + '"]').attr("src", avatar);
                       })
                       .fail(function(r)
                       {
-                        $(el).find('img[data-source="' + source["username"] + '"]').attr("src", "images/image-missing.png");
+                        $(el).find('img[data-source="' + source["username"].escapeQuotes() + '"]').attr("src", "images/image-missing.png");
                       });
                   }
                 }
