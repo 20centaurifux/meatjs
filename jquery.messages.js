@@ -39,8 +39,13 @@
                 if(msg["type"] == "wrote-comment" || msg["type"] == "voted-object" || msg["type"] == "recommendation")
                 {
                   // insert list element:
-                  var image = msg["target"]["object"];
+                  var image = msg["target"];
                   var author = msg["source"]["username"];
+                  
+                  if(msg["type"] != "recommendation")
+                  {
+                    image = image["object"];
+                  }
 
                   if(msg["type"] == "wrote-comment")
                   {
