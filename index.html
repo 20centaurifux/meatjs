@@ -58,6 +58,7 @@
       $("#page-friends").on("pagebeforeshow", page_friends_loading);
       $("#page-favorites").on("pagebeforeshow", page_favorites_loading);
       $("#page-messages").on("pagebeforeshow", page_messages_loading);
+      $("#page-recommend").on("pagebeforeshow", page_recommend_loading);
 
       // register window events:
       $(window).on("resize", window_resize);
@@ -737,8 +738,8 @@
 
       $.mobile.loading("show");
 
-      $.when(store.getObject(guid), store.getVote(guid), store.getFavorites())
-        .done(function(obj, vote, favorites)
+      $.when(store.getObject(guid), store.getVote(guid), store.getFavorites(), store.getOwnProfile())
+        .done(function(obj, vote, favorites, profile)
         {
           obj = obj[0];
           vote = vote[0];
@@ -797,6 +798,16 @@
 
                 $("#image-button-favorite").prop("disabled", false).removeClass("ui-disabled");
                 $("#image-button-write-comment").prop("disabled", false).removeClass("ui-disabled");
+
+                if(profile.following.length > 0)
+                {
+                  $("#image-button-recommend").show();
+                  $("#image-button-recommend").prop("disabled", false).removeClass("ui-disabled");
+                }
+                else
+                {
+                  $("#image-button-recommend").hide();
+                }
 
                 // assign guid to buttons:
                 $("#image-action-buttons").find("button").data("guid", obj["guid"]);
@@ -940,6 +951,123 @@
         });
     }
 
+    function button_recommend_tapped(guid)
+    {
+      $("body").pagecontainer("change", "#page-recommend");
+      $("#link-send-recommendations").data("guid", guid);
+    }
+
+    function link_send_recommendations_tapped(guid)
+    {
+      var usernames = new Array();
+
+      $("#recommend-to-listview li").each(function(i, li)
+      {
+        if($(li).find("select").val() == "yes")
+        {
+          usernames.push($(li).data("username"));
+        }
+
+        if(usernames.length > 0)
+        {
+          $.mobile.loading("show");
+
+          store.createClient().recommend(guid, usernames)
+            .success(function()
+            {
+              window.history.back();
+            })
+            .fail(function(result)
+            {
+              // TODO
+            })
+            .always(function()
+            {
+              $.mobile.loading("hide");
+            });
+        }
+      });
+    }
+
+    /*
+     *  recommend page:
+     */
+    function page_recommend_loading()
+    {
+      var client = store.createClient();
+      var ul = $("#recommend-to-listview");
+
+      ul.find("li").remove();
+      ul.listview();
+
+      $(document).blockUI("show");
+
+      store.getOwnProfile()
+        .done(function(profile)
+        {
+          $.when.apply($, $.map(profile["following"], function(friend) { return store.getProfile(friend); }))
+          .done(function(friends)
+          {
+            $(friends).each(function(i, user)
+            {
+              // build displayed username:
+              var fullname = user["firstname"];
+
+              if(user["firstname"] && user["lastname"])
+              {
+                fullname += " " + user["lastname"]
+              }
+              else if(!fullname)
+              {
+                fullname = user["lastname"];
+              }
+
+              if(!fullname)
+              {
+                fullname = "";
+              }
+
+              // insert list element:
+              var li = $('<li data-username="' + user["username"] + '">' +
+                         '<img data-source="' + user["username"] + '" src="images/image-loader.gif" alt="">' +
+                         '<div style="float:right;"><span style="font-size:smaller; font-weight:bold;">Send</span> <select data-mini="true">' +
+                         '<option value="no">No</option>' +
+                         '<option value="yes">Yes</option>' +
+                         '</select></div>' +
+                         '<div style="float:left;"><h2>' + user["username"] + '</h2></div>' +
+                         '<div style="clear:both;"></div>' +
+                         fullname +
+                         '</li>');
+
+              li.find("select").flipswitch();
+              ul.append(li);
+
+              // load avatar:
+              client.getAvatar(user["username"])
+                .done(function(image)
+                {
+                  $(li).find("img").attr("src", image);
+                })
+                .fail(function()
+                {
+                  $(li).find("img").attr("src", "images/image-missing.png");
+                });
+              });
+
+            ul.listview("refresh");
+          })
+          .always(function()
+          {
+            $(document).blockUI("hide");
+          });
+        })
+        .fail(function()
+        {
+          $(document).blockUI("hide");
+          // TODO
+        });
+    }
+
     /*
      * friends page: 
      */
@@ -975,13 +1103,13 @@
     }
 
     /*
-     * messages:
+     * messages page:
      */
     function page_messages_loading()
     {
       $("#messages-listview").messages(
       {
-        pageSize: 10,
+        pageSize: 50,
         onLoad: store.getMessages,
         onGetThumbnail: function(source)
         {
@@ -1096,7 +1224,7 @@
         <button id="image-button-like" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="thumbs-up" onclick="button_like_tapped($(this).data('guid'), true);">Like</button>
         <button id="image-button-dislike" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="thumbs-o-down" onclick="button_like_tapped($(this).data('guid'), false);">Dislike</button>
         <button id="image-button-favorite" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="star-o" onclick="button_favor_tapped($(this).data('guid'), $(this).attr('data-icon') == 'star-o');">Favorite</button>
-        <!--<button data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="mail-forward">Recommend</button>-->
+        <button id="image-button-recommend" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="mail-forward" onclick="button_recommend_tapped($(this).data('guid'));">Recommend</button>
         <button id="image-button-write-comment" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="pencil" onclick="button_write_comment_tapped();">Comment</button>
       </div>
     </div>
@@ -1355,6 +1483,24 @@
       <input name="filename" id="file-avatar" type="file" accept="image/*;capture=camera;" onchange="javascript:file_avatar_changed()">
     </form>
   </div>
+</div>
+
+<div data-role="page" id="page-recommend">
+  <div data-role="header" data-position="fixed">
+    <a href="#" data-rel="back" data-icon="back">Back</a>
+    <h1>Recommend</h1>
+    <a id="link-send-recommendations" href="javascript:link_send_recommendations_tapped($('#link-send-recommendations').data('guid'))" data-icon="edit" data-theme="b">Recommend</a>
+  </div>
+
+  <div role="main" class="ui-content">
+    <p>
+      Please select the users you want to recommend the picture to.
+    </p>
+
+    <ul id="recommend-to-listview" data-role="listview" data-inset="true">
+    </ul>
+  </div>
+
 </div>
 
 </body>
