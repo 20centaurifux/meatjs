@@ -150,7 +150,6 @@
     $(obj).data("jquery.messages", true);
     $(obj).data("jquery.messages.options", $.extend({pageSize: 10, tail: 0, onLoad: null, onSelect: null, onGetAvatar: null, onGetThumbnail: null}, options));
 
-    $(obj).find("li").remove();
     $(obj).listview();
   }
 
