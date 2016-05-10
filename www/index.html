@@ -29,6 +29,7 @@
 
   <script type="text/javascript" src="cordova.js"></script>
   <script type="text/javascript" src="escape.js"></script>
+  <script type="text/javascript" src="tools.js"></script>
   <script type="text/javascript" src="jquery.blockui.js"></script>
   <script type="text/javascript" src="meat.storage.js"></script>
   <script type="text/javascript" src="meat.cache.js"></script>
@@ -1249,21 +1250,7 @@
             $(friends).each(function(i, user)
             {
               // build displayed username:
-              var fullname = user["firstname"];
-
-              if(user["firstname"] && user["lastname"])
-              {
-                fullname += " " + user["lastname"]
-              }
-              else if(!fullname)
-              {
-                fullname = user["lastname"];
-              }
-
-              if(!fullname)
-              {
-                fullname = "";
-              }
+              fullname = Tools.buildDisplayUsername(user);
 
               // insert list element:
               var li = $('<li data-username="' + user["username"].escapeQuotes() + '">' +

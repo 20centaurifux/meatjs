@@ -6,21 +6,7 @@
     var opts = $(this).data("jquery.friends.options");
 
     // build displayed username:
-    var fullname = user["firstname"];
-
-    if(user["firstname"] && user["lastname"])
-    {
-      fullname += " " + user["lastname"]
-    }
-    else if(!fullname)
-    {
-      fullname = user["lastname"];
-    }
-
-    if(!fullname)
-    {
-      fullname = "";
-    }
+    var fullname = Tools.buildDisplayUsername(user);
 
     // build list element:
     var friend = $.inArray(user["username"], profile["following"]) > -1;
