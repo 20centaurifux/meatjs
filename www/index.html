@@ -198,15 +198,18 @@
       store.changeCredentials(username, password)
         .done(function(profile)
         {
+          var message = "You're connected now. Have fun :)";
+          var title = "Login";
+
           if(store.configured())
           {
-            $("body").pagecontainer("change", "#page-logged-in", {changeHash:false});
+            message = "You've been reconnected. Have fun :)";
+            title = "Reconnected";
           }
-          else
-          {
-            store.setConfigured();
-            $("body").pagecontainer("change", "#page-library", {changeHash:false});
-          }
+
+          navigator.notification.alert(message,
+                                       function() { store.setConfigured(); $("body").pagecontainer("change", "#page-library", {changeHash:false}); },
+                                       title, "Ok");
         })
         .fail(function(response)
         {
@@ -291,7 +294,8 @@
       store.requestPassword(username, email)
         .done(function(profile)
         {
-          $("body").pagecontainer("change", "#page-password-sent", {changeHash:false});
+          navigator.notification.alert("You'll receive a password reset mail within the next few minutes.",
+                                       function() { window.history.back(); }, "Password reset", "Ok");
         })
         .fail(function(response)
         {
@@ -353,7 +357,10 @@
       store.requestAccount(username, email)
         .done(function()
         {
-          $("body").pagecontainer("change", "#page-account-registered", {changeHash:false});
+          navigator.notification.alert("Your account has been registered successfully. You'll receive an activiation mail within " +
+                                       "the next few minutes.",
+                                       function() { $("body").pagecontainer("change", "#page-authentication", {changeHash:false}); },
+                                       "Password sent", "Ok");
         })
         .fail(function(response)
         {
@@ -500,10 +507,6 @@
         if(file)
         {
           store.uploadAvatar(file)
-            .done(function(result)
-            {
-              // TODO
-            })
             .fail(function(result)
             {
               $("#page-change-avatar").find(".error").first().text("*" + getFailureMessage(result)).show();
@@ -550,7 +553,9 @@
         .done(function(profile)
         {
           $("#page-change-password").find(".error").hide();
-          $("body").pagecontainer("change", "#page-password-changed", {changeHash:false});
+
+          navigator.notification.alert("Password changed successfully.",
+                                       function() { window.history.back(); }, "Password changed", "Ok");
         })
         .fail(function(response)
         {
@@ -847,7 +852,7 @@
             })
             .fail(function(result)
             {
-              // TODO
+              navigator.notification.alert("Couldn't load image, please try again.", null, "Request failed", "Ok");
             })
             .always(function()
             {
@@ -858,6 +863,8 @@
         {
           $(document).blockUI("hide");
           $.mobile.loading("hide");
+
+          navigator.notification.alert("Couldn't load image details, please try again.", null, "Request failed", "Ok");
         })
     }
 
@@ -981,7 +988,7 @@
             })
             .fail(function(result)
             {
-              // TODO
+              navigator.notification.alert("Couldn't recommend image, please try again.", null, "Request failed", "Ok");
             })
             .always(function()
             {
@@ -1058,6 +1065,10 @@
 
             ul.listview("refresh");
           })
+          .fail(function()
+          {
+            navigator.notification.alert("Couldn't load friends, please try again.", null, "Request failed", "Ok");
+          })
           .always(function()
           {
             $(document).blockUI("hide");
@@ -1066,7 +1077,7 @@
         .fail(function()
         {
           $(document).blockUI("hide");
-          // TODO
+          navigator.notification.alert("Couldn't load profile, please try again.", null, "Request failed", "Ok");
         });
     }
 
@@ -1131,8 +1142,6 @@
           }
         }
       });
-
-      $("#messages-listview").messages("update");
     }
   </script>
 </head>
@@ -1296,17 +1305,6 @@
   </div>
 </div>
 
-<div data-role="dialog" id="page-logged-in">
-  <div data-role="header" data-position="fixed">
-    <h1>Logged in</h1>
-  </div>
-
-  <div role="main" class="ui-content">
-    Logged in successfully. Have fun!
-    <a href="#" data-rel="back" data-icon="back" data-role="button">Back</a>
-  </div>
-</div>
-
 <div data-role="page" id="page-reset-password">
   <div data-role="header" data-position="fixed">
     <a href="#" data-rel="back" data-icon="back">Back</a>
@@ -1333,17 +1331,6 @@
     <label for="text-reset-password-email">Mail address:</label>
     <input name="text-reset-password-email" id="text-reset-password-email" value="" type="text">
     <span class="error" data-field="email"></span>
-  </div>
-</div>
-
-<div data-role="dialog" id="page-password-sent">
-  <div data-role="header" data-position="fixed">
-    <h1>Password reset</h1>
-  </div>
-
-  <div role="main" class="ui-content">
-    You should receive a mail with instructions in the next few minutes. Please stay patient :)
-    <a href="#" data-rel="back" data-icon="back" data-role="button">Back</a>
   </div>
 </div>
 
@@ -1375,18 +1362,6 @@
   </div>
 </div>
 
-<div data-role="dialog" id="page-account-registered">
-  <div data-role="header" data-position="fixed">
-    <h1>Account registered</h1>
-  </div>
-
-  <div role="main" class="ui-content">
-    Your account has been registered successfully. You'll receive an activiation mail within
-    the next few minutes. Please stay patient :)
-    <a href="#" data-rel="back" data-icon="back" data-role="button">Back</a>
-  </div>
-</div>
-
 <div data-role="page" id="page-change-password">
   <div data-role="header" data-position="fixed">
     <a href="#" data-rel="back" data-icon="back">Back</a>
@@ -1404,17 +1379,6 @@
     <label for="text-change-password-new2">Repeat new password:</label>
     <input name="text-change-password-new2" id="text-change-password-new2" value="" type="password">
     <span class="error" data-field="new_password2"></span>
-  </div>
-</div>
-
-<div data-role="dialog" id="page-password-changed">
-  <div data-role="header" data-position="fixed">
-    <h1>New Password</h1>
-  </div>
-
-  <div role="main" class="ui-content">
-    Your password has been changed successfully.
-    <a href="#" data-rel="back" data-icon="back" data-role="button">Back</a>
   </div>
 </div>
 

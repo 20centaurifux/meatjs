@@ -107,6 +107,10 @@
               });
             }
           })
+          .fail(function()
+          {
+            navigator.notification.alert("Couldn't load comments, please try again.", null, "Request failed", "Ok");
+          });
           .always(function()
           {
             $.mobile.loading("hide");

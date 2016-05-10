@@ -55,7 +55,7 @@
 
       if(f)
       {
-        $.mobile.loading("show");
+        setTimeout(function() { $.mobile.loading("show"); }, 50);
 
         var library = this;
 
@@ -71,6 +71,10 @@
             {
               methods.sort.apply(library);
             }
+          })
+          .fail(function()
+          {
+            navigator.notification.alert("Couldn't load images, please try again.", null, "Request failed", "Ok");
           })
           .always(function()
           {

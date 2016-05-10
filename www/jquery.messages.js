@@ -24,7 +24,7 @@
         var opts = $(this).data("jquery.messages.options");
         var ul = this;
 
-        $.mobile.loading("show");
+        setTimeout(function() { $.mobile.loading("show"); }, 50);
 
         return f($(this).data("jquery.messages.options").pageSize)
           .done(function(messages)
@@ -129,6 +129,10 @@
             });
 
             $(ul).listview("refresh");
+          })
+          .fail(function()
+          {
+            navigator.notification.alert("Couldn't load messages, please try again.", null, "Request failed", "Ok");
           })
           .always(function()
           {

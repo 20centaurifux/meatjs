@@ -1,6 +1,6 @@
 var MeatREST = function(options)
 {
-  this.opts = $.extend({Server: "http://10.0.0.33:8888", Username: "", Password: ""}, options);
+  this.opts = $.extend({Server: "http://localhost:8888", Username: "", Password: ""}, options);
 };
 
 MeatREST.prototype.requestAccount = function(username, email)

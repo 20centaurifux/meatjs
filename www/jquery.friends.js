@@ -118,6 +118,10 @@
 
             ul.listview("refresh");
           })
+          .fail(function()
+          {
+            navigator.notification.alert("Couldn't search user store, please try again.", null, "Request failed", "Ok");
+          })
           .always(function()
           {
             $(document).blockUI("hide");
@@ -156,7 +160,7 @@
           })
           .fail(function(response)
           {
-            // TODO
+            navigator.notification.alert("Couldn't load friends, please try again.", null, "Request failed", "Ok");
           })
           .always(function()
           {
