@@ -20,7 +20,7 @@
     $(document).bind("mobileinit", function()
     {
       $.mobile.autoInitializePage = false;
-      $.mobile.defaultPageTransition = "slide";
+      $.mobile.defaultPageTransition = "none";
       $.mobile.toolbar.prototype.options.updatePagePadding = false;
       $.mobile.toolbar.prototype.options.hideDuringFocus = "";
       $.mobile.toolbar.prototype.options.tapToggle = false;
@@ -62,6 +62,7 @@
       $("#page-favorites").on("pagebeforeshow", page_favorites_loading);
       $("#page-messages").on("pagebeforeshow", page_messages_loading);
       $("#page-recommend").on("pagebeforeshow", page_recommend_loading);
+      $("#page-image").on("pageshow", page_image_loaded);
 
       // register window events:
       $(window).on("resize", window_resize);
@@ -188,6 +189,198 @@
     }
 
     function link_authentication_connect_tapped()
+    {
+      $(document).blockUI("show");
+
+      $("#page-authentication").find(".error").hide();
+
+      var username = $("#text-authentication-username").val();
+      var password = $("#text-authentication-password").val();
+
+      store.changeCredentials(username, password)
+        .done(function(profile)
+        {
+          var message = "You're connected now. Have fun :)";
+          var title = "Login";
+
+          if(store.configured())
+          {
+            message = "You've been reconnected. Have fun :)";
+            title = "Reconnected";
+          }
+
+          navigator.notification.alert(message,
+                                       function() { store.setConfigured(); $("body").pagecontainer("change", "#page-library", {changeHash:false}); },
+                                       title, "Ok");
+        })
+        .fail(function(response)
+        {
+          var text;
+
+          if(response.status == 404)
+          {
+            text = "User account not found. Please check entered username.";
+          }
+          else if(response.status == 403)
+          {
+            text = "Invalid username or password.";
+          }
+          else
+          {
+            text = getFailureMessage(response);
+          }
+
+          $("#page-authentication").find(".error").first().text("*" + text).show();
+        })
+        .always(function()
+        {
+          $(document).blockUI("hide")
+        });
+    }
+
+    /*
+     *  password reset page:
+     */
+    function page_reset_password_loading()
+    {
+      $(document).blockUI("show");
+
+      $("#page-reset-password").find(".error").hide();
+
+      // test password reset timeout:
+      var expired = store.lastPasswordResetTimeoutExpired(120);
+
+      if(expired)
+      {
+        $("#link-reset-password").prop("disabled", false).removeClass("ui-disabled");
+        $("#text-reset-password-username").textinput("enable");
+        $("#text-reset-password-email").textinput("enable");
+        $("#p-reset-password-timeout").hide();
+      }
+      else
+      {
+        $("#link-reset-password").prop("disabled", true).addClass("ui-disabled");
+        $("#text-reset-password-username").textinput("disable");
+        $("#text-reset-password-email").textinput("disable");
+        $("#p-reset-password-timeout").show();
+      }
+
+      // try to fill username & email field:
+      store.getOwnProfile()
+        .done(function(profile)
+        {
+          $("#text-reset-password-username").val(profile["username"]);
+          $("#text-reset-password-email").val(profile["email"]);
+          $("#text-reset-password-username").textinput("disable");
+        })
+        .fail(function()
+        {
+          $("#text-reset-password-username").val("");
+          $("#text-reset-password-email").val("");
+        })
+        .always(function()
+        {
+          $(document).blockUI("hide");
+        });
+    }
+
+    function link_reset_password_tapped()
+    {
+      $(document).blockUI("show");
+
+      $("#page-authentication").find(".error").hide();
+
+      var username = $("#text-authentication-username").val();
+      var password = $("#text-authentication-password").val();
+
+      store.changeCredentials(username, password)
+        .done(function(profile)
+        {
+          var message = "You're connected now. Have fun :)";
+          var title = "Login";
+
+          if(store.configured())
+          {
+            message = "You've been reconnected. Have fun :)";
+            title = "Reconnected";
+          }
+
+          navigator.notification.alert(message,
+                                       function() { store.setConfigured(); $("body").pagecontainer("change", "#page-library", {changeHash:false}); },
+                                       title, "Ok");
+        })
+        .fail(function(response)
+        {
+          var text;
+
+          if(response.status == 404)
+          {
+            text = "User account not found. Please check entered username.";
+          }
+          else if(response.status == 403)
+          {
+            text = "Invalid username or password.";
+          }
+          else
+          {
+            text = getFailureMessage(response);
+          }
+
+          $("#page-authentication").find(".error").first().text("*" + text).show();
+        })
+        .always(function()
+        {
+          $(document).blockUI("hide")
+        });
+    }
+
+    /*
+     *  password reset page:
+     */
+    function page_reset_password_loading()
+    {
+      $(document).blockUI("show");
+
+      $("#page-reset-password").find(".error").hide();
+
+      // test password reset timeout:
+      var expired = store.lastPasswordResetTimeoutExpired(120);
+
+      if(expired)
+      {
+        $("#link-reset-password").prop("disabled", false).removeClass("ui-disabled");
+        $("#text-reset-password-username").textinput("enable");
+        $("#text-reset-password-email").textinput("enable");
+        $("#p-reset-password-timeout").hide();
+      }
+      else
+      {
+        $("#link-reset-password").prop("disabled", true).addClass("ui-disabled");
+        $("#text-reset-password-username").textinput("disable");
+        $("#text-reset-password-email").textinput("disable");
+        $("#p-reset-password-timeout").show();
+      }
+
+      // try to fill username & email field:
+      store.getOwnProfile()
+        .done(function(profile)
+        {
+          $("#text-reset-password-username").val(profile["username"]);
+          $("#text-reset-password-email").val(profile["email"]);
+          $("#text-reset-password-username").textinput("disable");
+        })
+        .fail(function()
+        {
+          $("#text-reset-password-username").val("");
+          $("#text-reset-password-email").val("");
+        })
+        .always(function()
+        {
+          $(document).blockUI("hide");
+        });
+    }
+
+    function link_reset_password_tapped()
     {
       $(document).blockUI("show");
 
@@ -745,6 +938,11 @@
     /*
      * image details page:
      */
+    function page_image_loaded()
+    {
+      $("#image-source").show();
+    }
+
     function scaleImage()
     {
       var maxHeight = $(window).height() - 60 + "px";
@@ -792,7 +990,7 @@
             .done(function(data)
             {
               // update image:
-              $("#image-source").attr("src", data);
+              $("#image-source").attr("src", data).hide();
 
               // update details:
               $("#image-score-up").text(obj["score"]["up"]);
@@ -1184,7 +1382,7 @@
     <a href='javascript:$("#library-listview").library("update");' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
   </div>
  
-  <div role="main" class="ui-content">
+  <div role="main" data-role="content">
     <ul id="library-listview" data-role="listview" data-inset="true">
     </ul>
   </div>
@@ -1197,7 +1395,7 @@
     <a href='javascript:$("#random-listview").library("clear").library("update");' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
   </div>
  
-  <div role="main" class="ui-content">
+  <div role="main" data-role="content">
     <ul id="random-listview" data-role="listview" data-inset="true">
     </ul>
   </div>
@@ -1210,7 +1408,7 @@
     <a href='javascript:$("#popular-listview").library("clear").library("update");' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
   </div>
  
-  <div role="main" class="ui-content">
+  <div role="main" data-role="content">
     <ul id="popular-listview" data-role="listview" data-inset="true">
     </ul>
   </div>
@@ -1223,7 +1421,7 @@
     <a href='javascript:$("#favorites-listview").library("update");' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
   </div>
  
-  <div role="main" class="ui-content">
+  <div role="main" data-role="content">
     <ul id="favorites-listview" data-role="listview" data-inset="true">
     </ul>
   </div>
@@ -1235,7 +1433,7 @@
     <h1>Friends</h1>
   </div>
  
-  <div data-role="main" class="ui-content" id="div-friends">
+  <div data-role="main" data-role="content" id="div-friends">
   </div>
 </div>
 
@@ -1245,7 +1443,7 @@
     <a href='javascript:$("#comments-listview").comments("update");' data-icon="refresh" data-iconpos="notext" data-direction="reverse" class="ui-btn-right"></a>
   </div>
 
-  <div role="main" class="ui-content">
+  <div role="main" data-role="content">
     <div style="width:100%; text-align:center;">
       <div>
         <img id="image-source" class="image" src="" alt="image">
@@ -1288,7 +1486,7 @@
     <a href='javascript:$("#messages-listview").messages("update");' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
   </div>
  
-  <div role="main" class="ui-content">
+  <div role="main" data-role="content">
     <ul id="messages-listview" data-role="listview" data-inset="true">
     </ul>
   </div>
@@ -1319,7 +1517,7 @@
     <a href="javascript:link_authentication_connect_tapped()" id="link-authentication-connect" data-icon="user" data-theme="b""ui-btn-right">Reconnect</a>
   </div>
  
-  <div role="main" class="ui-content">
+  <div role="main" data-role="content">
     <span class="error"></span>
 
     <label for="text-authentication-username">Username:</label>
@@ -1339,7 +1537,7 @@
     <a href="javascript:link_reset_password_tapped()" id="link-reset-password" data-icon="mail" data-theme="b" class="ui-btn-right">Mail</a>
   </div>
  
-  <div role="main" class="ui-content">
+  <div role="main" data-role="content">
     <p>
       If you should have forgot your password please enter your username and the corresponding mail address. By
       tapping the <strong>Mail</strong> button you'll receive a link for resetting your password.
@@ -1367,7 +1565,7 @@
     <a href="javascript:link_new_account_tapped()" id="link-new-account" data-icon="user" data-theme="b" class="ui-btn-right">Register</a>
   </div>
  
-  <div role="main" class="ui-content">
+  <div role="main" data-role="content">
     <p>
       To register a new user account enter a username and mail address. Then tap the <strong>Register</strong> button.
     </p>
@@ -1395,7 +1593,7 @@
     <a href="javascript:link_change_password_tapped()" id="link-change-password" data-icon="edit" data-theme="b" class="ui-btn-right">Change</a>
   </div>
  
-  <div role="main" class="ui-content">
+  <div role="main" data-role="content">
     <span class="error"></span>
 
     <label for="text-change-password-new1">New password:</label>
@@ -1415,7 +1613,7 @@
     <a href="javascript:link_profile_save_tapped()" id="link-profile-save" data-icon="edit">Save</a>
   </div>
  
-  <div role="main" class="ui-content">
+  <div role="main" data-role="content">
     <form novalidate>
       <span class="error"></span>
 
@@ -1461,7 +1659,7 @@
     <a href="javascript:link_avatar_upload_tapped()" id="link-upload-avatar" data-icon="edit">Save</a>
   </div>
  
-  <div role="main" class="ui-content">
+  <div role="main" data-role="content">
     <form id="form-avatar" novalidate>
       <span class="error"></span>
 
@@ -1482,7 +1680,7 @@
     <a id="link-send-recommendations" href="javascript:link_send_recommendations_tapped($('#link-send-recommendations').data('guid'))" data-icon="edit" class="ui-btn-right">Recommend</a>
   </div>
 
-  <div role="main" class="ui-content">
+  <div role="main" data-role="content">
     <p>
       Please select the users you want to recommend the picture to.
     </p>
@@ -1498,7 +1696,7 @@
     <h1>About</h1>
   </div>
 
-  <div role="main" class="ui-content">
+  <div role="main" data-role="content">
     <h1>meatjs</h1>
 
     <p style="line-height:2;">
