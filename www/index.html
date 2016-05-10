@@ -495,9 +495,50 @@
         });
     }
 
+    function link_avatar_take_picture_tapped()
+    {
+      if(navigator.camera)
+      {
+        var opts =
+        {
+          quality:30,
+          destinationType:Camera.DestinationType.DATA_URL,
+          sourceType:Camera.PictureSourceType.CAMERA,
+          encodingType:Camera.EncodingType.PNG,
+          targetWidth:480,
+          targetHeight:480,
+          correctOrientation:true
+        };
+
+        navigator.camera.getPicture(function(image)
+        {
+          $("#image-avatar").attr("src", "data:image/png;base64," + image).fadeIn();
+        }, function()
+        {
+          navigator.notification.alert("Error taking picture.", null, "Take picture", "Ok");
+        }, opts);
+      }
+      else
+      {
+        navigator.notification.alert("Camera not found.", null, "Take picture", "Ok");
+      }
+    }
+
     function link_avatar_upload_tapped()
     {
-      var file = $("#file-avatar").get(0).files[0];
+      var dataUrl = $("#image-avatar").attr("src");
+      var arr = dataUrl.split(",");
+      var mime = arr[0].match(/:(.*?);/)[1];
+      var bstr = atob(arr[1]);
+      var n = bstr.length;
+      var u8arr = new Uint8Array(n);
+
+      while(n--)
+      {
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+
+      var file = new Blob([u8arr], {type:mime});
 
       if(file != null)
       {
@@ -517,19 +558,6 @@
             });
         }
       }
-    }
-
-    function file_avatar_changed(e)
-    {
-      var reader = new FileReader();
-      var file = $("#file-avatar").get(0).files[0];
-
-      reader.onload = function(e)
-      {
-        $("#image-avatar").attr("src", e.target.result).fadeIn();
-      }
-
-      reader.readAsDataURL(file);
     }
 
     /*
@@ -1445,8 +1473,7 @@
 
       <br />
 
-      <label for="file-avatar">Change avatar:</label>
-      <input name="filename" id="file-avatar" type="file" accept="image/*;capture=camera;" onchange="javascript:file_avatar_changed()">
+      <a id="link-avatar-take-picture" href="javascript:link_avatar_take_picture_tapped();" data-icon="camera" data-role="button">Take picture</a>
     </form>
   </div>
 </div>
