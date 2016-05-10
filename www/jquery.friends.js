@@ -58,6 +58,11 @@
             if(!friend && !form.is(":visible"))
             {
               li.remove();
+
+              if(profile["following"].length == 1)
+              {
+                $(obj).find('p[data-nofriends="yes"]').show();
+              }
             }
           })
           .fail(function()
@@ -141,9 +146,12 @@
       {
         // clear listview:
         var ul = $(this).find("ul");
+        var nofriends = $(this).find('p[data-nofriends="yes"]');
 
         ul.find("li").remove();
         ul.listview();
+
+        nofriends.hide();
 
         // get friends & insert found profiles:
         $(document).blockUI("show");
@@ -151,12 +159,19 @@
         $.when(opts.onGetProfile(), opts.onGetFriends())
           .done(function(profile, friends)
           {
-            $(friends).each(function(i, user)
+            if(friends.length == 0)
             {
-              ul.append(buildFriendListItem.apply(obj, [profile, user]));
-            });
+              nofriends.show();
+            }
+            else
+            {
+              $(friends).each(function(i, user)
+              {
+                ul.append(buildFriendListItem.apply(obj, [profile, user]));
+              });
 
-            ul.listview("refresh");
+              ul.listview("refresh");
+            }
           })
           .fail(function(response)
           {
@@ -185,6 +200,8 @@
         removeId = addId;
         addId = "back";
         text = "Close";
+
+        $(this).find('p[data-nofriends="yes"]').hide();
       }
 
       // update search button:
@@ -273,7 +290,10 @@
 
       list.listview();
 
-      $(obj).find('div[data-role="main"]').append(form).append(list);
+      // "no friends" info:
+      var nofriends = '<p data-nofriends="yes">You don\'t have any friends yet :(</p>';
+
+      $(obj).find('div[data-role="main"]').append(form).append(list).append(nofriends);
 
       // handle search query clear button:
       $(form).on("click", '.ui-input-clear', function()
