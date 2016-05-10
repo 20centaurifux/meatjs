@@ -20,6 +20,7 @@
     $(document).bind("mobileinit", function()
     {
       $.mobile.autoInitializePage = false;
+      $.mobile.defaultPageTransition = "slide";
       $.mobile.toolbar.prototype.options.updatePagePadding = false;
       $.mobile.toolbar.prototype.options.hideDuringFocus = "";
       $.mobile.toolbar.prototype.options.tapToggle = false;
@@ -132,7 +133,7 @@
 
     function openNavigation()
     {
-      $("body").pagecontainer("change", "#page-navigation", {changeHash:false});
+      $("body").pagecontainer("change", "#page-navigation", {transition:"slidedown"});
     }
 
     function getFailureMessage(response)
@@ -1177,7 +1178,7 @@
 <body>
 
 <div data-role="page" id="page-library" data-position="fixed">
-  <div data-role="header" data-position="fixed">
+  <div data-role="header" data-position="fixed" data-theme="b">
     <a href='javascript:openNavigation();' data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
     <h1>Library</h1>
     <a href='javascript:$("#library-listview").library("update");' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
@@ -1190,7 +1191,7 @@
 </div>
 
 <div data-role="page" id="page-random" data-position="fixed">
-  <div data-role="header" data-position="fixed">
+  <div data-role="header" data-position="fixed" data-theme="b">
     <a href='javascript:openNavigation();' data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
     <h1>Random</h1>
     <a href='javascript:$("#random-listview").library("clear").library("update");' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
@@ -1203,7 +1204,7 @@
 </div>
 
 <div data-role="page" id="page-popular" data-position="fixed">
-  <div data-role="header" data-position="fixed">
+  <div data-role="header" data-position="fixed" data-theme="b">
     <a href='javascript:openNavigation();' data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
     <h1>Popular</h1>
     <a href='javascript:$("#popular-listview").library("clear").library("update");' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
@@ -1216,7 +1217,7 @@
 </div>
 
 <div data-role="page" id="page-favorites" data-position="fixed">
-  <div data-role="header" data-position="fixed">
+  <div data-role="header" data-position="fixed" data-theme="b">
     <a href='javascript:openNavigation();' data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
     <h1>Favorites</h1>
     <a href='javascript:$("#favorites-listview").library("update");' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
@@ -1229,7 +1230,7 @@
 </div>
 
 <div data-role="page" id="page-friends" data-position="fixed">
-  <div data-role="header" data-position="fixed">
+  <div data-role="header" data-position="fixed" data-theme="b">
     <a href='javascript:openNavigation();' data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
     <h1>Friends</h1>
   </div>
@@ -1239,10 +1240,9 @@
 </div>
 
 <div data-role="page" id="page-image" data-position="fixed">
-  <div data-role="header" data-position="fixed">
-    <a href="#" data-rel="back" data-icon="back">Back</a>
+  <div data-role="header" data-position="fixed" data-theme="b">
     <h1>Image</h1>
-    <a href='javascript:$("#comments-listview").comments("update");' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
+    <a href='javascript:$("#comments-listview").comments("update");' data-icon="refresh" data-iconpos="notext" data-direction="reverse" class="ui-btn-right"></a>
   </div>
 
   <div role="main" class="ui-content">
@@ -1282,7 +1282,7 @@
 </div>
 
 <div data-role="page" id="page-messages" data-position="fixed">
-  <div data-role="header" data-position="fixed">
+  <div data-role="header" data-position="fixed" data-theme="b">
     <a href='javascript:openNavigation();' data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
     <h1>Messages</h1>
     <a href='javascript:$("#messages-listview").messages("update");' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
@@ -1294,7 +1294,7 @@
   </div>
 </div>
 
-<div id="page-navigation" data-role="page">
+<div id="page-navigation" data-role="page" data-theme="b">
   <div role="main" class="ui-content">
     <ul data-role="listview">
       <li><a href="#page-library">Library</a></li>
@@ -1313,10 +1313,10 @@
 </div>
 
 <div data-role="page" id="page-authentication">
-  <div data-role="header" data-position="fixed">
-    <a id="link-authentication-back" href="#" data-rel="back" data-icon="back">Back</a>
+  <div data-role="header" data-position="fixed" data-theme="b">
+    <a id="link-authentication-back" data-rel="back" data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
     <h1>Login</h1>
-    <a href="javascript:link_authentication_connect_tapped()" id="link-authentication-connect" data-icon="user" data-theme="b">Reconnect</a>
+    <a href="javascript:link_authentication_connect_tapped()" id="link-authentication-connect" data-icon="user" data-theme="b""ui-btn-right">Reconnect</a>
   </div>
  
   <div role="main" class="ui-content">
@@ -1334,10 +1334,9 @@
 </div>
 
 <div data-role="page" id="page-reset-password">
-  <div data-role="header" data-position="fixed">
-    <a href="#" data-rel="back" data-icon="back">Back</a>
+  <div data-role="header" data-position="fixed" data-theme="b">
     <h1>Reset password</h1>
-    <a href="javascript:link_reset_password_tapped()" id="link-reset-password" data-icon="mail" data-theme="b">Mail</a>
+    <a href="javascript:link_reset_password_tapped()" id="link-reset-password" data-icon="mail" data-theme="b" class="ui-btn-right">Mail</a>
   </div>
  
   <div role="main" class="ui-content">
@@ -1363,10 +1362,9 @@
 </div>
 
 <div data-role="page" id="page-new-account">
-  <div data-role="header" data-position="fixed">
-    <a href="#" data-rel="back" data-icon="back">Back</a>
+  <div data-role="header" data-position="fixed" data-theme="b">
     <h1>Registration</h1>
-    <a href="javascript:link_new_account_tapped()" id="link-new-account" data-icon="user" data-theme="b">Register</a>
+    <a href="javascript:link_new_account_tapped()" id="link-new-account" data-icon="user" data-theme="b" class="ui-btn-right">Register</a>
   </div>
  
   <div role="main" class="ui-content">
@@ -1391,10 +1389,10 @@
 </div>
 
 <div data-role="page" id="page-change-password">
-  <div data-role="header" data-position="fixed">
-    <a href="#" data-rel="back" data-icon="back">Back</a>
+  <div data-role="header" data-position="fixed" data-theme="b">
+    <a data-rel="back" data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
     <h1>Change password</h1>
-    <a href="javascript:link_change_password_tapped()" id="link-change-password" data-icon="edit" data-theme="b">Change</a>
+    <a href="javascript:link_change_password_tapped()" id="link-change-password" data-icon="edit" data-theme="b" class="ui-btn-right">Change</a>
   </div>
  
   <div role="main" class="ui-content">
@@ -1411,10 +1409,10 @@
 </div>
 
 <div data-role="page" id="page-edit-profile">
-  <div data-role="header" data-position="fixed">
-    <a href="#" data-rel="back" data-icon="back">Back</a>
+  <div data-role="header" data-position="fixed" data-theme="b">
+    <a data-rel="back" data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
     <h1>Edit profile</h1>
-    <a href="javascript:link_profile_save_tapped()" id="link-profile-save" data-icon="edit" data-theme="b">Save</a>
+    <a href="javascript:link_profile_save_tapped()" id="link-profile-save" data-icon="edit">Save</a>
   </div>
  
   <div role="main" class="ui-content">
@@ -1457,10 +1455,10 @@
 </div>
 
 <div data-role="page" id="page-change-avatar">
-  <div data-role="header" data-position="fixed">
-    <a href="#" data-rel="back" data-icon="back">Back</a>
+  <div data-role="header" data-position="fixed" data-theme="b">
+    <a data-rel="back" data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
     <h1>Change avatar</h1>
-    <a href="javascript:link_avatar_upload_tapped()" id="link-upload-avatar" data-icon="edit" data-theme="b">Save</a>
+    <a href="javascript:link_avatar_upload_tapped()" id="link-upload-avatar" data-icon="edit">Save</a>
   </div>
  
   <div role="main" class="ui-content">
@@ -1479,10 +1477,9 @@
 </div>
 
 <div data-role="page" id="page-recommend">
-  <div data-role="header" data-position="fixed">
-    <a href="#" data-rel="back" data-icon="back">Back</a>
+  <div data-role="header" data-position="fixed" data-theme="b">
     <h1>Recommend</h1>
-    <a id="link-send-recommendations" href="javascript:link_send_recommendations_tapped($('#link-send-recommendations').data('guid'))" data-icon="edit" data-theme="b">Recommend</a>
+    <a id="link-send-recommendations" href="javascript:link_send_recommendations_tapped($('#link-send-recommendations').data('guid'))" data-icon="edit" class="ui-btn-right">Recommend</a>
   </div>
 
   <div role="main" class="ui-content">
@@ -1496,8 +1493,8 @@
 </div>
 
 <div data-role="page" id="page-about">
-  <div data-role="header" data-position="fixed">
-    <a href="#" data-rel="back" data-icon="back">Back</a>
+  <div data-role="header" data-position="fixed" data-theme="b">
+    <a data-rel="back" data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
     <h1>About</h1>
   </div>
 
