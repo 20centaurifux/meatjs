@@ -18,8 +18,10 @@
     update: function()
     {
       var f = $(this).data("jquery.messages.options").onLoad;
+      var obj = this;
+      var lastUpdate = $(obj).data("lastUpdate");
 
-      if(f)
+      if(f && (lastUpdate == null || (new Date().getTime() - lastUpdate) / 1000 > 60))
       {
         var opts = $(this).data("jquery.messages.options");
         var ul = this;
@@ -127,6 +129,8 @@
                 }
               }
             });
+
+            $(obj).data("lastUpdate", new Date().getTime());
 
             $(ul).listview("refresh");
           })

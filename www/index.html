@@ -839,6 +839,7 @@
       {
         $("#library-listview").library(
         {
+          requestLimit: 60,
           pageSize: 10,
           onLoad: function(page, pageSize)
           {
@@ -918,6 +919,7 @@
     {
         $("#favorites-listview").library(
         {
+          requestLimit: 60,
           onLoad: function(page, pageSize)
           {
             return store.getFavorites().done(function(objects)

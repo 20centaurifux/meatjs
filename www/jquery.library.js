@@ -33,7 +33,13 @@
   {
     update: function()
     {
-      methods.loadPage.apply(this, [0]);
+      var lastUpdate = $(this).data("lastUpdate");
+
+      if(lastUpdate == null || (new Date().getTime() - lastUpdate) / 1000 > $(this).data("jquery.library.options").requestLimit)
+      {
+        methods.loadPage.apply(this, [0]);
+        $(this).data("lastUpdate", new Date().getTime());
+      }
     },
     nextPage: function()
     {
@@ -182,7 +188,7 @@
   function createLibrary(obj, options)
   {
     $(obj).data("jquery.library", true);
-    $(obj).data("jquery.library.options", $.extend({pageSize: 10, tail: 0, onLoad: null, onCompare: null}, options));
+    $(obj).data("jquery.library.options", $.extend({pageSize: 10, tail: 0, onLoad: null, onCompare: null, requestLimit: 0}, options));
   }
 
   $.fn.library = function(args)
