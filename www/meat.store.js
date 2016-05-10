@@ -244,6 +244,7 @@
     return client.follow(username, follow).then(function()
     {
       cache.remove("user.Profile");
+      cache.remove("user.Other." + username.toLowerCase());
 
       return store.getOwnProfile();
     });
