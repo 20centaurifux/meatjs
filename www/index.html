@@ -46,9 +46,9 @@
     var store = null;
     var notifications = null;
 
-    document.addEventListener('deviceready', function()
+    $(document).ready(function()
     {
-      $(document).ready(function()
+      document.addEventListener('deviceready', function()
       {
         // initialize store:
         store = new MeatStore();
@@ -82,6 +82,13 @@
           setupNotifications();
           setupTasks();
         });
+
+        // back button:
+        if(device.platform == "Android")
+        {
+          navigator.app.overrideBackbutton(true);
+          document.addEventListener("backbutton", function() { window.history.back(); }, true);
+        }
 
         // initialize jquery mobile:
         $.mobile.initializePage();
