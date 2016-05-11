@@ -57,11 +57,15 @@
     },
     loadPage: function(page)
     {
-      var f = $(this).data("jquery.library.options").onLoad;
+      var opts = $(this).data("jquery.library.options");
+      var f = opts.onLoad;
 
       if(f)
       {
-        setTimeout(function() { $.mobile.loading("show"); }, 50);
+        if(!opts.silent)
+        {
+          setTimeout(function() { $.mobile.loading("show"); }, 50);
+        }
 
         var library = this;
 
@@ -73,18 +77,24 @@
               methods.touch.apply(library, [this, true, false]);
             });
 
-            if($(library).data("jquery.library.options").onCompare)
+            if(opts.onCompare)
             {
               methods.sort.apply(library);
             }
           })
           .fail(function()
           {
-            navigator.notification.alert("Couldn't load images, please try again.", null, "Request failed", "Ok");
+            if(!opts.silent)
+            {
+              navigator.notification.alert("Couldn't load images, please try again.", null, "Request failed", "Ok");
+            }
           })
           .always(function()
           {
-            $.mobile.loading("hide");
+            if(!opts.silent)
+            {
+              $.mobile.loading("hide");
+            }
           });
       }
 
@@ -92,8 +102,11 @@
     },
     touch: function(image, insert, sort)
     {
+      var opts = $(this).data("jquery.library.options");
+
       // test if image has already been inserted:
       var li = $(this).find('li[data-guid="' + image["guid"] + '"]').first();
+      var inserted = false;
 
       if(li.get(0))
       {
@@ -121,10 +134,17 @@
 
         $(this).append(el);
         bindEvents(this, el);
+
+        if(opts.onNewImage)
+        {
+          opts.onNewImage(image);
+        }
+
+        inserted = true;
       }
 
       // sort list:
-      var compare = $(this).data("jquery.library.options").onCompare;
+      var compare = opts.onCompare;
 
       if(sort && compare)
       {
@@ -134,17 +154,20 @@
       // redraw listview control & load thumbnail:
       $(this).listview("refresh");
 
-      var client = new MeatStore().createClient();
+      if(inserted)
+      {
+        var client = new MeatStore().createClient();
 
-      client.getThumbnail(image["source"])
-        .success(function(thumbnail)
-        {
-          $('img[data-source="' + image["source"].escapeQuotes() + '"]').attr("src", thumbnail);
-        })
-        .fail(function(r)
-        {
-          $('img[data-source="' + image["source"].escapeQuotes() + '"]').attr("src", "images/image-missing.png");
-        });
+        client.getThumbnail(image["source"])
+          .success(function(thumbnail)
+          {
+            $('img[data-source="' + image["source"].escapeQuotes() + '"]').attr("src", thumbnail);
+          })
+          .fail(function(r)
+          {
+            $('img[data-source="' + image["source"].escapeQuotes() + '"]').attr("src", "images/image-missing.png");
+          });
+      }
     },
     remove: function(image)
     {
@@ -188,7 +211,9 @@
   function createLibrary(obj, options)
   {
     $(obj).data("jquery.library", true);
-    $(obj).data("jquery.library.options", $.extend({pageSize: 10, tail: 0, onLoad: null, onCompare: null, requestLimit: 0}, options));
+    $(obj).data("jquery.library.options",
+                $.extend({pageSize: 10, tail: 0, onLoad: null, onCompare: null, requestLimit: 0, onNewMessage: null, silent: false},
+                options));
   }
 
   $.fn.library = function(args)

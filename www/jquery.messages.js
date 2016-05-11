@@ -26,17 +26,31 @@
         var opts = $(this).data("jquery.messages.options");
         var ul = this;
 
-        setTimeout(function() { $.mobile.loading("show"); }, 50);
+        if(!opts.silent)
+        {
+          setTimeout(function() { $.mobile.loading("show"); }, 50);
+        }
 
         return f($(this).data("jquery.messages.options").pageSize)
           .done(function(messages)
           {
+            var inserted = false;
+
             // insert messages:
             $(messages).each(function(i, msg)
             {
               if(!$(ul).find('li[data-id="' + msg["id"] + '"]').first().get(0))
               {
                 var el = null;
+
+                if(opts.onNewMessage)
+                {
+                  opts.onNewMessage(msg);
+                }
+
+                inserted = true;
+
+                var created_on = new Date(msg["created_on"]["$date"]);
 
                 if(msg["type"] == "wrote-comment" || msg["type"] == "voted-object" || msg["type"] == "recommendation")
                 {
@@ -53,10 +67,10 @@
                   {
                     var text = msg["target"]["text"];
 
-                    el = $('<li data-id="' + msg["id"] + '" data-destination="' + image["guid"] + ',' + msg["target"]["id"] + '" data-type="comment">' +
+                    el = $('<li data-id="' + msg["id"] + '" data-destination="' + image["guid"] + ',' + msg["target"]["id"] + '" data-type="comment" data-timestamp="' + created_on.getTime() + '">' +
                            '<a href="#"><img data-source="' + image["source"].escapeQuotes() + '"src="images/image-loader.gif" alt="">' +
                            '<h2>' + image["source"].escapeHTML() + '</h2>' +
-                           '<p>' + new Date(msg["created_on"]["$date"]).toLocaleString() + '</p>' +
+                           '<p>' + created_on.toLocaleString() + '</p>' +
                            '<p><em>' + text.escapeHTML() + '</em></p>' +
                            '<p>commented by <strong>' + author.escapeHTML() + '</strong></p>' +
                            '</a></li>');
@@ -65,19 +79,19 @@
                   {
                     var liked = msg["target"]["voting"];
 
-                    el = $('<li data-id="' + msg["id"] + '" data-destination="' + image["guid"] + '" data-type="image">' +
+                    el = $('<li data-id="' + msg["id"] + '" data-destination="' + image["guid"] + '" data-type="image" data-timestamp="' + created_on.getTime() + '">' +
                            '<a href="#"><img data-source="' + image["source"].escapeQuotes() + '"src="images/image-loader.gif" alt="">' +
                            '<h2>' + image["source"].escapeHTML() + '</h2>' +
-                           '<p>' + new Date(msg["created_on"]["$date"]).toLocaleString() + '</p>' +
+                           '<p>' + created_on.toLocaleString() + '</p>' +
                            '<p>' + author.escapeHTML() + ' <strong>' + (liked ? 'liked' : 'disliked') + '</strong> this picture.</p>' +
                            '</a></li>');                     
                   }
                   else
                   {
-                    el = $('<li data-id="' + msg["id"] + '" data-destination="' + image["guid"] + '" data-type="image">' +
+                    el = $('<li data-id="' + msg["id"] + '" data-destination="' + image["guid"] + '" data-type="image" data-timestamp="' + created_on.getTime() + '">' +
                            '<a href="#"><img data-source="' + image["source"].escapeQuotes() + '"src="images/image-loader.gif" alt="">' +
                            '<h2>' + image["source"].escapeHTML() + '</h2>' +
-                           '<p>' + new Date(msg["created_on"]["$date"]).toLocaleString() + '</p>' +
+                           '<p>' +  created_on.toLocaleString() + '</p>' +
                            '<p><strong>' + author.escapeHTML() + ' </strong> recommended this picture to you.</p>' +
                            '</a></li>'); 
                   }
@@ -104,10 +118,10 @@
                   // insert list element:
                   var source = msg["source"];
 
-                  el = $('<li data-id="' + msg["id"] + '">' +
-                         '<img data-source="' + source["username"].escapeQuotes() + '"src="images/image-loader.gif" alt="">' +
+                  el = $('<li data-id="' + msg["id"] + '" data-timestamp="' + created_on.getTime() + '">' +
+                         '<img data-source="' + source["username"].escapeQuotes() + '"src="images/image-loader.gif" alt="" date-timestamp="' + created_on.getTime() + '">' +
                          '<h2>' + source["username"].escapeHTML() + '</h2>' +
-                         '<p>' + new Date(msg["created_on"]["$date"]).toLocaleString() + '</p>' +
+                         '<p>' + created_on.toLocaleString() + '</p>' +
                          '<p>is now <strong>' + msg["type"] + '</strong> you.</p>' +
                          '</li>');
 
@@ -130,17 +144,41 @@
               }
             });
 
+            if(inserted)
+            {
+              var items = $(ul).find("li").get();
+
+              items.sort(function(a, b)
+              {
+                return parseInt($(b).data("timestamp"), 10) - parseInt($(a).data("timestamp"), 10);
+              });
+
+              $(ul).find("li").remove();
+
+              $.each(items, function(i, li)
+              {
+                $(ul).append(li);
+                bindEvents(ul, li);
+              });
+            }
+
             $(obj).data("lastUpdate", new Date().getTime());
 
             $(ul).listview("refresh");
           })
           .fail(function()
           {
-            navigator.notification.alert("Couldn't load messages, please try again.", null, "Request failed", "Ok");
+            if(!opts.silent)
+            {
+              navigator.notification.alert("Couldn't load messages, please try again.", null, "Request failed", "Ok");
+            }
           })
           .always(function()
           {
-            $.mobile.loading("hide");
+            if(!opts.silent)
+            {
+              $.mobile.loading("hide");
+            }
           });
       }
 
@@ -156,7 +194,9 @@
   function createMessages(obj, options)
   {
     $(obj).data("jquery.messages", true);
-    $(obj).data("jquery.messages.options", $.extend({pageSize: 10, tail: 0, onLoad: null, onSelect: null, onGetAvatar: null, onGetThumbnail: null}, options));
+    $(obj).data("jquery.messages.options",
+                $.extend({pageSize: 10, tail: 0, onLoad: null, onSelect: null, onGetAvatar: null, onGetThumbnail: null, onNewMessage: null, silent: false},
+                options));
 
     $(obj).listview();
   }

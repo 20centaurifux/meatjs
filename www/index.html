@@ -33,6 +33,7 @@
   <script type="text/javascript" src="jquery.blockui.js"></script>
   <script type="text/javascript" src="meat.storage.js"></script>
   <script type="text/javascript" src="meat.cache.js"></script>
+  <script type="text/javascript" src="meat.notifications.js"></script>
   <script type="text/javascript" src="meat.rest.js"></script>
   <script type="text/javascript" src="meat.store.js"></script>
   <script type="text/javascript" src="jquery.library.js"></script>
@@ -43,39 +44,124 @@
 
   <script type="text/javascript">
     var store = null;
+    var notifications = null;
 
-    $(document).ready(function()
+    document.addEventListener('deviceready', function()
     {
-      // initialize store:
-      store = new MeatStore();
+      $(document).ready(function()
+      {
+        // initialize store:
+        store = new MeatStore();
 
-      // register page events:
-      $("#page-edit-profile").on("pagebeforeshow", page_profile_loading);
-      $("#page-change-avatar").on("pagebeforeshow", page_change_avatar_loading);
-      $("#page-reset-password").on("pagebeforeshow", page_reset_password_loading);
-      $("#page-change-password").on("pagebeforeshow", page_change_password_loading);
-      $("#page-authentication").on("pagebeforeshow", page_authentication_loading);
-      $("#page-new-account").on("pagebeforeshow", page_new_account_loading);
-      $("#page-library").on("pagebeforeshow", page_library_loading);
-      $("#page-random").on("pagebeforeshow", page_random_loading);
-      $("#page-popular").on("pagebeforeshow", page_popular_loading);
-      $("#page-friends").on("pagebeforeshow", page_friends_loading);
-      $("#page-favorites").on("pagebeforeshow", page_favorites_loading);
-      $("#page-messages").on("pagebeforeshow", page_messages_loading);
-      $("#page-recommend").on("pagebeforeshow", page_recommend_loading);
-      $("#page-image").on("pageshow", page_image_loaded);
+        // register page events:
+        $("#page-edit-profile").on("pagebeforeshow", page_profile_loading);
+        $("#page-change-avatar").on("pagebeforeshow", page_change_avatar_loading);
+        $("#page-reset-password").on("pagebeforeshow", page_reset_password_loading);
+        $("#page-change-password").on("pagebeforeshow", page_change_password_loading);
+        $("#page-authentication").on("pagebeforeshow", page_authentication_loading);
+        $("#page-new-account").on("pagebeforeshow", page_new_account_loading);
+        $("#page-library").on("pagebeforeshow", page_library_loading);
+        $("#page-random").on("pagebeforeshow", page_random_loading);
+        $("#page-popular").on("pagebeforeshow", page_popular_loading);
+        $("#page-friends").on("pagebeforeshow", page_friends_loading);
+        $("#page-favorites").on("pagebeforeshow", page_favorites_loading);
+        $("#page-messages").on("pagebeforeshow", page_messages_loading);
+        $("#page-recommend").on("pagebeforeshow", page_recommend_loading);
+        $("#page-image").on("pageshow", page_image_loaded);
 
-      // register window events:
-      $(window).on("resize", window_resize);
-      $(window).on("navigate", window_navigate);
+        // register window events:
+        $(window).on("resize", window_resize);
+        $(window).on("navigate", window_navigate);
 
-      // setup scrolling & image scaling:
-      setupScrolling();
-      setupScaling();
+        // setup scrolling, image scaling & tasks:
+        $(document).on("pagecreate", "#page-library", function()
+        {
+          setupScrolling();
+          setupScaling();
+          setupBackgroundMode();
+          setupNotifications();
+          setupTasks();
+        });
 
-      // initialize jquery mobile:
-      $.mobile.initializePage();
-    });
+        // initialize jquery mobile:
+        $.mobile.initializePage();
+      })});
+
+    function setupBackgroundMode()
+    {
+      cordova.plugins.backgroundMode.setDefaults({ silent: true, title: "meatjs", text: "" });
+      cordova.plugins.backgroundMode.enable();
+    }
+
+    function setupNotifications()
+    {
+      var NOTIFICATION_MESSAGES = 1;
+      var NOTIFICATION_LIBRARY  = 2;
+
+      notifications = new MeatNotification(
+      {
+        onNotify: function(name, timestamp)
+        {
+          var id = NOTIFICATION_MESSAGES;
+          var title = "New Message(s)";
+          var message = "There are new messages waiting for you.";
+
+          if(name == "Library")
+          {
+            id = NOTIFICATION_LIBRARY;
+            title = "New image(s)";
+            message = "There are new images waiting for you.";
+          }
+
+          var notify = function()
+          {
+            cordova.plugins.notification.local.schedule(
+            {
+              id: id,
+              title: title,
+              message: message
+            });
+          };
+
+          cordova.plugins.notification.local.hasPermission(function(granted)
+          {
+            if(granted)
+            {
+              notify();
+            }
+            else
+            {
+              cordova.plugins.notification.local.registerPermission(function(granted)
+              {
+                if(granted)
+                {
+                  notify();
+                }
+              });
+            }
+          });
+        }
+      });
+
+      cordova.plugins.notification.local.on("click", function(notification)
+      {
+        var pageId = null;
+
+        if(notification.id == NOTIFICATION_MESSAGES)
+        {
+          pageId = "#page-messages";
+        }
+        else if(notification.id == NOTIFICATION_LIBRARY)
+        {
+          pageId = "#page-library";
+        }
+
+        if(pageId)
+        {
+          $("body").pagecontainer("change", pageId);
+        }
+      });
+    }
 
     function setupScrolling()
     {
@@ -118,6 +204,35 @@
       $("#image-source").on("load", scaleImage);
     }
 
+    function setupTasks()
+    {
+      (function f()
+       {
+         if(store.configured())
+         {
+           try
+           {
+             page_messages_update_task();
+           }
+           catch(e) {}
+
+           try
+           {
+             page_library_update_task();
+           }
+           catch(e) {}
+
+           try
+           {
+             cordova.plugins.backgroundMode.configure({ text: "", silent: true });
+           }
+           catch(e) {}
+         }
+
+         setTimeout(f, 120000);
+       })();
+    }
+
     function window_resize()
     {
       var pageId = $("body").pagecontainer("getActivePage").attr("id");
@@ -136,6 +251,14 @@
     function openNavigation()
     {
       $("body").pagecontainer("change", "#page-navigation", {transition:"slidedown"});
+    }
+
+    function initializeAccount()
+    {
+      store.setConfigured();
+
+      notifications.enable("Messages");
+      notifications.enable("Library");
     }
 
     function getFailureMessage(response)
@@ -209,9 +332,13 @@
             message = "You've been reconnected. Have fun :)";
             title = "Reconnected";
           }
+          else
+          {
+            initializeAccount();
+          }
 
           navigator.notification.alert(message,
-                                       function() { store.setConfigured(); $("body").pagecontainer("change", "#page-library", {changeHash:false}); },
+                                       function() { $("body").pagecontainer("change", "#page-library", { changeHash:false }); },
                                        title, "Ok");
         })
         .fail(function(response)
@@ -307,7 +434,7 @@
           }
 
           navigator.notification.alert(message,
-                                       function() { store.setConfigured(); $("body").pagecontainer("change", "#page-library", {changeHash:false}); },
+                                       function() { store.setConfigured(); $("body").pagecontainer("change", "#page-library", { changeHash:false }); },
                                        title, "Ok");
         })
         .fail(function(response)
@@ -403,7 +530,7 @@
           }
 
           navigator.notification.alert(message,
-                                       function() { store.setConfigured(); $("body").pagecontainer("change", "#page-library", {changeHash:false}); },
+                                       function() { store.setConfigured(); $("body").pagecontainer("change", "#page-library", { changeHash:false }); },
                                        title, "Ok");
         })
         .fail(function(response)
@@ -554,7 +681,7 @@
         {
           navigator.notification.alert("Your account has been registered successfully. You'll receive an activiation mail within " +
                                        "the next few minutes.",
-                                       function() { $("body").pagecontainer("change", "#page-authentication", {changeHash:false}); },
+                                       function() { $("body").pagecontainer("change", "#page-authentication", { changeHash:false }); },
                                        "Password sent", "Ok");
         })
         .fail(function(response)
@@ -834,33 +961,63 @@
     /*
      * library:
      */
+    function build_library_opts()
+    {
+      var opts =
+      {
+        requestLimit: 60,
+        pageSize: 10,
+        onLoad: function(page, pageSize)
+        {
+          return store.getObjects(page, pageSize).done(function(objects)
+          {
+            updateLibraries(["popular-listview", "favorites-listview"], objects);
+          });
+        },
+        onCompare: function(a, b)
+        {
+          return b["created_on"]["$date"] - a["created_on"]["$date"]
+        },
+        onSelect: openImage
+      };
+
+      return opts;
+    }
+
     function page_library_loading()
     {
       if(store.configured())
       {
-        $("#library-listview").library(
-        {
-          requestLimit: 60,
-          pageSize: 10,
-          onLoad: function(page, pageSize)
-          {
-            return store.getObjects(page, pageSize).done(function(objects)
-            {
-              updateLibraries(["popular-listview", "favorites-listview"], objects);
-            });
-          },
-          onCompare: function(a, b)
-          {
-            return b["created_on"]["$date"] - a["created_on"]["$date"]
-          },
-          onSelect: openImage
-        });
+        $("#library-listview").library(build_library_opts()).library("update");
 
-        $("#library-listview").library("update");
+        if(notifications)
+        {
+          notifications.markReceived("Library");
+        }
       }
       else
       {
-        $("body").pagecontainer("change", "#page-authentication", {changeHash:false});
+        $("body").pagecontainer("change", "#page-authentication", { changeHash:false });
+      }
+    }
+
+    function page_library_update_task()
+    {
+      var pageId = $("body").pagecontainer("getActivePage").attr("id");
+
+      cordova.plugins.backgroundMode.configure({ text: "Searching for new images.", silent: false });
+
+      if(notifications.enabled("Messages") && (pageId != "page-library" || cordova.plugins.backgroundMode.isActive()))
+      {
+        var opts = build_library_opts();
+
+        opts["silent"] = true;
+        opts["onNewImage"] = function(image)
+        {
+          notifications.feed("Library", new Date(image["created_on"]["$date"]).getTime());
+        };
+
+        $("#library-listview").library(opts).library("update");
       }
     }
 
@@ -1334,9 +1491,9 @@
     /*
      * messages page:
      */
-    function page_messages_loading()
+    function build_messages_opts()
     {
-      $("#messages-listview").messages(
+      var opts =
       {
         pageSize: 50,
         onLoad: store.getMessages,
@@ -1357,7 +1514,40 @@
             openImage(id[0]);
           }
         }
-      });
+      };
+
+      return opts;
+    }
+
+    function page_messages_loading()
+    {
+      $("#messages-listview").messages(build_messages_opts());
+
+      if(notifications)
+      {
+        notifications.markReceived("Messages");
+      }
+    }
+
+    function page_messages_update_task()
+    {
+      var pageId = $("body").pagecontainer("getActivePage").attr("id");
+      var background = false;
+
+      cordova.plugins.backgroundMode.configure({ text: "Searching for new messages.", silent: false });
+
+      if(notifications.enabled("Messages") && (pageId != "page-messages" || cordova.plugins.backgroundMode.isActive()))
+      {
+        var opts = build_messages_opts();
+
+        opts["silent"] = true;
+        opts["onNewMessage"] = function(msg)
+        {
+          notifications.feed("Messages", new Date(msg["created_on"]["$date"]).getTime());
+        };
+
+        $("#messages-listview").messages(opts);
+      }
     }
   </script>
 </head>

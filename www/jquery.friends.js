@@ -185,7 +185,7 @@
       {
         removeId = addId;
         addId = "back";
-        text = "Close";
+        text = "Show friends";
 
         $(this).find('p[data-nofriends="yes"]').hide();
       }
