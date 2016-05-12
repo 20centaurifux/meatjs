@@ -299,32 +299,6 @@
       notifications.enable("Library");
     }
 
-    function getFailureMessage(response)
-    {
-      var message = "An unexpected failure occured, please try again later.";
-
-      if(response.responseJSON && response.responseJSON["message"])
-      {
-        message = response.responseJSON["message"];
-      }
-      else if(response.status == 403)
-      {
-        message = "Authentication failed.";
-      }
-
-      return message;
-    }
-
-    function findInvalidField(response)
-    {
-      if(response.responseJSON && response.responseJSON["field"])
-      {
-        return response.responseJSON["field"];
-      }
-
-      return null;
-    }
-
     /*
      *  authentication page:
      */
@@ -393,7 +367,7 @@
           }
           else
           {
-            text = getFailureMessage(response);
+            text = Tools.getFailureMessage(response);
           }
 
           $("#page-authentication").find(".error").first().text("*" + text).show();
@@ -489,7 +463,7 @@
           }
           else
           {
-            text = getFailureMessage(response);
+            text = Tools.getFailureMessage(response);
           }
 
           $("#page-authentication").find(".error").first().text("*" + text).show();
@@ -585,7 +559,7 @@
           }
           else
           {
-            text = getFailureMessage(response);
+            text = Tools.getFailureMessage(response);
           }
 
           $("#page-authentication").find(".error").first().text("*" + text).show();
@@ -659,7 +633,7 @@
         })
         .fail(function(response)
         {
-          var field = findInvalidField(response);
+          var field = Tools.findInvalidField(response);
 
           if(response.status == 422 || field == "email")
           {
@@ -671,7 +645,7 @@
           }
           else
           {
-            $("#page-reset-password").find(".error").first().text("*" + getFailureMessage(response)).show();
+            $("#page-reset-password").find(".error").first().text("*" + Tools.getFailureMessage(response)).show();
           }
         })
         .always(function()
@@ -724,7 +698,7 @@
         })
         .fail(function(response)
         {
-          var field = findInvalidField(response);
+          var field = Tools.findInvalidField(response);
           var text;
 
           if(field == "email")
@@ -741,7 +715,7 @@
           }
           else
           {
-            message = getFailureMessage(response);
+            message = Tools.getFailureMessage(response);
           }
 
           if(field)
@@ -802,7 +776,7 @@
         })
         .fail(function(response)
         {
-          var field = findInvalidField(response);
+          var field = Tools.findInvalidField(response);
           var text;
 
           if(field == "email")
@@ -815,7 +789,7 @@
           }
           else
           {
-            message = getFailureMessage(response);
+            message = Tools.getFailureMessage(response);
           }
 
           if(field)
@@ -850,7 +824,7 @@
         {
           if(result.status != 404)
           {
-            $("#page-change-avatar").find(".error").first().text("*" + getFailureMessage(result)).show();
+            $("#page-change-avatar").find(".error").first().text("*" + Tools.getFailureMessage(result)).show();
           }
         });
     }
@@ -910,7 +884,7 @@
           store.uploadAvatar(file)
             .fail(function(result)
             {
-              $("#page-change-avatar").find(".error").first().text("*" + getFailureMessage(result)).show();
+              $("#page-change-avatar").find(".error").first().text("*" + Tools.getFailureMessage(result)).show();
             })
             .always(function()
             {
@@ -947,7 +921,7 @@
         })
         .fail(function(response)
         {
-          var field = findInvalidField(response);
+          var field = Tools.findInvalidField(response);
           var text;
 
           if(field == "new_password1")
@@ -960,7 +934,7 @@
           }
           else
           {
-            text = getFailureMessage(response);
+            text = Tools.getFailureMessage(response);
           }
 
           if(field)
