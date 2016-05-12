@@ -213,31 +213,29 @@
 
     function setupTasks()
     {
-      (function f()
-       {
-         if(store.configured())
-         {
-           try
-           {
-             page_messages_update_task();
-           }
-           catch(e) {}
+      setInterval(function()
+      {
+        if(store.configured())
+        {
+          try
+          {
+            page_messages_update_task();
+          }
+          catch(e) {}
 
-           try
-           {
-             page_library_update_task();
-           }
-           catch(e) {}
+          try
+          {
+            page_library_update_task();
+          }
+          catch(e) {}
 
-           try
-           {
-             cordova.plugins.backgroundMode.configure({ text: "", silent: true });
-           }
-           catch(e) {}
-         }
-
-         setTimeout(f, 120000);
-       })();
+          try
+          {
+            cordova.plugins.backgroundMode.configure({ text: "", silent: true });
+          }
+          catch(e) {}
+        }
+      }, 120000);
     }
 
     function window_resize()
@@ -345,7 +343,7 @@
           }
 
           navigator.notification.alert(message,
-                                       function() { $("body").pagecontainer("change", "#page-library", { changeHash:false }); },
+                                       function() { location.replace("index.html#page-library"); },
                                        title, "Ok");
         })
         .fail(function(response)
