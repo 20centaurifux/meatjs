@@ -93,7 +93,7 @@
           {
             if(!opts.silent)
             {
-              $.mobile.loading("hide");
+              setTimeout(function() { $.mobile.loading("hide"); }, 50);
             }
           });
       }
