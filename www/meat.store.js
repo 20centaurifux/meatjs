@@ -57,20 +57,16 @@
           })
           .fail(d.reject);
       }
-      else if(profile != null)
+      else
       {
         d.resolve(profile);
       }
-      else
-      {
-        d.reject(profile);
+
+      return d.promise();
     }
 
-    return d.promise();
-  }
-
-  this.getProfile = function(username)
-  {
+    this.getProfile = function(username)
+    {
       var d = $.Deferred();
 
       var key = "user.Other." + username.toLowerCase();
@@ -88,206 +84,225 @@
           })
           .fail(d.reject);
       }
-      else if(profile != null)
+      else
       {
         d.resolve(profile);
       }
+
+      return d.promise();
+    }
+
+    this.updateProfile = function(email, firstname, lastname, language, sex, protected)
+    {
+      var p = store.createClient().updateProfile(email, firstname, lastname, sex, language, protected);
+
+      p.done(function(profile)
+      {
+        cache.setJSON("user.Profile", profile, 300);
+      });
+
+      return p;
+    }
+
+    this.updatePassword = function(new_password1, new_password2)
+    {
+      var d = $.Deferred();
+
+      store.createClient().updatePassword(storage.load("user.Password"), new_password1, new_password2)
+        .success(function(response)
+        {
+          storage.store("user.Password", new_password1);
+
+          d.resolve(response);
+        })
+        .fail(d.reject);
+
+      return d.promise();
+    }
+
+    this.requestAccount = function(username, email)
+    {
+      var d = $.Deferred();
+
+      store.createClient().requestAccount(username, email)
+        .success(function(response)
+        {
+          storage.storeInt("app.LastAccountRequest", new Date().getTime());
+          d.resolve(response);
+        })
+        .fail(d.reject);
+
+      return d.promise();
+    }
+
+    this.lastAccountRequestTimeoutExpired = function(seconds)
+    {
+      return isExpired("app.LastAccountRequest", seconds);
+    }
+
+    this.requestPassword = function(username, email)
+    {
+      var d = $.Deferred();
+
+      store.createClient().requestPassword(username, email)
+        .success(function(response)
+        {
+          storage.storeInt("app.LastPasswordReset", new Date().getTime());
+          d.resolve(response);
+        })
+        .fail(d.reject);
+
+      return d.promise();
+    }
+
+    this.lastPasswordResetTimeoutExpired = function(seconds)
+    {
+      return isExpired("app.LastPasswordReset", seconds);
+    }
+
+    var isExpired = function(key, seconds)
+    {
+      var timestamp = storage.loadInt(key);
+      var expired = true;
+
+      if(!isNaN(timestamp))
+      {
+        var diff = (new Date().getTime() - timestamp) / 1000;
+
+        expired = diff > seconds;
+      }
+
+      return expired;
+    }
+
+    this.getObjects = function(page, pageSize)
+    {
+      return store.createClient().getObjects(page, pageSize).promise();
+    }
+
+    this.getRandom = function(pageSize)
+    {
+      return store.createClient().getRandomObjects(pageSize).promise();
+    }
+
+    this.getPopular = function(page, pageSize)
+    {
+      return store.createClient().getPopularObjects(page, pageSize).promise();
+    }
+
+    this.getObject = function(guid)
+    {
+      return store.createClient().getObject(guid).promise();
+    }
+
+    this.getFavorites = function()
+    {
+      var d = $.Deferred();
+
+      var favorites = cache.getJSON("user.Favorites");
+
+      if(favorites == null)
+      {
+        var client = store.createClient();
+
+        client.getFavorites()
+          .success(function(favorites)
+          {
+            cache.setJSON("user.Favorites", favorites, 900);
+            d.resolve(favorites);
+          })
+          .fail(d.reject);
+      }
       else
       {
-        d.reject(profile);
+        d.resolve(favorites);
+      }
+
+      return d.promise();
     }
 
-    return d.promise();
-  }
-
-  this.updateProfile = function(email, firstname, lastname, language, sex, protected)
-  {
-    var p = store.createClient().updateProfile(email, firstname, lastname, sex, language, protected);
-
-    p.done(function(profile)
+    this.favor = function(guid, favor)
     {
-      cache.setJSON("user.Profile", profile, 300);
-    });
+      var client = store.createClient();
 
-    return p;
-  }
+      cache.remove("user.Favorites");
 
-  this.updatePassword = function(new_password1, new_password2)
-  {
-    var d = $.Deferred();
-
-    store.createClient().updatePassword(storage.load("user.Password"), new_password1, new_password2)
-      .success(function(response)
-      {
-        storage.store("user.Password", new_password1);
-
-        d.resolve(response);
-      })
-      .fail(d.reject);
-
-    return d.promise();
-  }
-
-  this.requestAccount = function(username, email)
-  {
-    var d = $.Deferred();
-
-    store.createClient().requestAccount(username, email)
-      .success(function(response)
-      {
-        storage.storeInt("app.LastAccountRequest", new Date().getTime());
-        d.resolve(response);
-      })
-      .fail(d.reject);
-
-    return d.promise();
-  }
-
-  this.lastAccountRequestTimeoutExpired = function(seconds)
-  {
-    return isExpired("app.LastAccountRequest", seconds);
-  }
-
-  this.requestPassword = function(username, email)
-  {
-    var d = $.Deferred();
-
-    store.createClient().requestPassword(username, email)
-      .success(function(response)
-      {
-        storage.storeInt("app.LastPasswordReset", new Date().getTime());
-        d.resolve(response);
-      })
-      .fail(d.reject);
-
-    return d.promise();
-  }
-
-  this.lastPasswordResetTimeoutExpired = function(seconds)
-  {
-    return isExpired("app.LastPasswordReset", seconds);
-  }
-
-  var isExpired = function(key, seconds)
-  {
-    var timestamp = storage.loadInt(key);
-    var expired = true;
-
-    if(!isNaN(timestamp))
-    {
-      var diff = (new Date().getTime() - timestamp) / 1000;
-
-      expired = diff > seconds;
+      return client.favor(guid, favor).then(function() { return client.getObject(guid); });
     }
 
-    return expired;
-  }
-
-  this.getObjects = function(page, pageSize)
-  {
-    return store.createClient().getObjects(page, pageSize).promise();
-  }
-
-  this.getRandom = function(pageSize)
-  {
-    return store.createClient().getRandomObjects(pageSize).promise();
-  }
-
-  this.getPopular = function(page, pageSize)
-  {
-    return store.createClient().getPopularObjects(page, pageSize).promise();
-  }
-
-  this.getObject = function(guid)
-  {
-    return store.createClient().getObject(guid).promise();
-  }
-
-  this.getFavorites = function()
-  {
-    return store.createClient().getFavorites().promise();
-  }
-
-  this.favor = function(guid, favor)
-  {
-    var client = store.createClient();
-
-    return client.favor(guid, favor).then(function() { return client.getObject(guid); });
-  }
-
-  this.getVote = function(guid)
-  {
-    return store.createClient().getVote(guid).promise();
-  }
-
-  this.like = function(guid, like)
-  {
-    var client = store.createClient();
-
-    return client.vote(guid, like).then(function() { return client.getObject(guid); });
-  }
-
-  this.getImage = function(source)
-  {
-    return store.createClient().getImage(source).promise();
-  }
-
-  this.searchUsers = function(query)
-  {
-    return store.createClient().searchUsers(query).promise();
-  }
-
-  this.follow = function(username, follow)
-  {
-    var client = store.createClient();
-
-    return client.follow(username, follow).then(function()
+    this.getVote = function(guid)
     {
-      cache.remove("user.Profile");
-      cache.remove("user.Other." + username.toLowerCase());
-
-      return store.getOwnProfile();
-    });
-  }
-
-  this.getAvatar = function(username)
-  {
-    if(username.toLowerCase() == storage.load("user.Username").toLowerCase())
-    {
-      return store.getOwnAvatar();
+      return store.createClient().getVote(guid).promise();
     }
 
-    return store.createClient().getAvatar(username).promise();
-  }
+    this.like = function(guid, like)
+    {
+      var client = store.createClient();
 
-  this.getOwnAvatar = function()
-  {
-    return store.createClient().getOwnAvatar(avatarTimestamp).promise();
-  }
+      return client.vote(guid, like).then(function() { return client.getObject(guid); });
+    }
 
-  this.uploadAvatar = function(file)
-  {
-      return store.createClient().uploadAvatar(file).promise()
-        .done(function()
-        {
-          avatarTimestamp = new Date().getTime();
-        });
-  }
+    this.getImage = function(source)
+    {
+      return store.createClient().getImage(source).promise();
+    }
 
-  this.getComments = function(guid, page, pageSize)
-  {
-    return store.createClient().getComments(guid, page, pageSize);
-  }
+    this.searchUsers = function(query)
+    {
+      return store.createClient().searchUsers(query).promise();
+    }
 
-  this.addComment = function(guid, text)
-  {
-    var client = store.createClient();
+    this.follow = function(username, follow)
+    {
+      var client = store.createClient();
 
-    return client.addComment(guid, text).then(function() { return client.getObject(guid); });
-  }
+      return client.follow(username, follow).then(function()
+      {
+        cache.remove("user.Profile");
+        cache.remove("user.Other." + username.toLowerCase());
 
-  this.getMessages = function(pageSize, after)
-  {
-    return store.createClient().getMessages(pageSize, after);
-  }
+        return store.getOwnProfile();
+      });
+    }
+
+    this.getAvatar = function(username)
+    {
+      if(username.toLowerCase() == storage.load("user.Username").toLowerCase())
+      {
+        return store.getOwnAvatar();
+      }
+
+      return store.createClient().getAvatar(username).promise();
+    }
+
+    this.getOwnAvatar = function()
+    {
+      return store.createClient().getOwnAvatar(avatarTimestamp).promise();
+    }
+
+    this.uploadAvatar = function(file)
+    {
+        return store.createClient().uploadAvatar(file).promise()
+          .done(function()
+          {
+            avatarTimestamp = new Date().getTime();
+          });
+    }
+
+    this.getComments = function(guid, page, pageSize)
+    {
+      return store.createClient().getComments(guid, page, pageSize);
+    }
+
+    this.addComment = function(guid, text)
+    {
+      var client = store.createClient();
+
+      return client.addComment(guid, text).then(function() { return client.getObject(guid); });
+    }
+
+    this.getMessages = function(pageSize, after)
+    {
+      return store.createClient().getMessages(pageSize, after);
+    }
 }
