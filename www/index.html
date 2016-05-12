@@ -45,6 +45,7 @@
   <script type="text/javascript">
     var store = null;
     var notifications = null;
+    var foreground = true;
 
     $(document).ready(function()
     {
@@ -66,6 +67,7 @@
         $("#page-friends").on("pagebeforeshow", page_friends_loading);
         $("#page-favorites").on("pagebeforeshow", page_favorites_loading);
         $("#page-messages").on("pagebeforeshow", page_messages_loading);
+        $("#page-messages").on("pageshow", page_messages_loaded);
         $("#page-recommend").on("pagebeforeshow", page_recommend_loading);
         $("#page-image").on("pageshow", page_image_loaded);
 
@@ -89,6 +91,25 @@
           navigator.app.overrideBackbutton(true);
           document.addEventListener("backbutton", function() { window.history.back(); }, true);
         }
+
+        // watch activity status changes:
+        document.addEventListener("pause", function() { foreground = false; }, false);
+
+        document.addEventListener("resume", function()
+        {
+          foreground = true;
+
+          var pageId = $("body").pagecontainer("getActivePage").attr("id");
+
+          if(pageId == "page-library")
+          {
+            notifications.markReceived("Library");
+          }
+          else if(pageId == "page-messages")
+          {
+            notifications.markReceived("Messages");
+          }
+        }, false);
 
         // initialize jquery mobile:
         $.mobile.initializePage();
@@ -166,6 +187,18 @@
         if(pageId)
         {
           $("body").pagecontainer("change", pageId);
+        }
+      });
+
+      cordova.plugins.notification.local.on("clear", function(notification)
+      {
+        if(notification.id == NOTIFICATION_MESSAGES)
+        {
+          notifications.markReceived("Messages");
+        }
+        else if(notification.id == NOTIFICATION_LIBRARY)
+        {
+          notifications.markReceived("Library");
         }
       });
     }
@@ -1012,7 +1045,7 @@
 
       cordova.plugins.backgroundMode.configure({ text: "Searching for new images.", silent: false });
 
-      if(notifications.enabled("Messages") && (pageId != "page-library" || cordova.plugins.backgroundMode.isActive()))
+      if(notifications.enabled("Library") && (pageId != "page-library" || !foreground))
       {
         var opts = build_library_opts();
 
@@ -1500,6 +1533,7 @@
     {
       var opts =
       {
+        requestFilter: 0,
         pageSize: 50,
         onLoad: store.getMessages,
         onGetThumbnail: function(source)
@@ -1524,14 +1558,41 @@
       return opts;
     }
 
+    function set_messages_opts_after_filter(opts)
+    {
+      var lastNotified = notifications.lastNotified("Messages");
+
+      opts["requestFilter"] = 0;
+
+      if(lastNotified)
+      {
+        opts["onLoad"] = function(limit)
+        {
+          return store.getMessages(limit, lastNotified);
+        };
+      }
+    }
+
     function page_messages_loading()
     {
-      $("#messages-listview").messages(build_messages_opts());
+      var opts = build_messages_opts();
+
+      if($("#page-messages").data("initialized"))
+      {
+        set_messages_opts_after_filter(opts);
+      }
+
+      $("#messages-listview").messages(opts);
 
       if(notifications)
       {
         notifications.markReceived("Messages");
       }
+    }
+
+    function page_messages_loaded()
+    {
+      $("#page-messages").data("initialized", true);
     }
 
     function page_messages_update_task()
@@ -1541,15 +1602,18 @@
 
       cordova.plugins.backgroundMode.configure({ text: "Searching for new messages.", silent: false });
 
-      if(notifications.enabled("Messages") && (pageId != "page-messages" || cordova.plugins.backgroundMode.isActive()))
+      if(notifications.enabled("Messages") && (pageId != "page-messages" || !foreground))
       {
         var opts = build_messages_opts();
 
         opts["silent"] = true;
+        opts["requestLimit"] = 0;
         opts["onNewMessage"] = function(msg)
         {
           notifications.feed("Messages", new Date(msg["created_on"]["$date"]).getTime());
         };
+
+        set_messages_opts_after_filter(opts);
 
         $("#messages-listview").messages(opts);
       }

@@ -20,10 +20,10 @@
       var f = $(this).data("jquery.messages.options").onLoad;
       var obj = this;
       var lastUpdate = $(obj).data("lastUpdate");
+      var opts = $(this).data("jquery.messages.options");
 
-      if(f && (lastUpdate == null || (new Date().getTime() - lastUpdate) / 1000 > 60))
+      if(f && (lastUpdate == null || (new Date().getTime() - lastUpdate) / 1000 > opts.requestLimit))
       {
-        var opts = $(this).data("jquery.messages.options");
         var ul = this;
 
         if(!opts.silent)
@@ -195,7 +195,7 @@
   {
     $(obj).data("jquery.messages", true);
     $(obj).data("jquery.messages.options",
-                $.extend({pageSize: 10, tail: 0, onLoad: null, onSelect: null, onGetAvatar: null, onGetThumbnail: null, onNewMessage: null, silent: false},
+                $.extend({pageSize: 10, tail: 0, onLoad: null, onSelect: null, onGetAvatar: null, onGetThumbnail: null, onNewMessage: null, silent: false, requestLimit: 0},
                 options));
 
     $(obj).listview();

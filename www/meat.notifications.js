@@ -3,6 +3,7 @@ var MeatNotification = function(options)
   var storage = $(options).prop('Storage') || LocalMeatStorage;
   var onNotify = $(options).prop('onNotify');
   var notified = {};
+  var notified_timestamp = {};
 
   this.enable = function(id)
   {
@@ -25,17 +26,18 @@ var MeatNotification = function(options)
     {
       var mostRecent = storage.loadInt("notification." + id + ".timestamp");
 
-      if((mostRecent == null || isNaN(mostRecent) || timestamp > mostRecent) && !notified[id] && onNotify)
+      if((mostRecent == null || isNaN(mostRecent) || timestamp > mostRecent) && onNotify)
       {
-        onNotify(id, timestamp);
-
         if(!notified[id])
         {
-          notified[id] = timestamp;
+          onNotify(id, timestamp);
         }
-        else if(notified[id] < timestamp)
+
+        notified[id] = true;
+
+        if(!notified_timestamp[id] || notified_timestamp[id] < timestamp)
         {
-          notified[id] = timestamp;
+          notified_timestamp[id] = timestamp;
         }
       }
     }
@@ -45,7 +47,20 @@ var MeatNotification = function(options)
   {
     if(notified[id])
     {
-      storage.storeInt("notification." + id + ".timestamp", notified[id]);
+      storage.storeInt("notification." + id + ".timestamp", notified_timestamp[id]);
+      notified[id] = false;
     }
+  }
+
+  this.lastNotified = function(id)
+  {
+    var lastNotified = storage.loadInt("notification." + id + ".timestamp");
+
+    if(lastNotified == null || isNaN(lastNotified))
+    {
+      return null;
+    }
+
+    return new Date(lastNotified);
   }
 };

@@ -79,9 +79,16 @@ MeatREST.prototype.favor = function(guid, favor)
   return this.requestJSON(method, "/rest/favorites/" + guid, {guid: guid});
 }
 
-MeatREST.prototype.getMessages = function(limit)
+MeatREST.prototype.getMessages = function(limit, after)
 {
-  return this.requestJSON("GET", "/rest/messages?limit=" + limit, null);
+  var qs = "?limit=" + limit;
+
+  if(after)
+  {
+    qs += "&after=" + Math.round(after.getTime() / 1000);
+  }
+
+  return this.requestJSON("GET", "/rest/messages" + qs);
 }
 
 MeatREST.prototype.getPublicMessages = function(limit)

@@ -286,8 +286,8 @@
     return client.addComment(guid, text).then(function() { return client.getObject(guid); });
   }
 
-  this.getMessages = function(pageSize)
+  this.getMessages = function(pageSize, after)
   {
-    return store.createClient().getMessages(pageSize);
+    return store.createClient().getMessages(pageSize, after);
   }
 }
