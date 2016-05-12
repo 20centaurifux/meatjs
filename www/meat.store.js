@@ -208,7 +208,7 @@
         client.getFavorites()
           .success(function(favorites)
           {
-            cache.setJSON("user.Favorites", favorites, 900);
+            cache.setJSON("user.Favorites", favorites, 900, MeatCache.FLAGS_REFRESH_ON_READ);
             d.resolve(favorites);
           })
           .fail(d.reject);
@@ -232,7 +232,28 @@
 
     this.getVote = function(guid)
     {
-      return store.createClient().getVote(guid).promise();
+      var d = $.Deferred();
+
+      var vote = cache.getJSON("user.Vote." + guid);
+
+      if(vote == null)
+      {
+        var client = store.createClient();
+
+        store.createClient().getVote(guid)
+          .success(function(vote)
+          {
+            cache.setJSON("user.Vote." + guid, vote, 900, MeatCache.FLAGS_REFRESH_ON_READ);
+            d.resolve(vote);
+          })
+          .fail(d.reject);
+      }
+      else
+      {
+        d.resolve(vote);
+      }
+
+      return d.promise();
     }
 
     this.like = function(guid, like)
