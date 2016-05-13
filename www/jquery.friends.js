@@ -88,7 +88,7 @@
       var obj = this;
       var opts = $(this).data("jquery.friends.options");
 
-      if(query && query.length > 2 && opts.onGetProfile && opts.onSearch)
+      if(query && query.length >= 2 && opts.onGetProfile && opts.onSearch)
       {
         $(document).blockUI("show");
 
@@ -251,7 +251,7 @@
 
       // search form:
       var form = $('<form autocomplete="off">' +
-                   '<label for="text-friends-search-query">Search network:</label>' +
+                   '<label style="font-size:x-large;" for="text-friends-search-query">Search network:</label>' +
                    '<input type="text" data-type="search" name="text-friends-search-query">' +
                    '</form>')
 
@@ -277,7 +277,7 @@
       list.listview();
 
       // "no friends" info:
-      var nofriends = '<p data-nofriends="yes">You don\'t have any friends yet :(</p>';
+      var nofriends = '<p style="font-size:x-large;" data-nofriends="yes">You don\'t have any friends yet :(</p>';
 
       $(obj).find('div[data-role="main"]').append(form).append(list).append(nofriends);
 
