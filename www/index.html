@@ -1026,7 +1026,7 @@
         opts["silent"] = true;
         opts["onNewImage"] = function(image)
         {
-          notifications.feed("Library", new Date(image["created_on"]["$date"]).getTime());
+          notifications.feed("Library", Tools.toUTC(new Date(image["created_on"]["$date"])).getTime());
         };
 
         $("#library-listview").library(opts).library("update");
@@ -1582,7 +1582,7 @@
         opts["requestLimit"] = 0;
         opts["onNewMessage"] = function(msg)
         {
-          notifications.feed("Messages", new Date(msg["created_on"]["$date"]).getTime());
+          notifications.feed("Messages", Tools.toUTC(new Date(msg["created_on"]["$date"])).getTime());
         };
 
         set_messages_opts_after_filter(opts);
