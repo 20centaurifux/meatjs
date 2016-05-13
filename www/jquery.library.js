@@ -127,9 +127,9 @@
                    '<p><strong>Comments: </strong>' +
                    '<span data-field="comments_n">' + image["comments_n"] + '</span></p>' +
                    '<p><strong>Score: </strong>' +
-                   '<span data-field="up">' + image["score"]["up"] + '</span> up,' +
+                   '<span data-field="up">' + image["score"]["up"] + '</span> up, ' +
                    '<span data-field="down">' + image["score"]["down"] + '</span> down, ' +
-                   '<span data-field="fav">' + image["score"]["fav"] + '</span> favs</p>' +
+                   '<span data-field="fav">' + image["score"]["fav"] + '</span> favorite(s)</p>' +
                    '</a></li>');
 
         $(this).append(el);
