@@ -43,5 +43,9 @@ var Tools =
     }
 
     return null;
+  },
+  toUTC: function(d)
+  {
+    return new Date(d.getTime() + d.getTimezoneOffset() * 60000);
   }
 };
