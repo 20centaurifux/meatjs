@@ -260,6 +260,8 @@
     {
       var client = store.createClient();
 
+      cache.remove("user.Vote." + guid);
+
       return client.vote(guid, like).then(function() { return client.getObject(guid); });
     }
 
