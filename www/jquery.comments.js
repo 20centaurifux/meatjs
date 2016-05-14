@@ -43,8 +43,6 @@
         var ul = this;
         var users = new Array();
 
-        $.mobile.loading("show");
-
         return f(page, $(this).data("jquery.comments.options").pageSize)
           .done(function(comments)
           {
@@ -110,10 +108,6 @@
           .fail(function()
           {
             navigator.notification.alert("Couldn't load comments, please try again.", null, "Request failed", "Ok");
-          })
-          .always(function()
-          {
-            $.mobile.loading("hide");
           });
       }
 

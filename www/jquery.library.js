@@ -39,7 +39,14 @@
 
       if(lastUpdate == null || (new Date().getTime() - lastUpdate) / 1000 > $(this).data("jquery.library.options").requestLimit)
       {
-        methods.loadPage.apply(this, [0]);
+        var opts = $(this).data("jquery.library.options");
+
+        if(!opts.silent)
+        {
+          setTimeout(function() { $.mobile.loading("show"); }, 50);
+        }
+
+        methods.loadPage.apply(this, [0]).always(function() { if(!opts.silent) { $.mobile.loading("hide"); } });
         $(this).data("lastUpdate", new Date().getTime());
       }
     },
@@ -64,11 +71,6 @@
 
       if(f)
       {
-        if(!opts.silent)
-        {
-          setTimeout(function() { $.mobile.loading("show"); }, 50);
-        }
-
         var library = this;
 
         return f(page, $(this).data("jquery.library.options").pageSize)
@@ -97,13 +99,6 @@
             if(!opts.silent)
             {
               navigator.notification.alert("Couldn't load images, please try again.", null, "Request failed", "Ok");
-            }
-          })
-          .always(function()
-          {
-            if(!opts.silent)
-            {
-              setTimeout(function() { $.mobile.loading("hide"); }, 50);
             }
           });
       }
