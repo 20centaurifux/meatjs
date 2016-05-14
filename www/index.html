@@ -1412,9 +1412,9 @@
         .done(function(profile)
         {
           $.when.apply($, $.map(profile["following"], function(friend) { return store.getProfile(friend); }))
-          .done(function(friends)
+          .done(function()
           {
-            $(friends).each(function(i, user)
+            $(arguments).each(function(i, user)
             {
               // build displayed username:
               fullname = Tools.buildDisplayUsername(user);
@@ -1444,7 +1444,7 @@
                 {
                   $(li).find("img").attr("src", "images/image-missing.png");
                 });
-              });
+            });
 
             ul.listview("refresh");
           })
