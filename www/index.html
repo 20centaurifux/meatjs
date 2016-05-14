@@ -1321,6 +1321,8 @@
                   $("#image-button-recommend").hide();
                 }
 
+                $("#image-button-open").prop("disabled", false).removeClass("ui-disabled");
+
                 // assign guid to buttons:
                 $("#image-action-buttons").find("button").data("guid", obj["guid"]);
               }
@@ -1511,6 +1513,15 @@
       });
     }
 
+    function button_open_image_tapped(guid)
+    {
+      var b64 = $("#image-source").attr("src");
+      var token = b64.split(",");
+      var type = token[0].split("/")[1].toLowerCase().replace(";base64", "");
+
+      window.FullScreenImage.showImageBase64(token[1], guid, type);
+    }
+
     /*
      *  recommend page:
      */
@@ -1649,8 +1660,6 @@
     function set_messages_opts_after_filter(opts)
     {
       var lastNotified = notifications.lastNotified("Messages");
-
-      opts["requestFilter"] = 0;
 
       if(lastNotified)
       {
@@ -1800,6 +1809,8 @@
         <button id="image-button-favorite" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="star-o" onclick="button_favor_tapped($(this).data('guid'), $(this).attr('data-icon') == 'star-o');">Favorite</button>
         <button id="image-button-recommend" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="mail-forward" onclick="button_recommend_tapped($(this).data('guid'));">Recommend</button>
         <button id="image-button-write-comment" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="pencil" onclick="button_write_comment_tapped();">Comment</button>
+        <button id="image-button-open" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="picture-o" onclick="button_open_image_tapped();">Comment</button>
+      </div>
       </div>
     </div>
 
