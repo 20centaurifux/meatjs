@@ -25,6 +25,8 @@
       $(li).on("click", function()
       {
         onSelect($(this).data("guid"));
+
+        $(library).data("selected", li);
       });
     }
   }
@@ -41,12 +43,12 @@
         $(this).data("lastUpdate", new Date().getTime());
       }
     },
-    nextPage: function()
+    nextPage: function(triggerNext)
     {
       var page = $(this).data("jquery.library.options").tail;
       var library = this;
 
-      methods.loadPage.apply(this, [page + 1])
+      return methods.loadPage.apply(this, [page + 1, triggerNext])
         .done(function(images)
         {
           if(images.length > 0)
@@ -55,7 +57,7 @@
           }
         });
     },
-    loadPage: function(page)
+    loadPage: function(page, triggerNext)
     {
       var opts = $(this).data("jquery.library.options");
       var f = opts.onLoad;
@@ -72,14 +74,22 @@
         return f(page, $(this).data("jquery.library.options").pageSize)
           .done(function(images)
           {
-            $(images).each(function()
+            if(images && images.length > 0)
             {
-              methods.touch.apply(library, [this, true, false]);
-            });
+              $(images).each(function()
+              {
+                methods.touch.apply(library, [this, true, false]);
+              });
 
-            if(opts.onCompare)
-            {
-              methods.sort.apply(library);
+              if(opts.onCompare)
+              {
+                methods.sort.apply(library);
+              }
+
+              if(triggerNext)
+              {
+                methods.next.apply(library);
+              }
             }
           })
           .fail(function()
@@ -182,6 +192,7 @@
     {
       $(this).find("li").remove();
       $(this).listview("refresh");
+      $(this).data("selected", null);
     },
     sort: function()
     {
@@ -204,6 +215,37 @@
           $(library).append(li);
           bindEvents(library, li);
         });
+      }
+    },
+    next: function()
+    {
+      var li = $(this).data("selected");
+      var n = $(li).next();
+
+      if(n && n.get(0))
+      {
+        $(n).click();
+      }
+      else
+      {
+        methods.nextPage.apply(this, [true]);
+      }
+    },
+    prev: function(f)
+    {
+      var li = $(this).data("selected");
+      var p = $(li).prev();
+      var success = false;
+
+      if(p && p.get(0))
+      {
+        $(p).click();
+        success = true;
+      }
+
+      if(f)
+      {
+        f(success);
       }
     }
   };

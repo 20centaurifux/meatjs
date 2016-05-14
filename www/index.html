@@ -41,6 +41,7 @@
   <script type="text/javascript" src="jquery.comments.js"></script>
   <script type="text/javascript" src="jquery.messages.js"></script>
   <script type="text/javascript" src="jquery.mobile-1.4.5.min.js"></script>
+  <script type="text/javascript" src="jquery.mobile.paramsHandler-1.4.2.js"></script>
 
   <script type="text/javascript">
     var store = null;
@@ -69,8 +70,9 @@
         $("#page-messages").on("pagebeforeshow", page_messages_loading);
         $("#page-messages").on("pageshow", page_messages_loaded);
         $("#page-recommend").on("pagebeforeshow", page_recommend_loading);
-        $("#page-image").on("pageinit", page_image_init);
-        $("#page-image").on("pageshow", page_image_loaded);
+
+        $.mobile.paramsHandler.addPage("page-image", ["guid"], [], function(params) { page_image_loaded(params.guid); });
+        $.mobile.paramsHandler.init();
 
         // register window events:
         $(window).on("resize", window_resize);
@@ -81,6 +83,7 @@
         {
           setupScrolling();
           setupScaling();
+          setupSwipe();
           setupBackgroundMode();
           setupNotifications();
           setupTasks();
@@ -243,6 +246,90 @@
     function setupScaling()
     {
       $("#image-source").on("load", scaleImage);
+    }
+
+    function setupSwipe()
+    {
+      /* Using the page title is the best way to get the correct parent page id. Using the Browser's history
+         doesn't work properly after opening the App from a local notification. */
+      function getParentPageId()
+      {
+        var history = $.mobile.navigate.history.stack[$.mobile.navigate.history.stack.length - 2];
+        var pageId = null;
+
+        switch(history.title)
+        {
+          case "Library":
+            pageId = "#page-library";
+            break;
+
+          case "Random":
+            pageId = "#page-random";
+            break;
+
+          case "Popular":
+            pageId = "#page-popular";
+            break;
+
+          case "Favorites":
+            pageId = "#page-favorites";
+            break;
+
+          default:
+            pageId = null;
+        }
+
+        return pageId;
+      }
+
+      $('div[data-role="page"]').each(function()
+      {
+        if($(this).attr("id") == "page-image")
+        {
+          // navigate trough image library:
+          $("#page-image").on("swipeleft", function()
+          {
+            var pageId = getParentPageId();
+
+            if(pageId)
+            {
+              var obj = $(pageId).find('ul[data-role="listview"]:first');
+
+              $(obj).library("next");
+            }
+          });
+
+          $("#page-image").on("swiperight", function()
+          {
+            var pageId = getParentPageId();
+
+            if(pageId)
+            {
+              var obj = $(pageId).find('ul[data-role="listview"]:first');
+
+              $(obj).library("prev", function(success)
+              {
+                if(!success)
+                {
+                  window.history.back();
+                }
+              });
+            }
+            else
+            {
+              window.history.back();
+            }
+          });
+        }
+        else
+        {
+          $(this).on("swiperight", function()
+          {
+            // navigation trough window history:
+            window.history.back();
+          });
+        }
+      });
     }
 
     function setupTasks()
@@ -1093,10 +1180,24 @@
           requestLimit: 60,
           onLoad: function(page, pageSize)
           {
-            return store.getFavorites().done(function(objects)
+            var d = $.Deferred();
+
+            if(page > 0)
             {
-              updateLibraries(["library-listview", "popular-listview"], objects);
-            });
+              d.resolve([]);
+            }
+            else
+            {
+              store.getFavorites()
+                .done(function(objects)
+                {
+                  d.resolve(objects);
+                  updateLibraries(["library-listview", "popular-listview"], objects);
+                })
+                .fail(d.reject);
+            }
+
+            return d.promise();
           },
           onCompare: function(a, b)
           {
@@ -1111,31 +1212,7 @@
     /*
      * image details page:
      */
-    function page_image_init()
-    {
-      $("#page-image").on("swipeleft swiperight", function(event)
-      {
-        if(event.type == "swiperight")
-        {
-          window.history.back();
-        }
-      });
-    }
-
-    function page_image_loaded()
-    {
-      $("#image-source").show();
-    }
-
-    function scaleImage()
-    {
-      var maxHeight = $(window).height() - 60 + "px";
-      var maxWidth = $(window).width() - 60 + "px";
-
-      $("#image-source").css({"max-height": maxHeight, "max-width": maxWidth});
-    }
-
-    function openImage(guid)
+    function page_image_loaded(guid)
     {
       var guidExists = function(objects, guid)
       {
@@ -1154,7 +1231,9 @@
         return contains;
       };
 
-      $.mobile.loading("show");
+      setTimeout(function() { $.mobile.loading("show"); }, 50);
+
+      $("#image-source").hide();
 
       $.when(store.getObject(guid), store.getVote(guid), store.getFavorites(), store.getOwnProfile())
         .done(function(obj, vote, favorites, profile)
@@ -1172,7 +1251,7 @@
             .done(function(data)
             {
               // update image:
-              $("#image-source").attr("src", data).hide();
+              $("#image-source").attr("src", data).show();
 
               // update details:
               $("#image-score-up").text(obj["score"]["up"]);
@@ -1255,9 +1334,6 @@
               }).val("");
 
               $("#form-add-comment").hide();
-
-              // open page:
-              $("body").pagecontainer("change", "#page-image");
             })
             .fail(function(result)
             {
@@ -1275,6 +1351,19 @@
 
           navigator.notification.alert("Couldn't load image details, please try again.", null, "Request failed", "Ok");
         })
+    }
+
+    function scaleImage()
+    {
+      var maxHeight = $(window).height() - 60 + "px";
+      var maxWidth = $(window).width() - 60 + "px";
+
+      $("#image-source").css({"max-height": maxHeight, "max-width": maxWidth});
+    }
+
+    function openImage(guid)
+    {
+      $("body").pagecontainer("change", "#page-image?guid=" + guid);
     }
 
     function button_like_tapped(guid, like)
@@ -1671,6 +1760,7 @@
 
 <div data-role="page" id="page-image" data-position="fixed">
   <div data-role="header" data-position="fixed" data-theme="b">
+    <a data-rel="back" href="#" data-icon="back" data-iconpos="notext" data-direction="reverse"></a>
     <h1>Image</h1>
     <a href='javascript:$("#comments-listview").comments("update");' data-icon="refresh" data-iconpos="notext" data-direction="reverse" class="ui-btn-right"></a>
   </div>
