@@ -257,6 +257,11 @@
         var history = $.mobile.navigate.history.stack[$.mobile.navigate.history.stack.length - 2];
         var pageId = null;
 
+        if(!history.title && history.hash == "")
+        {
+          history.title = "Library";
+        }
+
         switch(history.title)
         {
           case "Library":
@@ -1234,6 +1239,9 @@
       setTimeout(function() { $.mobile.loading("show"); }, 50);
 
       $("#image-source").hide();
+      $("#p-image-details").hide();
+      $("#image-action-buttons").hide();
+      $("#form-add-comment").hide();
 
       $.when(store.getObject(guid), store.getVote(guid), store.getFavorites(), store.getOwnProfile())
         .done(function(obj, vote, favorites, profile)
@@ -1258,7 +1266,11 @@
               $("#image-score-down").text(obj["score"]["down"]);
               $("#image-score-favorite").text(obj["score"]["fav"]);
 
+              $("#p-image-details").show();
+
               // setup buttons:
+              $("#image-action-buttons").show();
+
               if(!obj["locked"])
               {
                 if(vote["up"] == null)
@@ -1332,8 +1344,6 @@
                   $("#button-add-comment").prop("disabled", true).addClass("ui-disabled").button("refresh");
                 }
               }).val("");
-
-              $("#form-add-comment").hide();
             })
             .fail(function(result)
             {
@@ -1770,7 +1780,7 @@
       <div>
         <img id="image-source" class="image" src="" alt="image">
 
-        <p style="font-size:small;">
+        <p id="p-image-details" style="font-size:small;">
           <strong><span id="image-score-up">0</span></strong> people <strong> liked </strong> this image <br />
           <strong><span id="image-score-down">0</span></strong> people <strong> disliked </strong> this image <br />
           <strong><span id="image-score-favorite">0</span></strong> people <strong> favorited </strong> this image <br />
