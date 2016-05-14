@@ -69,6 +69,7 @@
         $("#page-messages").on("pagebeforeshow", page_messages_loading);
         $("#page-messages").on("pageshow", page_messages_loaded);
         $("#page-recommend").on("pagebeforeshow", page_recommend_loading);
+        $("#page-image").on("pageinit", page_image_init);
         $("#page-image").on("pageshow", page_image_loaded);
 
         // register window events:
@@ -1110,6 +1111,17 @@
     /*
      * image details page:
      */
+    function page_image_init()
+    {
+      $("#page-image").on("swipeleft swiperight", function(event)
+      {
+        if(event.type == "swiperight")
+        {
+          window.history.back();
+        }
+      });
+    }
+
     function page_image_loaded()
     {
       $("#image-source").show();
