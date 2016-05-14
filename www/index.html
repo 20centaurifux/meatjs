@@ -97,11 +97,17 @@
         }
 
         // watch activity status changes:
-        document.addEventListener("pause", function() { foreground = false; }, false);
+        document.addEventListener("pause", function()
+        {
+          foreground = false;
+          cordova.plugins.backgroundMode.enable();
+        }, false);
 
         document.addEventListener("resume", function()
         {
           foreground = true;
+      
+          cordova.plugins.backgroundMode.disable();
 
           var pageId = $("body").pagecontainer("getActivePage").attr("id");
 
@@ -121,8 +127,7 @@
 
     function setupBackgroundMode()
     {
-      cordova.plugins.backgroundMode.setDefaults({ silent: true, title: "meatjs", text: "" });
-      cordova.plugins.backgroundMode.enable();
+      cordova.plugins.backgroundMode.setDefaults({ title: "meatjs", text: "Waiting for more meat." });
     }
 
     function setupNotifications()
@@ -357,11 +362,11 @@
 
           try
           {
-            cordova.plugins.backgroundMode.configure({ text: "", silent: true });
+            cordova.plugins.backgroundMode.configure({ text: "Waiting for more meat." });
           }
           catch(e) {}
         }
-      }, 120000);
+      }, 5 * 60 * 1000);
     }
 
     function window_resize()
@@ -1110,7 +1115,7 @@
     {
       var pageId = $("body").pagecontainer("getActivePage").attr("id");
 
-      cordova.plugins.backgroundMode.configure({ text: "Searching for new images.", silent: false });
+      cordova.plugins.backgroundMode.configure({ text: "Searching for new images." });
 
       if(notifications.enabled("Library") && (pageId != "page-library" || !foreground))
       {
@@ -1683,7 +1688,7 @@
       var pageId = $("body").pagecontainer("getActivePage").attr("id");
       var background = false;
 
-      cordova.plugins.backgroundMode.configure({ text: "Searching for new messages.", silent: false });
+      cordova.plugins.backgroundMode.configure({ text: "Searching for new messages." });
 
       if(notifications.enabled("Messages") && (pageId != "page-messages" || !foreground))
       {
