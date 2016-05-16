@@ -42,5 +42,5 @@
     <plugin name="de.appplant.cordova.plugin.local-notification" spec="https://github.com/katzer/cordova-plugin-local-notifications.git" />
     <plugin name="cordova-plugin-background-mode" spec="https://github.com/katzer/cordova-plugin-background-mode.git" />
     <plugin name="cordova-plugin-splashscreen" spec="~3.2.2" />
-    <plugin name="es.keensoft.fullscreenimage" spec="https://github.com/keensoft/FullScreenImage-Cordova-Plugin.git" />
+    <plugin name="es.keensoft.fullscreenimage" spec="https://github.com/20centaurifux/FullScreenImage-Cordova-Plugin.git" />
 </widget>
