@@ -127,7 +127,12 @@
 
     function setupBackgroundMode()
     {
-      cordova.plugins.backgroundMode.setDefaults({ title: "meatjs", text: "Waiting for more meat." });
+      cordova.plugins.backgroundMode.setDefaults(
+      {
+        title: "meatjs",
+        text: "Waiting for more meat.",
+        icon: "res://logo",
+        smallIcon: "res://logo" });
     }
 
     function setupNotifications()
@@ -156,7 +161,9 @@
             {
               id: id,
               title: title,
-              message: message
+              message: message,
+              icon: "res://logo",
+              smallIcon: "res://logo"
             });
           };
 
