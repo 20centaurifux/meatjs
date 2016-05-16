@@ -56,6 +56,11 @@
         store = new MeatStore();
 
         // register page events:
+        $('div[data-role="page"]').each(function()
+        {
+          $(this).on("pagebeforeshow", function() { $(document).blockUI("hide"); });
+        });
+
         $("#page-edit-profile").on("pagebeforeshow", page_profile_loading);
         $("#page-change-avatar").on("pagebeforeshow", page_change_avatar_loading);
         $("#page-reset-password").on("pagebeforeshow", page_reset_password_loading);
@@ -76,7 +81,6 @@
 
         // register window events:
         $(window).on("resize", window_resize);
-        $(window).on("navigate", window_navigate);
 
         // setup scrolling, image scaling & tasks:
         $(document).on("pagecreate", "#page-library", function()
@@ -384,11 +388,6 @@
       {
         scaleImage();
       }
-    }
-
-    function window_navigate()
-    {
-      $(document).blockUI("hide");
     }
 
     function openNavigation()
@@ -1143,20 +1142,21 @@
      */
     function page_random_loading()
     {
-        $("#random-listview").library(
+      $("#random-listview").library(
+      {
+        requestLimit: 0,
+        pageSize: 20,
+        onLoad: function(page, pageSize)
         {
-          pageSize: 10,
-          onLoad: function(page, pageSize)
+          return store.getRandom(pageSize).done(function(objects)
           {
-            return store.getRandom(pageSize).done(function(objects)
-            {
-              updateLibraries(["library-listview", "popular-listview", "favorites-listview"], objects);
-            });
-          },
-          onSelect: openImage
-        });
+            updateLibraries(["library-listview", "popular-listview", "favorites-listview"], objects);
+          });
+        },
+        onSelect: openImage
+      });
 
-        $("#random-listview").library("update");
+      $("#random-listview").library("update");
     }
 
     /*
@@ -1164,27 +1164,28 @@
      */
     function page_popular_loading()
     {
-        $("#popular-listview").library(
+      $("#popular-listview").library(
+      {
+        requestLimit: 180,
+        pageSize: 10,
+        onLoad: function(page, pageSize)
         {
-          pageSize: 10,
-          onLoad: function(page, pageSize)
+          return store.getPopular(page, pageSize).done(function (objects)
           {
-            return store.getPopular(page, pageSize).done(function (objects)
-            {
-              updateLibraries(["library-listview", "favorites-listview"], objects);
-            });
-          },
-          onCompare: function(a, b)
-          {
-            var score_a = a["score"]["up"] - a["score"]["down"] + a["score"]["fav"];
-            var score_b = b["score"]["up"] - b["score"]["down"] + b["score"]["fav"];
+            updateLibraries(["library-listview", "favorites-listview"], objects);
+          });
+        },
+        onCompare: function(a, b)
+        {
+          var score_a = a["score"]["up"] - a["score"]["down"] + a["score"]["fav"];
+          var score_b = b["score"]["up"] - b["score"]["down"] + b["score"]["fav"];
 
-            return score_b - score_a || b["created_on"]["$data"] - a["created_on"]["$data"];
-          },
-          onSelect: openImage
-        });
+          return score_b - score_a || b["created_on"]["$data"] - a["created_on"]["$data"];
+        },
+        onSelect: openImage
+      });
 
-        $("#popular-listview").library("update");
+      $("#popular-listview").library("update");
     }
 
     /*
@@ -1192,38 +1193,38 @@
      */
     function page_favorites_loading()
     {
-        $("#favorites-listview").library(
+      $("#favorites-listview").library(
+      {
+        requestLimit: 300,
+        onLoad: function(page, pageSize)
         {
-          requestLimit: 60,
-          onLoad: function(page, pageSize)
+          var d = $.Deferred();
+
+          if(page > 0)
           {
-            var d = $.Deferred();
-
-            if(page > 0)
-            {
-              d.resolve([]);
-            }
-            else
-            {
-              store.getFavorites()
-                .done(function(objects)
-                {
-                  d.resolve(objects);
-                  updateLibraries(["library-listview", "popular-listview"], objects);
-                })
-                .fail(d.reject);
-            }
-
-            return d.promise();
-          },
-          onCompare: function(a, b)
+            d.resolve([]);
+          }
+          else
           {
-            return b["created_on"]["$date"] - a["created_on"]["$date"]
-          },
-          onSelect: openImage
-        });
+            store.getFavorites()
+              .done(function(objects)
+              {
+                d.resolve(objects);
+                updateLibraries(["library-listview", "popular-listview"], objects);
+              })
+              .fail(d.reject);
+          }
 
-        $("#favorites-listview").library("update");
+          return d.promise();
+        },
+        onCompare: function(a, b)
+        {
+          return b["created_on"]["$date"] - a["created_on"]["$date"]
+        },
+        onSelect: openImage
+      });
+
+      $("#favorites-listview").library("update");
     }
 
     /*

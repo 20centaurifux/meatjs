@@ -4,13 +4,19 @@
   {
     show: function()
     {
-      $("body").append('<div class="blockedUI" />');
-      $.mobile.loading('show');
+      setTimeout(function()
+      {
+        $("body").append('<div class="blockedUI" />');
+        $.mobile.loading('show');
+      }, 1);
     },
     hide: function()
     {
-      $(".blockedUI").remove();
-      $.mobile.loading('hide');
+      setTimeout(function()
+      {
+        $(".blockedUI").remove();
+        $.mobile.loading('hide');
+      }, 1);
     }
   };
 

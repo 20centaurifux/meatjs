@@ -28,7 +28,7 @@
 
         if(!opts.silent)
         {
-          setTimeout(function() { $.mobile.loading("show"); }, 50);
+          setTimeout(function() { $.mobile.loading("show"); }, 1);
         }
 
         return f($(this).data("jquery.messages.options").pageSize)
@@ -177,7 +177,7 @@
           {
             if(!opts.silent)
             {
-              $.mobile.loading("hide");
+              setTimeout(function() { $.mobile.loading("hide"); }, 1);
             }
           });
       }

@@ -43,10 +43,18 @@
 
         if(!opts.silent)
         {
-          setTimeout(function() { $.mobile.loading("show"); }, 50);
+          setTimeout(function() { $.mobile.loading("show"); }, 1);
         }
 
-        methods.loadPage.apply(this, [0]).always(function() { if(!opts.silent) { $.mobile.loading("hide"); } });
+        methods.loadPage.apply(this, [0])
+          .always(function()
+          {
+            if(!opts.silent)
+            {
+              setTimeout(function() { $.mobile.loading("hide"); }, 1);
+            }
+          });
+
         $(this).data("lastUpdate", new Date().getTime());
       }
     },
