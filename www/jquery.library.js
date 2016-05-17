@@ -170,15 +170,16 @@
       if(inserted)
       {
         var client = new MeatStore().createClient();
+        var obj = this;
 
         client.getThumbnail(image["source"])
           .success(function(thumbnail)
           {
-            $('img[data-source="' + image["source"].escapeQuotes() + '"]').attr("src", thumbnail);
+            $(obj).find('img[data-source="' + image["source"].escapeQuotes() + '"]').attr("src", thumbnail);
           })
           .fail(function(r)
           {
-            $('img[data-source="' + image["source"].escapeQuotes() + '"]').attr("src", "images/image-missing.png");
+            $(obj).find('img[data-source="' + image["source"].escapeQuotes() + '"]').attr("src", "images/image-missing.png");
           });
       }
     },
