@@ -43,24 +43,27 @@
     {
       var d = $.Deferred();
 
-      var profile = cache.getJSON("user.Profile");
-
-      if(profile == null)
+      setTimeout(function()
       {
-        var client = store.createClient();
+        var profile = cache.getJSON("user.Profile");
 
-        client.getOwnProfile()
-          .success(function(profile)
-          {
-            cache.setJSON("user.Profile", profile, 300);
-            d.resolve(profile);
-          })
-          .fail(d.reject);
-      }
-      else
-      {
-        d.resolve(profile);
-      }
+        if(profile == null)
+        {
+          var client = store.createClient();
+
+          client.getOwnProfile()
+            .success(function(profile)
+            {
+              cache.setJSON("user.Profile", profile, 300);
+              d.resolve(profile);
+            })
+            .fail(d.reject);
+        }
+        else
+        {
+          d.resolve(profile);
+        }
+      }, 1);
 
       return d.promise();
     }
@@ -69,25 +72,28 @@
     {
       var d = $.Deferred();
 
-      var key = "user.Other." + username.toLowerCase();
-      var profile = cache.getJSON(key);
-
-      if(profile == null)
+      setTimeout(function()
       {
-        var client = store.createClient();
+        var key = "user.Other." + username.toLowerCase();
+        var profile = cache.getJSON(key);
 
-        client.getProfile(username)
-          .success(function(profile)
-          {
-            cache.setJSON(key, profile, 300);
-            d.resolve(profile);
-          })
-          .fail(d.reject);
-      }
-      else
-      {
-        d.resolve(profile);
-      }
+        if(profile == null)
+        {
+          var client = store.createClient();
+
+          client.getProfile(username)
+            .success(function(profile)
+            {
+              cache.setJSON(key, profile, 300);
+              d.resolve(profile);
+            })
+            .fail(d.reject);
+        }
+        else
+        {
+          d.resolve(profile);
+        }
+      }, 1);
 
       return d.promise();
     }
@@ -199,24 +205,27 @@
     {
       var d = $.Deferred();
 
-      var favorites = cache.getJSON("user.Favorites");
-
-      if(favorites == null)
+      setTimeout(function()
       {
-        var client = store.createClient();
+        var favorites = cache.getJSON("user.Favorites");
 
-        client.getFavorites()
-          .success(function(favorites)
-          {
-            cache.setJSON("user.Favorites", favorites, 900, MeatCache.FLAGS_REFRESH_ON_READ);
-            d.resolve(favorites);
-          })
-          .fail(d.reject);
-      }
-      else
-      {
-        d.resolve(favorites);
-      }
+        if(favorites == null)
+        {
+          var client = store.createClient();
+
+          client.getFavorites()
+            .success(function(favorites)
+            {
+              cache.setJSON("user.Favorites", favorites, 900, MeatCache.FLAGS_REFRESH_ON_READ);
+              d.resolve(favorites);
+            })
+            .fail(d.reject);
+        }
+        else
+        {
+          d.resolve(favorites);
+        }
+      }, 1);
 
       return d.promise();
     }
@@ -234,24 +243,27 @@
     {
       var d = $.Deferred();
 
-      var vote = cache.getJSON("user.Vote." + guid);
-
-      if(vote == null)
+      setTimeout(function()
       {
-        var client = store.createClient();
+        var vote = cache.getJSON("user.Vote." + guid);
 
-        store.createClient().getVote(guid)
-          .success(function(vote)
-          {
-            cache.setJSON("user.Vote." + guid, vote, 900, MeatCache.FLAGS_REFRESH_ON_READ);
-            d.resolve(vote);
-          })
-          .fail(d.reject);
-      }
-      else
-      {
-        d.resolve(vote);
-      }
+        if(vote == null)
+        {
+          var client = store.createClient();
+
+          store.createClient().getVote(guid)
+            .success(function(vote)
+            {
+              cache.setJSON("user.Vote." + guid, vote, 900, MeatCache.FLAGS_REFRESH_ON_READ);
+              d.resolve(vote);
+            })
+            .fail(d.reject);
+        }
+        else
+        {
+          d.resolve(vote);
+        }
+      }, 1);
 
       return d.promise();
     }
