@@ -136,7 +136,8 @@
         title: "meatjs",
         text: "Waiting for more meat.",
         icon: "res://logo",
-        smallIcon: "res://logo" });
+        smallIcon: "res://logo"
+      });
     }
 
     function setupNotifications()
@@ -151,12 +152,14 @@
           var id = NOTIFICATION_MESSAGES;
           var title = "New Message(s)";
           var message = "There are new messages waiting for you.";
+          var data = { fgcolor: "white", bgcolor: "#2e2b6d" };
 
           if(name == "Library")
           {
             id = NOTIFICATION_LIBRARY;
             title = "New image(s)";
             message = "There are new images waiting for you.";
+            data = { fgcolor: "white", bgcolor: "#5a5a5a" };
           }
 
           var notify = function()
@@ -167,7 +170,8 @@
               title: title,
               message: message,
               icon: "res://logo",
-              smallIcon: "res://logo"
+              smallIcon: "res://logo",
+              data: data
             });
           };
 
@@ -273,7 +277,7 @@
         var history = $.mobile.navigate.history.stack[$.mobile.navigate.history.stack.length - 2];
         var pageId = null;
 
-        if(!history.title && history.hash == "")
+        if(!history.title && (history.hash == "" || history.hash == "#page-library"))
         {
           history.title = "Library";
         }
@@ -1113,7 +1117,7 @@
       }
       else
       {
-        $("body").pagecontainer("change", "#page-authentication", { changeHash:false });
+        $("body").pagecontainer("change", "#page-authentication", { changeHash: false });
       }
     }
 
@@ -1142,10 +1146,12 @@
      */
     function page_random_loading()
     {
+      $("#random-listview").library("clear");
+
       $("#random-listview").library(
       {
         requestLimit: 0,
-        pageSize: 20,
+        pageSize: 10,
         onLoad: function(page, pageSize)
         {
           return store.getRandom(pageSize).done(function(objects)
