@@ -7,7 +7,7 @@ var MeatCache = function(options)
 
   if(isNaN(autoGC))
   {
-    autoGC = 10;
+    autoGC = 50;
   }
 
   var runAutoGC = function()
