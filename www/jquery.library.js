@@ -26,7 +26,7 @@
       {
         onSelect($(this).data("guid"));
 
-        $(library).data("selected", li);
+        $(library).data("jquery.library.selected", li);
       });
     }
   }
@@ -60,7 +60,7 @@
     },
     nextPage: function(triggerNext)
     {
-      var page = $(this).data("jquery.library.options").tail;
+      var page = $(this).data("jquery.library.tail");
       var library = this;
 
       return methods.loadPage.apply(this, [page + 1, triggerNext])
@@ -68,7 +68,7 @@
         {
           if(images.length > 0)
           {
-            $(library).data("jquery.library.options").tail++;
+            $(library).data("jquery.library.tail", page + 1);
           }
         });
     },
@@ -195,7 +195,9 @@
     {
       $(this).find("li").remove();
       $(this).listview("refresh");
-      $(this).data("selected", null);
+      $(this).data("jquery.library.selected", null);
+      $(this).data("jquery.library.tail", 0);
+
     },
     sort: function()
     {
@@ -222,7 +224,7 @@
     },
     next: function()
     {
-      var li = $(this).data("selected");
+      var li = $(this).data("jquery.library.selected");
       var n = $(li).next();
 
       if(n && n.get(0))
@@ -236,7 +238,7 @@
     },
     prev: function(f)
     {
-      var li = $(this).data("selected");
+      var li = $(this).data("jquery.library.selected");
       var p = $(li).prev();
       var success = false;
 
@@ -255,9 +257,14 @@
 
   function createLibrary(obj, options)
   {
-    $(obj).data("jquery.library", true);
+    if(!$(obj).data("jquery.library"))
+    {
+      $(obj).data("jquery.library", true);
+      $(obj).data("jquery.library.tail", 0);
+    }
+
     $(obj).data("jquery.library.options",
-                $.extend({pageSize: 10, tail: 0, onLoad: null, onCompare: null, requestLimit: 0, onNewMessage: null, silent: false},
+                $.extend({pageSize: 10, onLoad: null, onCompare: null, requestLimit: 0, onNewMessage: null, silent: false},
                 options));
   }
 
