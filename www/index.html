@@ -1255,7 +1255,7 @@
         return contains;
       };
 
-      setTimeout(function() { $.mobile.loading("show"); }, 50);
+      setTimeout(function() { $.mobile.loading("show"); }, 150);
 
       $("#image-source").hide();
       $("#p-image-details").hide();
@@ -1372,13 +1372,12 @@
             })
             .always(function()
             {
-              $.mobile.loading("hide");
+              setTimeout(function() { $(document).blockUI("hide"); }, 150);
             })
         })
         .fail(function(result)
         {
-          $(document).blockUI("hide");
-          $.mobile.loading("hide");
+          setTimeout(function() { $(document).blockUI("hide"); }, 150);
 
           navigator.notification.alert("Couldn't load image details, please try again.", null, "Request failed", "Ok");
         })
