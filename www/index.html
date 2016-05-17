@@ -1164,9 +1164,14 @@
       $("#random-listview").library("update");
     }
 
-    function page_random_unloading()
+    function page_random_unloading(e, data)
     {
-      $("#random-listview").library("clear");
+      var dst = data.toPage.attr("id");
+
+      if(dst != "page-image")
+      {
+        $("#random-listview").library("clear");
+      }
     }
 
     /*
