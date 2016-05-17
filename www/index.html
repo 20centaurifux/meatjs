@@ -69,6 +69,7 @@
         $("#page-new-account").on("pagebeforeshow", page_new_account_loading);
         $("#page-library").on("pagebeforeshow", page_library_loading);
         $("#page-random").on("pagebeforeshow", page_random_loading);
+        $("#page-random").on("pagebeforehide", page_random_unloading);
         $("#page-popular").on("pagebeforeshow", page_popular_loading);
         $("#page-friends").on("pagebeforeshow", page_friends_loading);
         $("#page-favorites").on("pagebeforeshow", page_favorites_loading);
@@ -1161,6 +1162,11 @@
       });
 
       $("#random-listview").library("update");
+    }
+
+    function page_random_unloading()
+    {
+      $("#random-listview").library("clear");
     }
 
     /*
