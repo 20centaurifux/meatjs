@@ -1190,7 +1190,7 @@
           var score_a = a["score"]["up"] - a["score"]["down"] + a["score"]["fav"];
           var score_b = b["score"]["up"] - b["score"]["down"] + b["score"]["fav"];
 
-          return score_b - score_a || b["created_on"]["$data"] - a["created_on"]["$data"];
+          return score_b - score_a || b["created_on"]["$date"] - a["created_on"]["$date"];
         },
         onSelect: openImage
       });
