@@ -1146,8 +1146,6 @@
      */
     function page_random_loading()
     {
-      $("#random-listview").library("clear");
-
       $("#random-listview").library(
       {
         requestLimit: 0,
@@ -1763,7 +1761,7 @@
   <div data-role="header" data-position="fixed" data-theme="b">
     <a href='javascript:openNavigation();' data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
     <h1>Popular</h1>
-    <a href='javascript:$("#popular-listview").library("clear").library("update");' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
+    <a href='javascript:$("#popular-listview").library("update");' data-icon="refresh" data-iconpos="notext" data-direction="reverse"></a>
   </div>
  
   <div role="main" data-role="content">
