@@ -47,6 +47,7 @@
     var store = null;
     var notifications = null;
     var foreground = true;
+    var jCache = {};
 
     $(document).ready(function()
     {
@@ -56,11 +57,6 @@
         store = new MeatStore();
 
         // register page events:
-        $('div[data-role="page"]').each(function()
-        {
-          $(this).on("pagebeforeshow", function() { $(document).blockUI("hide"); });
-        });
-
         $("#page-edit-profile").on("pagebeforeshow", page_profile_loading);
         $("#page-change-avatar").on("pagebeforeshow", page_change_avatar_loading);
         $("#page-reset-password").on("pagebeforeshow", page_reset_password_loading);
@@ -76,8 +72,9 @@
         $("#page-messages").on("pagebeforeshow", page_messages_loading);
         $("#page-messages").on("pageshow", page_messages_loaded);
         $("#page-recommend").on("pagebeforeshow", page_recommend_loading);
+        $("#page-image").on("pagebeforehide", page_image_unloading);
 
-        $.mobile.paramsHandler.addPage("page-image", ["guid"], [], function(params) { page_image_loaded(params.guid); });
+        $.mobile.paramsHandler.addPage("page-image", ["guid"], [], function(params) { page_image_loading(params.guid); });
         $.mobile.paramsHandler.init();
 
         // register window events:
@@ -231,35 +228,30 @@
     function setupScrolling()
     {
       var scrollTop = 0;
+      var b = $("body");
+      var d = $(document);
+      var w = $(window);
+      var listviews = { "page-library": $("#library-listview"), "page-popular": $("#popular-listview"), "page-image": $("#comments-listview") };
 
-      $(document).on("scrollstart", function()
+      d.on("scrollstart", function()
       {
-        scrollTop = $(window).scrollTop();
+        scrollTop = w.scrollTop();
       });
 
-      $(document).on("scrollstop", function()
+      $(d).on("scrollstop", function()
       {
-        var height = $(window).height();
-        var top = $(window).scrollTop();
+        var height = w.height();
+        var top = w.scrollTop();
 
-        if(top > scrollTop && $(window).scrollTop() >= $(document).height() - $(window).height())
+        if(top > scrollTop && w.scrollTop() >= d.height() - w.height())
         {
-          var pageId = $("body").pagecontainer("getActivePage").attr("id");
+          var pageId = b.pagecontainer("getActivePage").attr("id");
 
-          switch(pageId)
+          try
           {
-            case "page-library":
-              $("#library-listview").library("nextPage");
-              break;
-
-            case "page-popular":
-              $("#popular-listview").library("nextPage");
-              break;
-
-            case "page-image":
-              $("#comments-listview").comments("nextPage");
-              break;
+            listviews[pageId].library("nextPage");
           }
+          catch(e) {}
         }
       });
     }
@@ -271,69 +263,51 @@
 
     function setupSwipe()
     {
-      /* Using the page title is the best way to get the correct parent page id. Using the Browser's history
-         doesn't work properly after opening the App from a local notification. */
-      function getParentPageId()
+      var currentLibraryId = null;
+      var currentListview = null;
+      var listviews =
       {
-        var history = $.mobile.navigate.history.stack[$.mobile.navigate.history.stack.length - 2];
-        var pageId = null;
-
-        if(!history.title && (history.hash == "" || history.hash == "#page-library"))
-        {
-          history.title = "Library";
-        }
-
-        switch(history.title)
-        {
-          case "Library":
-            pageId = "#page-library";
-            break;
-
-          case "Random":
-            pageId = "#page-random";
-            break;
-
-          case "Popular":
-            pageId = "#page-popular";
-            break;
-
-          case "Favorites":
-            pageId = "#page-favorites";
-            break;
-
-          default:
-            pageId = null;
-        }
-
-        return pageId;
-      }
+        "page-library": $("#library-listview"),
+        "page-random": $("#random-listview"),
+        "page-popular": $("#popular-listview"),
+        "page-favorites": $("#favorites-listview")
+      };
 
       $('div[data-role="page"]').each(function()
       {
-        if($(this).attr("id") == "page-image")
+        var page = $(this);
+
+        page.on("pageshow", function(event, data)
         {
-          // navigate trough image library:
-          $("#page-image").on("swipeleft", function()
+          var pageId = $("body").pagecontainer("getActivePage").attr("id");
+
+          if(pageId == "page-library" || pageId == "page-random" || pageId == "page-popular" || pageId == "page-favorites")
           {
-            var pageId = getParentPageId();
+            currentLibraryId = pageId;
+            currentListview = listviews[pageId];
+          }
+          else if(pageId == "page-messages")
+          {
+            currentLibraryId = null;
+            currentListview = null;
+          }
+        });
 
-            if(pageId)
+        if(page.attr("id") == "page-image")
+        {
+          page.on("swipeleft", function()
+          {
+            if(currentListview)
             {
-              var obj = $(pageId).find('ul[data-role="listview"]:first');
-
-              $(obj).library("next");
+              currentListview.library("next");
             }
           });
 
-          $("#page-image").on("swiperight", function()
+          page.on("swiperight", function()
           {
-            var pageId = getParentPageId();
-
-            if(pageId)
+            if(currentListview)
             {
-              var obj = $(pageId).find('ul[data-role="listview"]:first');
-
-              $(obj).library("prev", function(success)
+              currentListview.library("prev", function(success)
               {
                 if(!success)
                 {
@@ -349,9 +323,8 @@
         }
         else
         {
-          $(this).on("swiperight", function()
+          page.on("swiperight", function()
           {
-            // navigation trough window history:
             window.history.back();
           });
         }
@@ -382,7 +355,7 @@
           }
           catch(e) {}
         }
-      }, 5 * 60 * 1000);
+      }, 10 * 60 * 1000);
     }
 
     function window_resize()
@@ -1063,13 +1036,27 @@
 
     function updateLibraries(ids, objects)
     {
-      $(ids).each(function()
+      var cache = jCache["libraries"];
+
+      if(!cache)
       {
-        var el = $("#" + this);
+        cache = {}
+        jCache["libraries"] = cache;
+      }
+
+      $(ids).each(function(i, value)
+      {
+        var el = cache[value];
+
+        if(!el)
+        {
+          el = $("#" + this);
+          cache[value] = el;
+        }
 
         $(objects).each(function()
         {
-          $(el).library("touch", this, false, true);
+          el.library("touch", this, false, true);
         });
       });
     }
@@ -1245,7 +1232,21 @@
     /*
      * image details page:
      */
-    function page_image_loaded(guid)
+    function page_image_hide_details()
+    {
+      var cache = jCache["image"];
+
+      if(cache)
+      {
+        cache["#image-source"].hide();
+        cache["#p-image-details"].hide();
+        cache["#image-action-buttons"].hide();
+        cache["#form-add-comment"].hide();
+        cache["#comments-listview"].hide();
+      }
+    }
+
+    function page_image_loading(guid)
     {
       var guidExists = function(objects, guid)
       {
@@ -1264,59 +1265,78 @@
         return contains;
       };
 
-      setTimeout(function() { $.mobile.loading("show"); }, 150);
+      var cache = jCache["image"];
 
-      $("#image-source").hide();
-      $("#p-image-details").hide();
-      $("#image-action-buttons").hide();
-      $("#form-add-comment").hide();
+      if(!cache)
+      {
+        cache = {};
 
-      $.when(store.getObject(guid), store.getVote(guid), store.getFavorites(), store.getOwnProfile())
+        $(["#image-source", "#p-image-details", "#image-action-buttons", "#form-add-comment", "#comments-listview",
+           "#image-score-up", "#image-score-down", "#image-score-favorite", "#image-button-like",
+           "#image-button-dislike", "#image-button-favorite", "#image-button-write-comment", "#textarea-comment",
+           "#image-button-recommend", "#image-button-open", "#button-add-comment", "#comments-listview",
+           "#image-button-favorite .ui-icon"]).each(function(index, value)
+        {
+          cache[value] = $(value);
+        });
+
+        cache["#image-action-buttons.find('button')"] = cache["#image-action-buttons"].find("button");
+
+        jCache["image"] = cache;
+      }
+
+      setTimeout(function()
+      {
+        $.mobile.loading("show");
+        page_image_hide_details();
+      }, 1);
+
+      $.when(store.getObject(guid), store.getVote(guid), store.getFavorites(true), store.getOwnProfile())
         .done(function(obj, vote, favorites, profile)
         {
           obj = obj[0];
-
-          // update image in all libraries:
-          updateAllLibraries(obj);
+          favorites = favorites[0];
 
           // disable all buttons:
-          $("#image-action-buttons").find("button").prop("disabled", true).addClass("ui-disabled");
+          cache["#image-action-buttons.find('button')"].prop("disabled", true).addClass("ui-disabled");
 
           // load image:
           store.getImage(obj["source"])
             .done(function(data)
             {
+              setTimeout(function() { $(document).blockUI("hide"); }, 1);
+
               // update image:
-              $("#image-source").attr("src", data).show();
+              cache["#image-source"].attr("src", data).show();
 
               // update details:
-              $("#image-score-up").text(obj["score"]["up"]);
-              $("#image-score-down").text(obj["score"]["down"]);
-              $("#image-score-favorite").text(obj["score"]["fav"]);
+              cache["#image-score-up"].text(obj["score"]["up"]);
+              cache["#image-score-down"].text(obj["score"]["down"]);
+              cache["#image-score-favorite"].text(obj["score"]["fav"]);
 
-              $("#p-image-details").show();
+              cache["#p-image-details"].show();
 
               // setup buttons:
-              $("#image-action-buttons").show();
+              cache["#image-action-buttons"].show();
 
               if(!obj["locked"])
               {
                 if(vote["up"] == null)
                 {
-                  $("#image-button-like").prop("disabled", false).removeClass("ui-disabled");
-                  $("#image-button-dislike").prop("disabled", false).removeClass("ui-disabled");
+                  cache["#image-button-like"].prop("disabled", false).removeClass("ui-disabled");
+                  cache["#image-button-dislike"].prop("disabled", false).removeClass("ui-disabled");
                 }
                 else
                 {
-                  $("#image-button-like").prop("disabled", true).addClass("ui-disabled");
-                  $("#image-button-dislike").prop("disabled", true).addClass("ui-disabled");
+                  cache["#image-button-like"].prop("disabled", true).addClass("ui-disabled");
+                  cache["#image-button-dislike"].prop("disabled", true).addClass("ui-disabled");
                 }
 
-                $("#image-button-favorite .ui-icon").removeClass("ui-icon-star ui-icon-star-o");
+                cache["#image-button-favorite .ui-icon"].removeClass("ui-icon-star ui-icon-star-o");
 
                 var favorite = guidExists(favorites, guid);
 
-                $("#image-button-favorite")
+                cache["#image-button-favorite"]
                   .removeClass("ui-icon-star ui-icon-star-o")
                   .attr("data-icon", favorite ? "star" : "star-o")
                   .addClass(favorite ? "ui-icon-star" : "ui-icon-star-o")
@@ -1324,34 +1344,36 @@
 
                 if(guidExists(favorites, guid))
                 {
-                  $("#image-button-favorite").attr("data-icon", "star");
+                  cache["#image-button-favorite"].attr("data-icon", "star");
                 }
                 else
                 {
-                  $("#image-button-favorite").attr("data-icon", "star-o");
+                  cache["#image-button-favorite"].attr("data-icon", "star-o");
                 }
 
-                $("#image-button-favorite").prop("disabled", false).removeClass("ui-disabled");
-                $("#image-button-write-comment").prop("disabled", false).removeClass("ui-disabled");
+                cache["#image-button-favorite"].prop("disabled", false).removeClass("ui-disabled");
+                cache["#image-button-write-comment"].prop("disabled", false).removeClass("ui-disabled");
 
                 if(profile.following.length > 0)
                 {
-                  $("#image-button-recommend").show();
-                  $("#image-button-recommend").prop("disabled", false).removeClass("ui-disabled");
+                  cache["#image-button-recommend"].show();
+                  cache["#image-button-recommend"].prop("disabled", false).removeClass("ui-disabled");
                 }
                 else
                 {
-                  $("#image-button-recommend").hide();
+                  cache["#image-button-recommend"].hide();
                 }
 
-                $("#image-button-open").prop("disabled", false).removeClass("ui-disabled");
+                cache["#image-button-open"].prop("disabled", false).removeClass("ui-disabled");
 
                 // assign guid to buttons:
-                $("#image-action-buttons").find("button").data("guid", obj["guid"]);
+                cache["#image-action-buttons.find('button')"].data("guid", obj["guid"]);
               }
 
               // comments:
-              $("#comments-listview").comments(
+              cache["#comments-listview"].show();
+
+              cache["#comments-listview"].comments(
               {
                 pageSize: 10,
                 onLoad: function(page, pageSize)
@@ -1361,17 +1383,17 @@
                 onGetAvatar: store.getAvatar
               });
 
-              $("#button-add-comment").prop("disabled", true).addClass("ui-disabled").data("guid", obj["guid"]);
+              cache["#button-add-comment"].prop("disabled", true).addClass("ui-disabled").data("guid", obj["guid"]);
 
-              $("#textarea-comment").off("keyup").on("keyup", function()
+              cache["#textarea-comment"].off("keyup").on("keyup", function()
               {
-                if($("#textarea-comment").val().length > 0)
+                if(cache["#textarea-comment"].val().length > 0)
                 {
-                  $("#button-add-comment").prop("disabled", false).removeClass("ui-disabled").button("refresh");
+                  cache["#button-add-comment"].prop("disabled", false).removeClass("ui-disabled").button("refresh");
                 }
                 else
                 {
-                  $("#button-add-comment").prop("disabled", true).addClass("ui-disabled").button("refresh");
+                  cache["#button-add-comment"].prop("disabled", true).addClass("ui-disabled").button("refresh");
                 }
               }).val("");
             })
@@ -1381,15 +1403,23 @@
             })
             .always(function()
             {
-              setTimeout(function() { $(document).blockUI("hide"); }, 150);
-            })
+              setTimeout(function() { $(document).blockUI("hide"); }, 1);
+            });
+
+          // update image in all libraries:
+          setTimeout(function() { updateAllLibraries(obj); }, 1);
         })
         .fail(function(result)
         {
-          setTimeout(function() { $(document).blockUI("hide"); }, 150);
+          setTimeout(function() { $(document).blockUI("hide"); }, 1);
 
           navigator.notification.alert("Couldn't load image details, please try again.", null, "Request failed", "Ok");
         })
+    }
+
+    function page_image_unloading()
+    {
+        page_image_hide_details();
     }
 
     function scaleImage()
@@ -1409,19 +1439,21 @@
     {
       $.mobile.loading("show");
 
+      var cache = jCache["image"];
+
       store.like(guid, like)
         .done(function(image)
         {
           updateAllLibraries([image]);
 
           // update like/dislike buttons:
-          $("#image-button-like").prop("disabled", true).addClass("ui-disabled");
-          $("#image-button-dislike").prop("disabled", true).addClass("ui-disabled");
+          cache["#image-button-like"].prop("disabled", true).addClass("ui-disabled");
+          cache["#image-button-dislike"].prop("disabled", true).addClass("ui-disabled");
 
           // update displayed details:
-          $("#image-score-up").text(image["score"]["up"]);
-          $("#image-score-down").text(image["score"]["down"]);
-          $("#image-score-favorite").text(image["score"]["fav"]);
+          cache["#image-score-up"].text(image["score"]["up"]);
+          cache["#image-score-down"].text(image["score"]["down"]);
+          cache["#image-score-favorite"].text(image["score"]["fav"]);
         })
         .always(function()
         {
@@ -1432,6 +1464,8 @@
     function button_favor_tapped(guid, favor)
     {
       $.mobile.loading("show");
+
+      var cache = jCache["image"];
 
       store.favor(guid, favor)
         .done(function(image)
@@ -1448,16 +1482,16 @@
           }
 
           // update favorite button:
-          $("#image-button-favorite")
+          cache["#image-button-favorite"]
             .removeClass("ui-icon-star ui-icon-star-o")
             .attr("data-icon", favor ? "star" : "star-o")
             .addClass(favor ? "ui-icon-star" : "ui-icon-star-o")
             .trigger("refresh");
 
           // update displayed details:
-          $("#image-score-up").text(image["score"]["up"]);
-          $("#image-score-down").text(image["score"]["down"]);
-          $("#image-score-favorite").text(image["score"]["fav"]);
+          cache["#image-score-up"].text(image["score"]["up"]);
+          cache["#image-score-down"].text(image["score"]["down"]);
+          cache["#image-score-favorite"].text(image["score"]["fav"]);
         })
         .always(function()
         {
@@ -1467,29 +1501,33 @@
 
     function button_write_comment_tapped()
     {
-      $("#form-add-comment").show();
-      $("#textarea-comment").val("").focus();
-      $("#button-add-comment").prop("disabled", true).addClass("ui-disabled").button("refresh");
+      var cache = jCache["image"];
+
+      cache["#form-add-comment"].show();
+      cache["#textarea-comment"].val("").focus();
+      cache["#button-add-comment"].prop("disabled", true).addClass("ui-disabled").button("refresh");
     }
 
     function button_add_comment_tapped(btn)
     {
+      var cache = jCache["image"];
+
       var guid = $(btn).data("guid");
-      var text = $("#textarea-comment").val();
+      var text = cache["#textarea-comment"].val();
 
       $.mobile.loading("show");
 
-      $("#form-add-comment").hide();
+      cache["#form-add-comment"].hide();
 
       store.addComment(guid, text)
         .done(function(image)
         {
-          $("#textarea-comment").val("");
-          $("#form-add-comment").hide();
+          cache["#textarea-comment"].val("");
+          cache["#form-add-comment"].hide();
 
           updateLibraries(["library-listview", "random-listview", "popular-listview", "favorites-listview"], [image]);
 
-          $("#comments-listview").comments("update");
+          cache["#comments-listview"].comments("update");
         })
         .always(function()
         {

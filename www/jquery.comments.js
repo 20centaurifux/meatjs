@@ -10,23 +10,22 @@
     },
     nextPage: function()
     {
-      var comments = this;
+      var comments = $(this);
 
-      if(!$(comments).data("jquery.comments.options").endOfStream)
+      if(!comments.data("jquery.comments.options").endOfStream)
       {
-        var page = $(this).data("jquery.comments.options").tail;
-        var comments = this;
+        var page = comments.data("jquery.comments.options").tail;
 
         methods.loadPage.apply(this, [page + 1])
           .done(function(result)
           {
             if(result.length > 0)
             {
-              $(comments).data("jquery.comments.options").tail++;
+              comments.data("jquery.comments.options").tail++;
             }
             else
             {
-              $(comments).data("jquery.comments.options").endOfStream = true;
+              comments.data("jquery.comments.options").endOfStream = true;
             }
           });
       }
@@ -40,7 +39,7 @@
       if(f)
       {
         var opts = $(this).data("jquery.comments.options");
-        var ul = this;
+        var ul = $(this);
         var users = new Array();
 
         return f(page, $(this).data("jquery.comments.options").pageSize)
@@ -49,7 +48,7 @@
             // insert comments:
             $(comments).each(function(i, comment)
             {
-              var li = $(ul).find('li[data-id="' + comment["id"] + '"]').first();
+              var li = ul.find('li[data-id="' + comment["id"] + '"]').first();
 
               if(!li.get(0))
               {
@@ -63,7 +62,7 @@
 
                 var inserted = false;
 
-                $(ul).find("li").each(function(i, c)
+                ul.find("li").each(function(i, c)
                 {
                   if(parseInt(comment["created_on"]["$date"], 10) > parseInt($(c).data("timestamp"), 10))
                   {
@@ -76,7 +75,7 @@
 
                 if(!inserted)
                 {
-                  $(ul).append(el);
+                  ul.append(el);
                 }
 
                 if($.inArray(author, users) == -1)
@@ -86,7 +85,7 @@
               }
             });
 
-            $(ul).listview("refresh");
+            ul.listview("refresh");
 
             // load avatars:
             if(opts.onGetAvatar)
@@ -96,11 +95,11 @@
                 opts.onGetAvatar(username)
                   .done(function(avatar)
                   {
-                    $(ul).find('img[data-source="' + username.escapeQuotes() + '"]').attr("src", avatar);
+                    ul.find('img[data-source="' + username.escapeQuotes() + '"]').attr("src", avatar);
                   })
                   .fail(function(r)
                   {
-                    $(ul).find('img[data-source="' + username.escapeQuotes() + '"]').attr("src", "images/image-missing.png");
+                    ul.find('img[data-source="' + username.escapeQuotes() + '"]').attr("src", "images/image-missing.png");
                   });
               });
             }
@@ -117,11 +116,13 @@
 
   function createComments(obj, options)
   {
-    $(obj).data("jquery.comments", true);
-    $(obj).data("jquery.comments.options", $.extend({pageSize: 10, tail: 0, endOfStream: false, onLoad: null, onGetAvatar: null}, options));
+    var sel = $(obj);
 
-    $(obj).find("li").remove();
-    $(obj).listview();
+    sel.data("jquery.comments", true);
+    sel.data("jquery.comments.options", $.extend({pageSize: 10, tail: 0, endOfStream: false, onLoad: null, onGetAvatar: null}, options));
+
+    sel.find("li").remove();
+    sel.listview();
   }
 
   $.fn.comments = function(args)
