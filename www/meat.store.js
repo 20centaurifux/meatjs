@@ -201,13 +201,18 @@
       return store.createClient().getObject(guid).promise();
     }
 
-    this.getFavorites = function()
+    this.getFavorites = function(fromCache)
     {
       var d = $.Deferred();
 
       setTimeout(function()
       {
-        var favorites = cache.getJSON("user.Favorites");
+        var favorites = null;
+        
+        if(fromCache)
+        {
+          favorites = cache.getJSON("user.Favorites");
+        }
 
         if(favorites == null)
         {
