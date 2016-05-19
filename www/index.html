@@ -1295,7 +1295,7 @@
         .done(function(obj, vote, favorites, profile)
         {
           obj = obj[0];
-          favorites = favorites[0];
+          favorites = favorites;
 
           // disable all buttons:
           cache["#image-action-buttons.find('button')"].prop("disabled", true).addClass("ui-disabled");
