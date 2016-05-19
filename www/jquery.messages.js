@@ -24,7 +24,7 @@
 
       if(f && (lastUpdate == null || (new Date().getTime() - lastUpdate) / 1000 > opts.requestLimit))
       {
-        var ul = this;
+        var ul = $(this);
 
         if(!opts.silent)
         {
@@ -39,7 +39,7 @@
             // insert messages:
             $(messages).each(function(i, msg)
             {
-              if(!$(ul).find('li[data-id="' + msg["id"] + '"]').first().get(0))
+              if(!ul.find('li[data-id="' + msg["id"] + '"]').first().get(0))
               {
                 var el = null;
 
@@ -96,7 +96,7 @@
                            '</a></li>'); 
                   }
 
-                  $(ul).append(el);
+                  ul.append(el);
                   bindEvents(ul, el);
 
                   // load thumbnail:
@@ -125,7 +125,7 @@
                          '<p>is now <strong>' + msg["type"] + '</strong> you.</p>' +
                          '</li>');
 
-                  $(ul).append(el);
+                  ul.append(el);
 
                   // load avatar:
                   if(opts.onGetAvatar)
@@ -146,25 +146,25 @@
 
             if(inserted)
             {
-              var items = $(ul).find("li").get();
+              var items = ul.find("li").get();
 
               items.sort(function(a, b)
               {
                 return parseInt($(b).data("timestamp"), 10) - parseInt($(a).data("timestamp"), 10);
               });
 
-              $(ul).find("li").remove();
+              ul.find("li").remove();
 
               $.each(items, function(i, li)
               {
-                $(ul).append(li);
+                ul.append(li);
                 bindEvents(ul, li);
               });
             }
 
             $(obj).data("lastUpdate", new Date().getTime());
 
-            $(ul).listview("refresh");
+            methods.refresh.apply(ul);
           })
           .fail(function()
           {
@@ -186,15 +186,45 @@
     },
     clear: function()
     {
-      $(this).find("li").remove();
-      $(this).listview("refresh");
+      var messages = $(this);
+
+      messages.find("li").remove();
+      methods.refresh.apply(this);
+    },
+    refresh: function()
+    {
+      var messages = $(this);
+      var el = messages.data("jquery.messages.emptyNotification");
+      var children = messages.find("li");
+
+      if(children.length == 0 && !el)
+      {
+        var el = $("<li>No messages yet.</li>");
+
+        messages.append(el);
+        messages.data("jquery.messages.emptyNotification", el);
+      }
+      else if(children.length && el)
+      {
+        el.remove();
+        messages.data("jquery.messages.emptyNotification", null);
+      }
+
+      messages.listview("refresh");
     }
   };
 
   function createMessages(obj, options)
   {
-    $(obj).data("jquery.messages", true);
-    $(obj).data("jquery.messages.options",
+    var sel = $(obj);
+
+    if(!sel.data("jquery.messages"))
+    {
+      sel.data("jquery.emptyNotification", null);
+    }
+
+    sel.data("jquery.messages", true);
+    sel.data("jquery.messages.options",
                 $.extend({pageSize: 10, tail: 0, onLoad: null, onSelect: null, onGetAvatar: null, onGetThumbnail: null, onNewMessage: null, silent: false, requestLimit: 0},
                 options));
 
