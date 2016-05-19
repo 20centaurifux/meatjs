@@ -35,6 +35,9 @@
         <allow-intent href="itms:*" />
         <allow-intent href="itms-apps:*" />
     </platform>
+    <platform name="browser">
+      <preference name="ShowSplashScreen" value="false" />
+    </platform>
     <preference name="SplashScreen" value="screen" />
     <preference name="SplashScreenDelay" value="2000" />
     <plugin name="cordova-plugin-dialogs" spec="~1.2.1" />
@@ -43,4 +46,8 @@
     <plugin name="cordova-plugin-splashscreen" spec="~3.2.2" />
     <plugin name="es.keensoft.fullscreenimage" spec="https://github.com/20centaurifux/FullScreenImage-Cordova-Plugin.git" />
     <plugin name="de.appplant.cordova.plugin.local-notification" spec="https://github.com/20centaurifux/cordova-plugin-local-notifications.git" />
+    <preference name="xwalkVersion" value="xwalk_core_library_beta:18+" />
+    <preference name="xwalkCommandLine" value="--disable-pull-to-refresh-effect" />
+    <preference name="xwalkMode" value="embedded" />
+    <preference name="xwalkMultipleApk" value="true" />
 </widget>
