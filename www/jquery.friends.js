@@ -251,7 +251,7 @@
 
       // search form:
       var form = $('<form autocomplete="off">' +
-                   '<label style="font-size:x-large;" for="text-friends-search-query">Search network:</label>' +
+                   '<label style="font-size:large;" for="text-friends-search-query">Search network:</label>' +
                    '<input type="text" data-type="search" name="text-friends-search-query">' +
                    '</form>')
 
