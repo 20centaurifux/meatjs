@@ -1370,8 +1370,8 @@
                 cache["#image-action-buttons.find('button')"].data("guid", obj["guid"]);
 
                 // next/prev button:
-                if(device.platform == "browser")
-                {
+                if(device.platform == "browser" && !/Mobi/.test(navigator.userAgent))
+                {-
                   cache["#image-button-prev"].prop("disabled", false).removeClass("ui-disabled");
                   cache["#image-button-next"].prop("disabled", false).removeClass("ui-disabled");
                 }
