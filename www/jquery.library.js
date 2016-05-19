@@ -187,7 +187,7 @@
       }
       else
       {
-        $(this).listview("refresh");
+        methods.refresh.apply(this);
       }
 
       // load thumbnail:
@@ -221,11 +221,12 @@
       var library = $(this);
 
       library.find("li").remove();
-      library.listview("refresh");
       library.data("jquery.library.selected", null);
       library.data("jquery.library.tail", 0);
       library.data("jquery.library.objects", new Array());
       library.data("jquery.library.map", {});
+
+      methods.refresh.apply(this);
     },
     sort: function()
     {
@@ -246,7 +247,7 @@
           library.append(m[image["guid"]]);
         });
 
-        library.listview("refresh");
+        methods.refresh.apply(this);
       }
     },
     next: function()
@@ -279,6 +280,27 @@
       {
         f(success);
       }
+    },
+    refresh: function()
+    {
+      var library = $(this);
+      var objects = library.data("jquery.library.objects");
+      var el = library.data("jquery.library.emptyNotification");
+
+      if(objects.length == 0 && !el)
+      {
+        var el = $("<li>This library is empty.</li>");
+
+        library.append(el);
+        library.data("jquery.library.emptyNotification", el);
+      }
+      else if(objects.length && el)
+      {
+        el.remove();
+        library.data("jquery.library.emptyNotification", null);
+      }
+
+      library.listview("refresh");
     }
   };
 
@@ -292,6 +314,9 @@
       sel.data("jquery.library.tail", 0);
       sel.data("jquery.library.objects", new Array());
       sel.data("jquery.library.map", {});
+      sel.data("jquery.emptyNotification", null);
+
+      methods.refresh.apply(obj);
     }
 
     sel.data("jquery.library.options",
