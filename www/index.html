@@ -1275,7 +1275,7 @@
            "#image-score-up", "#image-score-down", "#image-score-favorite", "#image-button-like",
            "#image-button-dislike", "#image-button-favorite", "#image-button-write-comment", "#textarea-comment",
            "#image-button-recommend", "#image-button-open", "#button-add-comment", "#comments-listview",
-           "#image-button-favorite .ui-icon"]).each(function(index, value)
+           "#image-button-favorite .ui-icon", "#image-button-prev", "#image-button-next"]).each(function(index, value)
         {
           cache[value] = $(value);
         });
@@ -1368,6 +1368,18 @@
 
                 // assign guid to buttons:
                 cache["#image-action-buttons.find('button')"].data("guid", obj["guid"]);
+
+                // next/prev button:
+                if(device.platform == "browser")
+                {
+                  cache["#image-button-prev"].prop("disabled", false).removeClass("ui-disabled");
+                  cache["#image-button-next"].prop("disabled", false).removeClass("ui-disabled");
+                }
+                else
+                {
+                  cache["#image-button-prev"].prop("disabled", false).hide();
+                  cache["#image-button-next"].prop("disabled", false).hide();
+                }
               }
 
               // comments:
@@ -1869,13 +1881,14 @@
 
     <div style="width:100%; text-align:center;">
       <div id="image-action-buttons" data-role="controlgroup" data-type="horizontal" data-mini="true" data-shadow="false">
+        <button id="image-button-prev" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="arrow-circle-left" onclick="$('#page-image').trigger('swiperight');");">Previous</button>
         <button id="image-button-like" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="thumbs-up" onclick="button_like_tapped($(this).data('guid'), true);">Like</button>
         <button id="image-button-dislike" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="thumbs-o-down" onclick="button_like_tapped($(this).data('guid'), false);">Dislike</button>
         <button id="image-button-favorite" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="star-o" onclick="button_favor_tapped($(this).data('guid'), $(this).attr('data-icon') == 'star-o');">Favorite</button>
         <button id="image-button-recommend" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="mail-forward" onclick="button_recommend_tapped($(this).data('guid'));">Recommend</button>
         <button id="image-button-write-comment" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="pencil" onclick="button_write_comment_tapped();">Comment</button>
         <button id="image-button-open" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="picture-o" onclick="button_open_image_tapped();">Comment</button>
-      </div>
+        <button id="image-button-next" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="arrow-circle-right" onclick="$('#page-image').trigger('swipeleft');");">Next</button>
       </div>
     </div>
 
