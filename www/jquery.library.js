@@ -75,8 +75,14 @@
     },
     nextPage: function(triggerNext)
     {
-      var page = $(this).data("jquery.library.tail");
       var library = this;
+      var page = $(library).data("jquery.library.tail");
+      var opts = $(library).data("jquery.library.options");
+
+      if(triggerNext && !opts.silent)
+      {
+        setTimeout(function() { $.mobile.loading("show"); }, 1);
+      }
 
       return methods.loadPage.apply(this, [page + 1, triggerNext])
         .done(function(images)
@@ -117,6 +123,11 @@
 
               if(triggerNext)
               {
+                if(!opts.silent)
+                {
+                  setTimeout(function() { $.mobile.loading("hide"); }, 1);
+                }
+
                 methods.next.apply(library);
               }
             }
