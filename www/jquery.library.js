@@ -103,12 +103,16 @@
             {
               $(images).each(function()
               {
-                methods.touch.apply(library, [this, true, false]);
+                methods.touch.apply(library, [this, true, false, true]);
               });
 
               if(opts.onCompare)
               {
                 methods.sort.apply(library);
+              }
+              else
+              {
+                methods.refresh.apply(library);
               }
 
               if(triggerNext)
@@ -128,7 +132,7 @@
 
       return null;
     },
-    touch: function(image, insert, sort)
+    touch: function(image, insert, sort, noRefresh)
     {
       var opts = $(this).data("jquery.library.options");
       var objects = $(this).data("jquery.library.objects");
@@ -183,9 +187,9 @@
 
       if(sort && compare)
       {
-        methods.sort.apply(this);
+        methods.sort.apply(this, [noRefresh]);
       }
-      else
+      else if(!noRefresh)
       {
         methods.refresh.apply(this);
       }
@@ -228,7 +232,7 @@
 
       methods.refresh.apply(this);
     },
-    sort: function()
+    sort: function(noRefresh)
     {
       var library = $(this);
       var compare = library.data("jquery.library.options").onCompare;
@@ -247,7 +251,10 @@
           library.append(m[image["guid"]]);
         });
 
-        methods.refresh.apply(this);
+        if(!noRefresh)
+        {
+          methods.refresh.apply(this);
+        }
       }
     },
     next: function()
