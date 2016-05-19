@@ -277,7 +277,7 @@
       list.listview();
 
       // "no friends" info:
-      var nofriends = '<p style="font-size:x-large;" data-nofriends="yes">You don\'t have any friends yet :(</p>';
+      var nofriends = '<p style="font-size:large;" data-nofriends="yes">You don\'t have any friends yet :(</p>';
 
       $(obj).find('div[data-role="main"]').append(form).append(list).append(nofriends);
 
