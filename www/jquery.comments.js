@@ -148,7 +148,6 @@
       return this.each(function()
       {
         createComments(this, args);
-        methods["update"].apply(this);
       });
     }
   }

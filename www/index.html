@@ -1383,6 +1383,11 @@
                 onGetAvatar: store.getAvatar
               });
 
+              if(obj["comments_n"])
+              {
+                cache["#comments-listview"].comments("update");
+              }
+
               cache["#button-add-comment"].prop("disabled", true).addClass("ui-disabled").data("guid", obj["guid"]);
 
               cache["#textarea-comment"].off("keyup").on("keyup", function()
@@ -1403,7 +1408,7 @@
             })
             .always(function()
             {
-              setTimeout(function() { $(document).blockUI("hide"); }, 1);
+              $(document).blockUI("hide");
             });
 
           // update image in all libraries:
