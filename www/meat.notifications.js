@@ -12,7 +12,7 @@ var MeatNotification = function(options)
 
   this.disable = function(id)
   {
-    storage.storeInt("notification." + id + ".enabled", 1);
+    storage.storeInt("notification." + id + ".enabled", 0);
   }
 
   this.enabled = function(id)

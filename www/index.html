@@ -73,6 +73,7 @@
         $("#page-messages").on("pageshow", page_messages_loaded);
         $("#page-recommend").on("pagebeforeshow", page_recommend_loading);
         $("#page-image").on("pagebeforehide", page_image_unloading);
+        $("#page-settings").on("pageshow", page_settings_loading);
 
         $.mobile.paramsHandler.addPage("page-image", ["guid"], [], function(params) { page_image_loading(params.guid); });
         $.mobile.paramsHandler.init();
@@ -134,7 +135,8 @@
         title: "meatjs",
         text: "Waiting for more meat.",
         icon: "res://logo",
-        smallIcon: "res://logo"
+        smallIcon: "res://logo",
+        silent: true
       });
     }
 
@@ -351,11 +353,11 @@
 
           try
           {
-            cordova.plugins.backgroundMode.configure({ text: "Waiting for more meat." });
+            cordova.plugins.backgroundMode.configure({ text: "Waiting for more meat.", silent: true });
           }
           catch(e) {}
         }
-      }, 10 * 60 * 1000);
+      }, 7 * 60 * 1000);
     }
 
     function window_resize()
@@ -1113,7 +1115,7 @@
     {
       var pageId = $("body").pagecontainer("getActivePage").attr("id");
 
-      cordova.plugins.backgroundMode.configure({ text: "Searching for new images." });
+      cordova.plugins.backgroundMode.configure({ text: "Searching for new images.", silent: false });
 
       if(notifications.enabled("Library") && (pageId != "page-library" || !foreground))
       {
@@ -1774,7 +1776,7 @@
       var pageId = $("body").pagecontainer("getActivePage").attr("id");
       var background = false;
 
-      cordova.plugins.backgroundMode.configure({ text: "Searching for new messages." });
+      cordova.plugins.backgroundMode.configure({ text: "Searching for new messages.", silent: false });
 
       if(notifications.enabled("Messages") && (pageId != "page-messages" || !foreground))
       {
@@ -1792,6 +1794,41 @@
         $("#messages-listview").messages(opts);
       }
     }
+
+    /*
+     * settings page:
+     */
+     function page_settings_loading()
+     {
+       $("#flip-settings-notify-images").data("populating", true);
+       $("#flip-settings-notify-messages").data("populating", true);
+
+       $("#flip-settings-notify-images")
+         .prop("checked", notifications.enabled("Library"))
+         .flipswitch("refresh");
+
+       $("#flip-settings-notify-messages")
+         .prop("checked", notifications.enabled("Messages"))
+         .flipswitch("refresh");
+
+       $("#flip-settings-notify-images").data("populating", false);
+       $("#flip-settings-notify-messages").data("populating", false);
+     }
+
+     function toggle_notifications(el, id)
+     {
+       if(!$(el).data("populating"))
+       {
+         if($(el).prop("checked"))
+         {
+           notifications.enable(id);
+         }
+         else
+         {
+           notifications.disable(id);
+         }
+       }
+     }
   </script>
 </head>
 
@@ -1931,6 +1968,7 @@
       <li><a href="#page-change-avatar">Change avatar</a></li>
       <li><a href="#page-change-password">Change password</a></li>
       <li><a href="#page-authentication">Reconnect</a></li>
+      <li><a href="#page-settings">Settings</a></li>
       <li><a href="#page-about">About</a></li>
     </ul>
   </div>
@@ -2113,6 +2151,25 @@
 
     <ul id="recommend-to-listview" data-role="listview" data-inset="true">
     </ul>
+  </div>
+</div>
+
+<div data-role="page" id="page-settings">
+  <div data-role="header" data-position="fixed" data-theme="b">
+    <a data-rel="back" data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
+    <h1>Settings</h1>
+  </div>
+
+  <div role="main" data-role="content">
+    <div data-role="fieldcontain">
+      <form novalidate>
+        <label for="flip-settings-notify-images">Show notification when new images are available:</label>
+        <input name="flip-settings-notify-images" id="flip-settings-notify-images" value="" type="checkbox" data-role="flipswitch" onchange="toggle_notifications(this, 'Library');">
+
+        <label for="flip-settings-notify-messages">Show notification when new messages are available:</label>
+        <input name="flip-settings-notify-messages" id="flip-settings-notify-messages" value="" type="checkbox" data-role="flipswitch" onchange="toggle_notifications(this, 'Messages');">
+      </form>
+    </div>
   </div>
 </div>
 
