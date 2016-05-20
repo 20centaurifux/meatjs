@@ -304,6 +304,7 @@
             if(currentListview)
             {
               currentListview.library("next");
+              page_image_hide_details();
             }
           });
 
@@ -1956,9 +1957,9 @@
   <div role="main" data-role="content">
     <div style="width:100%; text-align:center;">
       <div>
-        <img id="image-source" class="image" src="" alt="image">
+        <img id="image-source" class="image" src="" alt="image" style="display:none:">
 
-        <p id="p-image-details" style="font-size:small;">
+        <p id="p-image-details" style="font-size:small;display:none;">
           <strong><span id="image-score-up">0</span></strong> people <strong> liked </strong> this image <br />
           <strong><span id="image-score-down">0</span></strong> people <strong> disliked </strong> this image <br />
           <strong><span id="image-score-favorite">0</span></strong> people <strong> favorited </strong> this image <br />
@@ -1967,7 +1968,7 @@
     </div>
 
     <div style="width:100%; text-align:center;">
-      <div id="image-action-buttons" data-role="controlgroup" data-type="horizontal" data-mini="true" data-shadow="false">
+      <div id="image-action-buttons" data-role="controlgroup" data-type="horizontal" data-mini="true" data-shadow="false" style="display:none;">
         <button id="image-button-prev" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="arrow-circle-left" onclick="$('#page-image').trigger('swiperight');");">Previous</button>
         <button id="image-button-like" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="thumbs-up" onclick="button_like_tapped($(this).data('guid'), true);">Like</button>
         <button id="image-button-dislike" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="thumbs-o-down" onclick="button_like_tapped($(this).data('guid'), false);">Dislike</button>
@@ -1979,7 +1980,7 @@
       </div>
     </div>
 
-    <form id="form-add-comment">
+    <form id="form-add-comment" style="display:none;">
       <div align="right">
         <input type="button" data-icon="delete" data-iconpos="notext" onclick="$(this).closest('form').hide();" />
       </div>
