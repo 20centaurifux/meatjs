@@ -168,6 +168,8 @@
           $(li).find('span[data-field="up"]').html(image["score"]["up"]);
           $(li).find('span[data-field="down"]').html(image["score"]["down"]);
           $(li).find('span[data-field="fav"]').html(image["score"]["fav"]);
+
+          objects[index] = image;
         }
       }
       else if(insert)
