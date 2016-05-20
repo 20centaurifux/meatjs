@@ -898,6 +898,18 @@
     {
       $("#image-avatar").hide();
       $("#page-change-avatar").find(".error").hide();
+      $("#file-avatar").val("");
+
+      if(device.platform == "browser")
+      {
+        $("#avatar-controls-mobile").hide();
+        $("#avatar-controls-browser").show();
+      }
+      else
+      {
+        $("#avatar-controls-mobile").show();
+        $("#avatar-controls-browser").hide();
+      }
 
       store.getOwnAvatar()
         .done(function(image)
@@ -913,19 +925,19 @@
         });
     }
 
-    function link_avatar_take_picture_tapped()
+    function choose_avatar(source)
     {
       if(navigator.camera)
       {
         var opts =
         {
-          quality:30,
-          destinationType:Camera.DestinationType.DATA_URL,
-          sourceType:Camera.PictureSourceType.CAMERA,
-          encodingType:Camera.EncodingType.PNG,
-          targetWidth:480,
-          targetHeight:480,
-          correctOrientation:true
+          quality: 30,
+          destinationType: Camera.DestinationType.DATA_URL,
+          sourceType: source,
+          encodingType: Camera.EncodingType.PNG,
+          targetWidth: 480,
+          targetHeight: 480,
+          correctOrientation: true
         };
 
         navigator.camera.getPicture(function(image)
@@ -933,12 +945,43 @@
           $("#image-avatar").attr("src", "data:image/png;base64," + image).fadeIn();
         }, function()
         {
-          navigator.notification.alert("Error taking picture.", null, "Take picture", "Ok");
+          navigator.notification.alert("No picture has been taken.", null, "Take picture", "Ok");
         }, opts);
       }
       else
       {
         navigator.notification.alert("Camera not found.", null, "Take picture", "Ok");
+      }
+    }
+
+    function link_avatar_take_picture_tapped()
+    {
+      if(navigator.camera)
+      {
+        choose_avatar(Camera.PictureSourceType.CAMERA);
+      }
+    }
+
+    function link_avatar_select_picture_tapped()
+    {
+      if(navigator.camera)
+      {
+        choose_avatar(Camera.PictureSourceType.PHOTOLIBRARY);
+      }
+    }
+
+    function file_avatar_changed(el)
+    {
+      if(el.files && el.files[0])
+      {
+        var reader = new FileReader();
+
+        reader.onload = function(e)
+        {
+          $("#image-avatar").attr("src", e.target.result).fadeIn();
+        }
+
+        reader.readAsDataURL(el.files[0]);
       }
     }
 
@@ -2133,7 +2176,13 @@
 
       <br />
 
-      <a id="link-avatar-take-picture" href="javascript:link_avatar_take_picture_tapped();" data-icon="camera" data-role="button">Take picture</a>
+      <div id="avatar-controls-mobile">
+        <a id="link-avatar-take-picture" href="javascript:link_avatar_take_picture_tapped();" data-icon="camera" data-role="button">Take picture</a>
+        <a id="link-avatar-select-picture" href="javascript:link_avatar_select_picture_tapped();" data-icon="folder-open" data-role="button">Choose picture</a>
+      </div>
+      <div id="avatar-controls-browser">
+        <input id="file-avatar" type="file" accept="image/*;capture=camera" onchange="file_avatar_changed(this);">
+      </div>
     </form>
   </div>
 </div>
