@@ -173,30 +173,39 @@
     },
     searchMode: function(active)
     {
-      var removeId = "back";
-      var addId = "search";
-      var text = "Search";
-      var ul = $(this).find("ul");
+      var page = this;
+      var ul = $(page).find("ul");
 
       // remove elements from listview:
       ul.find("li").remove();
 
       if(active)
       {
-        removeId = addId;
-        addId = "back";
-        text = "Show friends";
+        $(page).find('div[data-role="header"] .ui-btn-right').hide();
+        $(page).find('p[data-nofriends="yes"]').hide();
 
-        $(this).find('p[data-nofriends="yes"]').hide();
+        $(window).bind("popstate.friends", function()
+        {
+          window.history.pushState(
+          {
+            hash: "#page-friends",
+            title: "Friends",
+            transition: "none",
+            pageUrl: "page-friends"
+          },
+          "Friends",
+          "index.html#page-friends");
+
+          methods.toggleSearchMode.apply(page);
+
+          return false;
+        });
       }
-
-      // update search button:
-      $(this).find('div[data-role="header"] .ui-btn-right')
-        .removeClass("ui-icon-" + removeId)
-        .attr("data-icon", addId)
-        .addClass("ui-icon-" + addId)
-        .text(text)
-        .trigger("refresh");
+      else
+      {
+        $(this).find('div[data-role="header"] .ui-btn-right').show();
+        $(window).unbind("popstate.friends");
+      }
 
       // update form visibility:
       var form = $(this).find("form");
