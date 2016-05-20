@@ -387,7 +387,7 @@
 
     function openPage(id)
     {
-      $("body").pagecontainer("change", id, {changeHash:false});
+      location.replace(id);
     }
 
     /*
@@ -2026,7 +2026,7 @@
 
 <div data-role="page" id="page-authentication">
   <div data-role="header" data-position="fixed" data-theme="b">
-    <a id="link-authentication-back" data-rel="back" data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
+    <a id="link-authentication-back" href="javascript:openNavigation();" data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
     <h1>Login</h1>
     <a href="javascript:link_authentication_connect_tapped()" id="link-authentication-connect" data-icon="user" data-theme="b""ui-btn-right">Reconnect</a>
   </div>
@@ -2102,7 +2102,7 @@
 
 <div data-role="page" id="page-change-password">
   <div data-role="header" data-position="fixed" data-theme="b">
-    <a data-rel="back" data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
+    <a href='javascript:openNavigation();' data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
     <h1>Change password</h1>
     <a href="javascript:link_change_password_tapped()" id="link-change-password" data-icon="edit" data-theme="b" class="ui-btn-right">Change</a>
   </div>
@@ -2122,7 +2122,7 @@
 
 <div data-role="page" id="page-edit-profile">
   <div data-role="header" data-position="fixed" data-theme="b">
-    <a data-rel="back" data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
+    <a href='javascript:openNavigation();' data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
     <h1>Edit profile</h1>
     <a href="javascript:link_profile_save_tapped()" id="link-profile-save" data-icon="edit">Save</a>
   </div>
@@ -2168,7 +2168,7 @@
 
 <div data-role="page" id="page-change-avatar">
   <div data-role="header" data-position="fixed" data-theme="b">
-    <a data-rel="back" data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
+    <a href='javascript:openNavigation();' data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
     <h1>Change avatar</h1>
     <a href="javascript:link_avatar_upload_tapped()" id="link-upload-avatar" data-icon="edit">Save</a>
   </div>
@@ -2212,7 +2212,7 @@
 
 <div data-role="page" id="page-settings">
   <div data-role="header" data-position="fixed" data-theme="b">
-    <a data-rel="back" data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
+    <a href='javascript:openNavigation();' data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
     <h1>Settings</h1>
   </div>
 
@@ -2231,7 +2231,7 @@
 
 <div data-role="page" id="page-about">
   <div data-role="header" data-position="fixed" data-theme="b">
-    <a data-rel="back" data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
+    <a href='javascript:openNavigation();' data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
     <h1>About</h1>
   </div>
 
