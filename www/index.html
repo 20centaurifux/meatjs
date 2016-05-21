@@ -1621,26 +1621,26 @@
         {
           usernames.push($(li).data("username"));
         }
-
-        if(usernames.length > 0)
-        {
-          $.mobile.loading("show");
-
-          store.createClient().recommend(guid, usernames)
-            .success(function()
-            {
-              window.history.back();
-            })
-            .fail(function(result)
-            {
-              navigator.notification.alert("Couldn't recommend image, please try again.", null, "Request failed", "Ok");
-            })
-            .always(function()
-            {
-              $.mobile.loading("hide");
-            });
-        }
       });
+
+      if(usernames.length > 0)
+      {
+        $.mobile.loading("show");
+
+        store.createClient().recommend(guid, usernames)
+          .success(function()
+          {
+            window.history.back();
+          })
+          .fail(function(result)
+          {
+            navigator.notification.alert("Couldn't recommend image, please try again.", null, "Request failed", "Ok");
+          })
+          .always(function()
+          {
+            $.mobile.loading("hide");
+          });
+      }
     }
 
     function button_open_image_tapped(guid)
