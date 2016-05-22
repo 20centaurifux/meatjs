@@ -155,6 +155,7 @@
           var title = "New Message(s)";
           var message = "There are new messages waiting for you.";
           var data = { fgcolor: "white", bgcolor: "#2e2b6d" };
+          var icon = "res://ic_dialog_email";
 
           if(name == "Library")
           {
@@ -162,6 +163,7 @@
             title = "New image(s)";
             message = "There are new images waiting for you.";
             data = { fgcolor: "white", bgcolor: "#5a5a5a" };
+            icon = "res://ic_menu_gallery";
           }
 
           var notify = function()
@@ -171,8 +173,7 @@
               id: id,
               title: title,
               message: message,
-              icon: "res://logo",
-              smallIcon: "res://logo",
+              smallIcon: icon,
               data: data
             });
           };
