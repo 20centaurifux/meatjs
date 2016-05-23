@@ -390,7 +390,7 @@
 
     function openPage(id)
     {
-      location.replace(id);
+      window.location.replace(id);
     }
 
     /*
@@ -1990,7 +1990,7 @@
         <button id="image-button-recommend" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="mail-forward" onclick="button_recommend_tapped($(this).data('guid'));">Recommend</button>
         <button id="image-button-write-comment" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="pencil" onclick="button_write_comment_tapped();">Comment</button>
         <button id="image-button-open" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="picture-o" onclick="button_open_image_tapped();">Comment</button>
-        <button id="image-button-next" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="arrow-circle-right" onclick="$('#page-image').trigger('swipeleft');");">Next</button>
+        <button id="image-button-next" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="arrow-circle-right" onclick="$('#page-image').trigger('swipeleft');">Next</button>
       </div>
     </div>
 
@@ -2023,7 +2023,7 @@
 <div id="page-navigation" data-role="page" data-theme="b">
   <div role="main" class="ui-content">
     <ul data-role="listview">
-      <li><a href="javascript:openPage('#page-library')";>Library</a></li>
+      <li><a href="javascript:openPage('#page-library')">Library</a></li>
       <li><a href="javascript:openPage('#page-random')">Random</a></li>
       <li><a href="javascript:openPage('#page-popular')">Popular</a></li>
       <li><a href="javascript:openPage('#page-favorites')">Favorites</a></li>
