@@ -47,5 +47,14 @@ var Tools =
   toUTC: function(d)
   {
     return new Date(d.getTime() + d.getTimezoneOffset() * 60000);
+  },
+  replacePage: function(page)
+  {
+      window.location.replace(page);
+
+      if(window.navigator.userAgent.indexOf("MSIE") > -1 || window.navigator.userAgent.indexOf("Trident") > -1)
+      {
+        $("body").pagecontainer("change", page, {changeHash: false});
+      }
   }
 };

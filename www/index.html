@@ -388,11 +388,6 @@
       notifications.enable("Library");
     }
 
-    function openPage(id)
-    {
-      window.location.replace(id);
-    }
-
     /*
      *  authentication page:
      */
@@ -444,7 +439,7 @@
           }
 
           navigator.notification.alert(message,
-                                       function() { location.replace("index.html#page-library"); },
+                                       function() { Tools.replacePage("#page-library"); },
                                        title, "Ok");
         })
         .fail(function(response)
@@ -2039,18 +2034,18 @@
 <div id="page-navigation" data-role="page" data-theme="b">
   <div role="main" class="ui-content">
     <ul data-role="listview">
-      <li><a href="javascript:openPage('#page-library')">Library</a></li>
-      <li><a href="javascript:openPage('#page-random')">Random</a></li>
-      <li><a href="javascript:openPage('#page-popular')">Popular</a></li>
-      <li><a href="javascript:openPage('#page-favorites')">Favorites</a></li>
-      <li><a href="javascript:openPage('#page-friends')">Friends</a></li>
-      <li><a href="javascript:openPage('#page-messages')">Messages</a></li>
-      <li><a href="javascript:openPage('#page-edit-profile')">My Profile</a></li>
-      <li><a href="javascript:openPage('#page-change-avatar')">Change avatar</a></li>
-      <li><a href="javascript:openPage('#page-change-password')">Change password</a></li>
-      <li><a href="javascript:openPage('#page-authentication')">Reconnect</a></li>
-      <li><a href="javascript:openPage('#page-settings')">Settings</a></li>
-      <li><a href="javascript:openPage('#page-about')">About</a></li>
+      <li><a href="javascript:Tools.replacePage('#page-library')">Library</a></li>
+      <li><a href="javascript:Tools.replacePage('#page-random')">Random</a></li>
+      <li><a href="javascript:Tools.replacePage('#page-popular')">Popular</a></li>
+      <li><a href="javascript:Tools.replacePage('#page-favorites')">Favorites</a></li>
+      <li><a href="javascript:Tools.replacePage('#page-friends')">Friends</a></li>
+      <li><a href="javascript:Tools.replacePage('#page-messages')">Messages</a></li>
+      <li><a href="javascript:Tools.replacePage('#page-edit-profile')">My Profile</a></li>
+      <li><a href="javascript:Tools.replacePage('#page-change-avatar')">Change avatar</a></li>
+      <li><a href="javascript:Tools.replacePage('#page-change-password')">Change password</a></li>
+      <li><a href="javascript:Tools.replacePage('#page-authentication')">Reconnect</a></li>
+      <li><a href="javascript:Tools.replacePage('#page-settings')">Settings</a></li>
+      <li><a href="javascript:Tools.replacePage('#page-about')">About</a></li>
     </ul>
   </div>
 </div>
