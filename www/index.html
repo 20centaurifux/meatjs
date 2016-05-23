@@ -1968,7 +1968,7 @@
     <h1>Friends</h1>
   </div>
  
-  <div data-role="main" data-role="content" id="div-friends">
+  <div data-role="main" id="div-friends">
   </div>
 </div>
 
@@ -1982,7 +1982,7 @@
   <div role="main" data-role="content">
     <div style="width:100%; text-align:center;">
       <div>
-        <img id="image-source" class="image" src="" alt="image" style="display:none:">
+        <img id="image-source" class="image" src="" alt="image" style="display:none;">
 
         <p id="p-image-details" style="font-size:small;display:none;">
           <strong><span id="image-score-up">0</span></strong> people <strong> liked </strong> this image <br />
@@ -1994,7 +1994,7 @@
 
     <div style="width:100%; text-align:center;">
       <div id="image-action-buttons" data-role="controlgroup" data-type="horizontal" data-mini="true" data-shadow="false" style="display:none;">
-        <button id="image-button-prev" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="arrow-circle-left" onclick="$('#page-image').trigger('swiperight');");">Previous</button>
+        <button id="image-button-prev" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="arrow-circle-left" onclick="$('#page-image').trigger('swiperight');">Previous</button>
         <button id="image-button-like" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="thumbs-up" onclick="button_like_tapped($(this).data('guid'), true);">Like</button>
         <button id="image-button-dislike" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="thumbs-o-down" onclick="button_like_tapped($(this).data('guid'), false);">Dislike</button>
         <button id="image-button-favorite" data-shadow="false" href="#" data-role="button" data-iconpos="notext" data-icon="star-o" onclick="button_favor_tapped($(this).data('guid'), $(this).attr('data-icon') == 'star-o');">Favorite</button>
@@ -2054,7 +2054,7 @@
   <div data-role="header" data-position="fixed" data-theme="b">
     <a id="link-authentication-back" href="javascript:openNavigation();" data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
     <h1>Login</h1>
-    <a href="javascript:link_authentication_connect_tapped()" id="link-authentication-connect" data-icon="user" data-theme="b""ui-btn-right">Reconnect</a>
+    <a href="javascript:link_authentication_connect_tapped()" id="link-authentication-connect" data-icon="user" data-theme="b" class="ui-btn-right">Reconnect</a>
   </div>
  
   <div role="main" data-role="content">
