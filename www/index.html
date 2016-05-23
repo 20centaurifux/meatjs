@@ -71,6 +71,7 @@
         $("#page-popular").on("pagebeforeshow", page_popular_loading);
         $("#page-friends").on("pagebeforeshow", page_friends_loading);
         $("#page-favorites").on("pagebeforeshow", page_favorites_loading);
+        $("#page-favorites").on("pageshow", page_favorites_loaded);
         $("#page-messages").on("pagebeforeshow", page_messages_loading);
         $("#page-messages").on("pageshow", page_messages_loaded);
         $("#page-recommend").on("pagebeforeshow", page_recommend_loading);
@@ -1251,7 +1252,7 @@
     {
       $("#favorites-listview").library(
       {
-        requestLimit: 300,
+        requestLimit: 0,
         onLoad: function(page, pageSize)
         {
           var d = $.Deferred();
@@ -1262,7 +1263,14 @@
           }
           else
           {
-            store.getFavorites()
+            var initialized = false;
+
+            if($("#page-favorites").data("initialized"))
+            {
+              initialized = true;
+            }
+
+            store.getFavorites(initialized)
               .done(function(objects)
               {
                 d.resolve(objects);
@@ -1281,6 +1289,11 @@
       });
 
       $("#favorites-listview").library("update");
+    }
+
+    function page_favorites_loaded()
+    {
+      $("#page-favorites").data("initialized", true);
     }
 
     /*
