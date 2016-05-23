@@ -38,6 +38,24 @@
     <platform name="browser">
       <preference name="ShowSplashScreen" value="false" />
     </platform>
+    <platform name="windows">
+      <preference name="WindowsToastCapable" value="true" />
+
+      <icon src="res/windows/SplashScreen.png" target="SplashScreen" />
+      <icon src="res/windows/StoreLogo.png" target="StoreLogo" />
+      <icon src="res/windows/StoreLogo.scale-240.png" target="StoreLogo.scale-240" />
+      <icon src="res/windows/Square30x30Logo.png" target="Square30x30Logo" />
+      <icon src="res/Windows/Square44x44Logo.png" target="Square44x44Logo" />
+      <icon src="res/Windows/Square44x44Logo.scale-240.png" target="Square44x44Logo.scale-240" />
+      <icon src="res/Windows/Square70x70Logo.png" target="Square70x70Logo" />
+      <icon src="res/Windows/Square71x71Logo.png" target="Square71x71Logo" />
+      <icon src="res/Windows/Square71x71Logo.scale-240.png" target="Square71x71Logo.scale-240" />
+      <icon src="res/Windows/Square150x150Logo.png" target="Square150x150Logo" />
+      <icon src="res/Windows/Square150x150Logo.scale-240.png" target="Square150x150Logo.scale-240" />
+      <icon src="res/Windows/Square310x310Logo.png" target="Square310x310Logo" />
+      <icon src="res/Windows/Wide310x150Logo.png" target="Wide310x150Logo" />
+      <icon src="res/Windows/Wide310x150Logo.scale-240.png" target="Wide310x150Logo.scale-240" />
+    </platform>
     <preference name="SplashScreen" value="screen" />
     <preference name="SplashScreenDelay" value="2000" />
     <plugin name="cordova-plugin-dialogs" spec="~1.2.1" />
