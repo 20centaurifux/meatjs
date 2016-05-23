@@ -226,11 +226,21 @@
     },
     remove: function(image)
     {
-      var li = $(this).find('li[data-guid="' + image["guid"] + '"]').first();
+      var objects = $(this).data("jquery.library.objects");
+      var m = $(this).data("jquery.library.map");
 
-      if(li.get(0))
+      var li = m[image["guid"]];
+
+      if(li)
       {
+        var index = findGUID(objects, image["guid"]);
+
+        objects.splice(index, 1);
+        delete m[image["guid"]];
+
         $(li).remove();
+
+        methods.refresh.apply(this);
       }
     },
     clear: function()
