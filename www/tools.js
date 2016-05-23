@@ -50,11 +50,18 @@ var Tools =
   },
   replacePage: function(page)
   {
+    if (device.platform == "windows")
+    {
+      $.mobile.navigate(page);
+    }
+    else
+    {
       window.location.replace(page);
 
-      if(window.navigator.userAgent.indexOf("MSIE") > -1 || window.navigator.userAgent.indexOf("Trident") > -1)
+      if (window.navigator.userAgent.indexOf("MSIE") > -1 || window.navigator.userAgent.indexOf("Trident") > -1)
       {
         $("body").pagecontainer("change", page, {changeHash: false});
       }
+    }
   }
 };
