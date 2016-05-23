@@ -239,9 +239,12 @@
     {
       var client = store.createClient();
 
-      cache.remove("user.Favorites");
+      return client.favor(guid, favor).then(function(favorites)
+      {
+        cache.setJSON("user.Favorites", favorites, 900, MeatCache.FLAGS_REFRESH_ON_READ);
 
-      return client.favor(guid, favor).then(function() { return client.getObject(guid); });
+        return client.getObject(guid);
+      });
     }
 
     this.getVote = function(guid)
