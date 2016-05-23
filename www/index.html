@@ -1740,7 +1740,9 @@
      */
     function page_friends_loading()
     {
-      $("#page-friends").friends(
+      var page = $("#page-friends");
+
+      page.friends(
       {
         onGetProfile: store.getOwnProfile,
         onSearch: store.searchUsers,
@@ -1763,10 +1765,23 @@
           return d.promise();
         },
         onChangeFriendship: store.follow,
-        onGetAvatar: store.getAvatar
+        onGetAvatar: store.getAvatar,
+        onModeChanged: function(active)
+        {
+          if(active)
+          {
+            $("#link-friends-navigation").hide();
+            $("#link-friends-back").show();
+          }
+          else
+          {
+            $("#link-friends-navigation").show();
+            $("#link-friends-back").hide();
+          }
+        }
       });
 
-      $("#page-friends").friends("open");
+      page.friends("open");
     }
 
     /*
@@ -1953,7 +1968,8 @@
 
 <div data-role="page" id="page-friends" data-position="fixed">
   <div data-role="header" data-position="fixed" data-theme="b">
-    <a href='javascript:openNavigation();' data-icon="bars" data-iconpos="notext" data-direction="reverse"></a>
+    <a id="link-friends-navigation" href='javascript:openNavigation();' data-icon="bars" data-iconpos="notext" class="ui-btn-left" data-direction="reverse"></a>
+    <a id="link-friends-back" data-rel="back" href="#" data-icon="back" data-iconpos="notext" data-direction="reverse" class="ui-btn-left" style="display:none;"></a>
     <h1>Friends</h1>
   </div>
  

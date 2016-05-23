@@ -203,7 +203,7 @@
       }
       else
       {
-        $(this).find('div[data-role="header"] .ui-btn-right').show();
+        $(page).find('div[data-role="header"] .ui-btn-right').show();
         $(window).unbind("popstate.friends");
       }
 
@@ -221,6 +221,15 @@
       else
       {
         form.hide();
+      }
+
+      // event handler:
+      var opts = $(page).data("jquery.friends.options");
+      var f = opts.onModeChanged;
+
+      if(f)
+      {
+        f(active);
       }
 
       return this;
@@ -246,7 +255,7 @@
     { 
       $(obj).data("jquery.friends", true);
       $(obj).data("jquery.friends.options",
-                  $.extend({onGetProfile: null, onGetFriends: null, onSearch: null, onChangeFriendship: null, onGetAvatar: null}, options));
+                  $.extend({onGetProfile: null, onGetFriends: null, onSearch: null, onChangeFriendship: null, onGetAvatar: null, onModeChanged: null}, options));
 
       // search button:
       var btn = $('<a href="#" data-role="button" data-icon="search" data-theme="b" class="ui-btn-right">Search</a>');
