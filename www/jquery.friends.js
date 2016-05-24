@@ -65,7 +65,7 @@
     });
 
     // load avatar:
-    if(opts.onGetAvatar)
+    if(opts.onGetAvatar && user["avatar"])
     {
       opts.onGetAvatar(user["username"])
         .done(function(image)
@@ -76,6 +76,10 @@
         {
           $(li).find("img").attr("src", "images/image-missing.png");
         });
+    }
+    else
+    {
+      $(li).find("img").attr("src", "images/image-missing.png");
     }
 
     return li;
