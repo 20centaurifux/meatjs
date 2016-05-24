@@ -1426,13 +1426,20 @@
                   cache["#image-button-recommend"].hide();
                 }
 
-                cache["#image-button-open"].prop("disabled", false).removeClass("ui-disabled");
+                if(device.platform == "windows")
+                {
+                  cache["#image-button-open"].hide();
+                }
+                else
+                {
+                  cache["#image-button-open"].prop("disabled", false).removeClass("ui-disabled");
+                }
 
                 // assign guid to buttons:
                 cache["#image-action-buttons.find('button')"].data("guid", obj["guid"]);
 
                 // next/prev button:
-                if(device.platform == "browser" && !/Mobi/.test(navigator.userAgent))
+                if(device.platform == "browser" && !/Mobi/.test(navigator.userAgent) || device.platform == "windows")
                 {-
                   cache["#image-button-prev"].prop("disabled", false).removeClass("ui-disabled");
                   cache["#image-button-next"].prop("disabled", false).removeClass("ui-disabled");
