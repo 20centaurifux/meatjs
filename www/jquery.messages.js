@@ -118,12 +118,12 @@
                   // insert list element:
                   var source = msg["source"];
 
-                  el = $('<li data-id="' + msg["id"] + '" data-timestamp="' + created_on.getTime() + '">' +
-                         '<img data-source="' + source["username"].escapeQuotes() + '"src="images/image-loader.gif" alt="" date-timestamp="' + created_on.getTime() + '">' +
+                  el = $('<li data-id="' + msg["id"] + '"data-type="user" data-destination="' + source["username"].escapeQuotes() + '"  data-timestamp="' + created_on.getTime() + '">' +
+                         '<a href="#"><img data-source="' + source["username"].escapeQuotes() + '"src="images/image-loader.gif" alt="" data-timestamp="' + created_on.getTime() + '">' +
                          '<h2>' + source["username"].escapeHTML() + '</h2>' +
                          '<p>' + created_on.toLocaleString() + '</p>' +
                          '<p>is now <strong>' + msg["type"] + '</strong> you.</p>' +
-                         '</li>');
+                         '</a></li>');
 
                   ul.append(el);
 

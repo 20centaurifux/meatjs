@@ -1,5 +1,31 @@
 (function($)
 {
+  /*
+   * don't go back to previous page when search mode is active
+   * and the users uses the back button
+   */
+  var handlePopState = function(page)
+  {
+    return function()
+    {
+      window.history.pushState(
+      {
+        hash: "#page-friends",
+        title: "Friends",
+        transition: "none",
+        pageUrl: "page-friends"
+      },
+      "Friends",
+      "index.html#page-friends");
+
+      $(page).data("jquery.friends.restoreSearch", false);
+
+      methods.toggleSearchMode.apply(page);
+
+      return false;
+    }
+  }
+
   var buildFriendListItem = function(profile, user)
   {
     var obj = this;
@@ -9,10 +35,10 @@
     var fullname = Tools.buildDisplayUsername(user);
 
     // build list element:
-    var friend = $.inArray(user["username"], profile["following"]) > -1;
+    var friend = Tools.isFollowing(profile["following"], user["username"]);
 
     var li = $('<li data-username="' + user["username"].escapeQuotes() + '">' +
-               '<img data-source="' + user["username"].escapeQuotes() + '" src="images/image-loader.gif" alt="">' +
+               '<a href="#"><img data-source="' + user["username"].escapeQuotes() + '" src="images/image-loader.gif" alt="">' +
                '<div style="float:right;"><span style="font-size:smaller; font-weight:bold;">Follow</span> <select data-mini="true">' +
                '<option value="no">No</option>' +
                '<option value="yes">Yes</option>' +
@@ -20,7 +46,15 @@
                '<div style="float:left;"><h2>' + user["username"] + '</h2></div>' +
                '<div style="clear:both;"></div>' +
                fullname.escapeHTML() +
-               '</li>');
+               '</a></li>');
+
+    li.find("a").on("click", function()
+    {
+      /* the popstate event handler only handles the back button and so it has to be deactivated
+       * before the user profile is opened */
+      $(window).unbind("popstate.friends");
+      $("body").pagecontainer("change", "#page-foreign-profile?user=" + encodeURIComponent(user["username"]));
+    });
 
     var sel = li.find("select");
 
@@ -88,6 +122,9 @@
       var obj = this;
       var opts = $(this).data("jquery.friends.options");
 
+      $(obj).data("jquery.friends.searchQuery", query);
+      $(obj).data("jquery.friends.restoreSearch", true);
+
       if(query && query.length >= 2 && opts.onGetProfile && opts.onSearch)
       {
         $(document).blockUI("show");
@@ -126,47 +163,63 @@
       var obj = this;
       var opts = $(this).data("jquery.friends.options");
 
-      methods.searchMode.apply(this, [false]);
-
-      if(opts.onGetProfile && opts.onGetFriends)
+      if($(obj).data("jquery.friends.restoreSearch"))
       {
-        // clear listview:
-        var ul = $(this).find("ul");
-        var nofriends = $(this).find('p[data-nofriends="yes"]');
+        var query = $(obj).data("jquery.friends.searchQuery");
 
-        ul.find("li").remove();
-        ul.listview();
+        methods.searchMode.apply(obj, [true]);
 
-        nofriends.hide();
+        $(this).find("input").val(query);
 
-        // get friends & insert found profiles:
-        $(document).blockUI("show");
+        methods.search.apply(obj, [query]);
 
-        $.when(opts.onGetProfile(), opts.onGetFriends())
-          .done(function(profile, friends)
-          {
-            if(friends.length == 0)
+        $(obj).data("jquery.friends.restoreSearch", false);
+        $(obj).data("jquery.friends.searchQuery", "");
+      }
+      else
+      {
+        methods.searchMode.apply(this, [false]);
+
+        if(opts.onGetProfile && opts.onGetFriends)
+        {
+          // clear listview:
+          var ul = $(this).find("ul");
+          var nofriends = $(this).find('p[data-nofriends="yes"]');
+
+          ul.find("li").remove();
+          ul.listview();
+
+          nofriends.hide();
+
+          // get friends & insert found profiles:
+          $(document).blockUI("show");
+
+          $.when(opts.onGetProfile(), opts.onGetFriends())
+            .done(function(profile, friends)
             {
-              nofriends.show();
-            }
-            else
-            {
-              $(friends).each(function(i, user)
+              if(friends.length == 0)
               {
-                ul.append(buildFriendListItem.apply(obj, [profile, user]));
-              });
+                nofriends.show();
+              }
+              else
+              {
+                $(friends).each(function(i, user)
+                {
+                  ul.append(buildFriendListItem.apply(obj, [profile, user]));
+                });
 
-              ul.listview("refresh");
-            }
-          })
-          .fail(function(response)
-          {
-            navigator.notification.alert("Couldn't load friends, please try again.", null, "Request failed", "Ok");
-          })
-          .always(function()
-          {
-            $(document).blockUI("hide");
-          });
+                ul.listview("refresh");
+              }
+            })
+            .fail(function(response)
+            {
+              navigator.notification.alert("Couldn't load friends, please try again.", null, "Request failed", "Ok");
+            })
+            .always(function()
+            {
+              $(document).blockUI("hide");
+            });
+        }
       }
 
       return this;
@@ -183,23 +236,7 @@
       {
         $(page).find('div[data-role="header"] .ui-btn-right').hide();
         $(page).find('p[data-nofriends="yes"]').hide();
-
-        $(window).bind("popstate.friends", function()
-        {
-          window.history.pushState(
-          {
-            hash: "#page-friends",
-            title: "Friends",
-            transition: "none",
-            pageUrl: "page-friends"
-          },
-          "Friends",
-          "index.html#page-friends");
-
-          methods.toggleSearchMode.apply(page);
-
-          return false;
-        });
+        $(window).bind("popstate.friends", handlePopState(page));
       }
       else
       {
@@ -256,6 +293,8 @@
       $(obj).data("jquery.friends", true);
       $(obj).data("jquery.friends.options",
                   $.extend({onGetProfile: null, onGetFriends: null, onSearch: null, onChangeFriendship: null, onGetAvatar: null, onModeChanged: null}, options));
+      $(obj).data("jquery.friends.searchQuery", null);
+      $(obj).data("jquery.friends.restoreSearch", false);
 
       // search button:
       var btn = $('<a href="#" data-role="button" data-icon="search" data-theme="b" class="ui-btn-right">Search</a>');
