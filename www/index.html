@@ -1092,6 +1092,8 @@
     {
       var cache = jCache["foreignProfile"];
 
+      setTimeout(function() { $.mobile.loading("show"); }, 1);
+
       if(!cache)
       {
         cache = {}
@@ -1107,12 +1109,13 @@
         jCache["foreignProfile"] = cache;
       }
 
-      cache["#image-foreign-profile"].attr("src", "images/image-loader.gif");
+      cache["#image-foreign-profile"].attr("src", "images/image-loader.gif").hide();
       cache["#h1-foreign-profile-username"].text("");
       cache["#h2-foreign-profile-name"].text("");
       cache["#div-foreign-profile-following"].hide();
       cache["#p-foreign-profile-friendship"].hide();
       cache["#p-foreign-profile-following"].hide();
+      cache["#p-foreign-profile-protected"].hide();
 
       var ul = $("#foreign-profile-listview");
 
@@ -1133,7 +1136,7 @@
           cache["#h2-foreign-profile-name"].text(fullname);
 
           var text = profile["username"] + "'s profile is " + (profile["protected"] ? "protected" : "not protected") + ".";
-          cache["#p-foreign-profile-protected"].text(text);
+          cache["#p-foreign-profile-protected"].text(text).show();
             
           if(profile["username"].toLowerCase() != ownProfile["username"].toLowerCase())
           {
@@ -1175,6 +1178,8 @@
                 $(document).blockUI("hide");
               });
             });
+
+          cache["#image-foreign-profile"].show();
 
           if(profile["avatar"])
           {
@@ -1244,6 +1249,10 @@
         .fail(function(result)
         {
           navigator.notification.alert("Couldn't load profile, please try again.", null, "Request failed", "Ok");
+        })
+        .always(function()
+        {
+          setTimeout(function() { $.mobile.loading("hide"); }, 1);
         });
     }
 
