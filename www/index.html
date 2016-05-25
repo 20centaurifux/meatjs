@@ -1193,7 +1193,14 @@
             cache["#image-foreign-profile"].attr("src", "images/image-missing.png");
           }
 
-          if(profile["following"] && profile["following"].length)
+          var following = profile["following"]
+
+          if(profile["username"].toLowerCase() == ownProfile["username"].toLowerCase())
+          {
+            following = ownProfile["following"];
+          }
+
+          if(following && following.length)
           {
             var client = store.createClient();
 
