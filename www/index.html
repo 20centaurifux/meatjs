@@ -1099,7 +1099,7 @@
         $(["#h1-foreign-profile-username", "#h2-foreign-profile-name", "#p-foreign-profile-protected", 
            "#p-foreign-profile-following", "#span-foreign-profile-follow", "#select-foreign-profile-follow", 
            "#image-foreign-profile", "#div-foreign-profile-following", "#p-foreign-profile-followed-users", 
-           "#foreign-profile-listview"]).each(function(i, value)
+           "#foreign-profile-listview", "#p-foreign-profile-friendship"]).each(function(i, value)
         {
           cache[value] = $(value);
         });
@@ -1111,6 +1111,8 @@
       cache["#h1-foreign-profile-username"].text("");
       cache["#h2-foreign-profile-name"].text("");
       cache["#div-foreign-profile-following"].hide();
+      cache["#p-foreign-profile-friendship"].hide();
+      cache["#p-foreign-profile-following"].hide();
 
       var ul = $("#foreign-profile-listview");
 
@@ -1130,26 +1132,32 @@
           cache["#h1-foreign-profile-username"].text(profile["username"]);
           cache["#h2-foreign-profile-name"].text(fullname);
 
-          var text = profile["username"] + "'s profile is " + (profile["protected"] ? "protected" : "not protected") + ".";
-          cache["#p-foreign-profile-protected"].text(text);
-          
-          text = profile["username"] + " is ";
-          var friendText = "not following you.";
-          var credentials = store.getCredentials();
-
-          if(profile["following"] && Tools.isFollowing(profile["following"], credentials.Username))
+          if(profile["username"].toLowerCase() != ownProfile["username"].toLowerCase())
           {
-            friendText = "following you.";
+            var text = profile["username"] + "'s profile is " + (profile["protected"] ? "protected" : "not protected") + ".";
+            cache["#p-foreign-profile-protected"].text(text);
+            
+            text = profile["username"] + " is ";
+            var friendText = "not following you.";
+            var credentials = store.getCredentials();
+
+            if(profile["following"] && Tools.isFollowing(profile["following"], credentials.Username))
+            {
+              friendText = "following you.";
+            }
+
+            cache["#p-foreign-profile-following"].text(text + friendText);
+            cache["#span-foreign-profile-follow"].text(profile["username"]);
+
+            $("#select-foreign-profile-follow").off("change");
+
+            cache["#select-foreign-profile-follow"]
+             .val(Tools.isFollowing(ownProfile["following"], profile["username"]) ? "yes" : "no")
+             .flipswitch("refresh");
+
+            cache["#p-foreign-profile-friendship"].show();
+            cache["#p-foreign-profile-following"].show();
           }
-
-          cache["#p-foreign-profile-following"].text(text + friendText);
-          cache["#span-foreign-profile-follow"].text(profile["username"]);
-
-          $("#select-foreign-profile-follow").off("change");
-
-          cache["#select-foreign-profile-follow"]
-           .val(Tools.isFollowing(ownProfile["following"], profile["username"]) ? "yes" : "no")
-           .flipswitch("refresh");
           
           cache["#select-foreign-profile-follow"].on("change", function(e)
           {
@@ -2399,7 +2407,7 @@
       <p id="p-foreign-profile-protected"></p>
       <p id="p-foreign-profile-following"></p>
 
-      <p>
+      <p id="p-foreign-profile-friendship">
         Follow <span id="span-foreign-profile-follow"></span>?
         <select id="select-foreign-profile-follow" data-role="flipswitch" data-mini="true">
           <option value="no">No</option>' +
