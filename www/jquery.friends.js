@@ -178,9 +178,6 @@
         $(this).find("input").val(query);
 
         methods.search.apply(obj, [query]);
-
-        $(obj).data("jquery.friends.restoreSearch", false);
-        $(obj).data("jquery.friends.searchQuery", "");
       }
       else
       {
