@@ -1132,11 +1132,11 @@
           cache["#h1-foreign-profile-username"].text(profile["username"]);
           cache["#h2-foreign-profile-name"].text(fullname);
 
+          var text = profile["username"] + "'s profile is " + (profile["protected"] ? "protected" : "not protected") + ".";
+          cache["#p-foreign-profile-protected"].text(text);
+            
           if(profile["username"].toLowerCase() != ownProfile["username"].toLowerCase())
           {
-            var text = profile["username"] + "'s profile is " + (profile["protected"] ? "protected" : "not protected") + ".";
-            cache["#p-foreign-profile-protected"].text(text);
-            
             text = profile["username"] + " is ";
             var friendText = "not following you.";
             var credentials = store.getCredentials();
