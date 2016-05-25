@@ -1090,10 +1090,27 @@
      */
     function page_foreign_profile_loading(user)
     {
-      $("#image-foreign-profile").attr("src", "images/image-loader.gif");
-      $("#h1-foreign-profile-username").text("");
-      $("#h2-foreign-profile-name").text("");
-      $("#div-foreign-profile-following").hide();
+      var cache = jCache["foreignProfile"];
+
+      if(!cache)
+      {
+        cache = {}
+
+        $(["#h1-foreign-profile-username", "#h2-foreign-profile-name", "#p-foreign-profile-protected", 
+           "#p-foreign-profile-following", "#span-foreign-profile-follow", "#select-foreign-profile-follow", 
+           "#image-foreign-profile", "#div-foreign-profile-following", "#p-foreign-profile-followed-users", 
+           "#foreign-profile-listview"]).each(function(i, value)
+        {
+          cache[value] = $(value);
+        });
+
+        jCache["foreignProfile"] = cache;
+      }
+
+      cache["#image-foreign-profile"].attr("src", "images/image-loader.gif");
+      cache["#h1-foreign-profile-username"].text("");
+      cache["#h2-foreign-profile-name"].text("");
+      cache["#div-foreign-profile-following"].hide();
 
       var ul = $("#foreign-profile-listview");
 
@@ -1110,11 +1127,11 @@
             fullname = profile["username"];
           }
 
-          $("#h1-foreign-profile-username").text(profile["username"]);
-          $("#h2-foreign-profile-name").text(fullname);
+          cache["#h1-foreign-profile-username"].text(profile["username"]);
+          cache["#h2-foreign-profile-name"].text(fullname);
 
           var text = profile["username"] + "'s profile is " + (profile["protected"] ? "protected" : "not protected") + ".";
-          $("#p-foreign-profile-protected").text(text);
+          cache["#p-foreign-profile-protected"].text(text);
           
           text = profile["username"] + " is ";
           var friendText = "not following you.";
@@ -1125,25 +1142,25 @@
             friendText = "following you.";
           }
 
-          $("#p-foreign-profile-following").text(text + friendText);
-          $("#span-foreign-profile-follow").text(profile["username"]);
+          cache["#p-foreign-profile-following"].text(text + friendText);
+          cache["#span-foreign-profile-follow"].text(profile["username"]);
 
           $("#select-foreign-profile-follow").off("change");
 
-          $("#select-foreign-profile-follow")
+          cache["#select-foreign-profile-follow"]
            .val(Tools.isFollowing(ownProfile["following"], profile["username"]) ? "yes" : "no")
            .flipswitch("refresh");
           
-          $("#select-foreign-profile-follow").on("change", function(e)
+          cache["#select-foreign-profile-follow"].on("change", function(e)
           {
-            var follow = $("#select-foreign-profile-follow").val() == "yes";
+            var follow = cache["#select-foreign-profile-follow"].val() == "yes";
 
             $(document).blockUI("show");
 
             store.follow(user, follow)
               .fail(function()
               {
-                $("#select-foreign-profile-follow").val(follow ? "no" : "yes").flipswitch("refresh");
+                cache["#select-foreign-profile-follow"].val(follow ? "no" : "yes").flipswitch("refresh");
               })
               .always(function()
               {
@@ -1156,16 +1173,16 @@
             store.getAvatar(user)
               .done(function(avatar)
               {
-                $("#image-foreign-profile").attr("src", avatar).show();
+                cache["#image-foreign-profile"].attr("src", avatar).show();
               })
               .fail(function(result)
               {
-                $("#image-foreign-profile").attr("src", "images/image-missing.png");
+                cache["#image-foreign-profile"].attr("src", "images/image-missing.png");
               });
           }
           else
           {
-            $("#image-foreign-profile").attr("src", "images/image-missing.png");
+            cache["#image-foreign-profile"].attr("src", "images/image-missing.png");
           }
 
           if(profile["following"] && profile["following"].length)
@@ -1173,8 +1190,8 @@
             var client = store.createClient();
 
             
-            $("#div-foreign-profile-following").show();
-            $("#p-foreign-profile-followed-users").text(profile["username"] + " is following...");
+            cache["#div-foreign-profile-following"].show();
+            cache["#p-foreign-profile-followed-users"].text(profile["username"] + " is following...");
 
             $.when.apply($, $.map(profile["following"], function(friend) { return store.getProfile(friend); }))
             .done(function()
