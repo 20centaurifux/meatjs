@@ -54,11 +54,12 @@
               {
                 var author = comment["user"]["username"];
                 var el = $('<li data-id="' + comment["id"] + '" data-timestamp="' + comment["created_on"]["$date"] + '">' +
-                           '<img data-source="' + author.escapeQuotes() + '" src="images/image-loader.gif" alt="">' +
+                           '<a href="#page-foreign-profile?user=' + encodeURIComponent(author).escapeQuotes() + '">' +
+                           '<img data-source="' + author.escapeQuotes() + '" src="images/image-loader.gif" alt="" />' +
                            '<p>' + comment["text"].escapeHTML() + '</p>' +
                            '<p>' + new Date(comment["created_on"]["$date"]).toLocaleString() + '</strong>' +
                            ' by <strong>' + author.escapeHTML() + '</strong></p>' +
-                           '</li>');
+                           '</a></li>');
 
                 var inserted = false;
 

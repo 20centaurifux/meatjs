@@ -63,5 +63,24 @@ var Tools =
         $("body").pagecontainer("change", page, {changeHash: false});
       }
     }
+  },
+  isFollowing: function(a, username)
+  {
+    if(!a)
+    {
+      return false;
+    }
+
+    var length = a.length;
+
+    for(var i = 0; i < length; i++)
+    {
+      if(a[i].toLowerCase() == username.toLowerCase())
+      {
+        return true;
+      }
+    }
+
+    return false;
   }
 };

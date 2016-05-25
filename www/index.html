@@ -13,7 +13,7 @@
 
   <style>
     span.error {color:red; margin:5px; font-style:italic;}
-    img.image  {border-style:dotted; border-width:1px;}
+    img.image  {border-style:dotted; border-width:1px; border-radius:8px;}
   </style>
 
   <script type="text/javascript" src="jquery.min.js"></script>
@@ -79,6 +79,7 @@
         $("#page-settings").on("pageshow", page_settings_loading);
 
         $.mobile.paramsHandler.addPage("page-image", ["guid"], [], function(params) { page_image_loading(params.guid); });
+        $.mobile.paramsHandler.addPage("page-foreign-profile", ["user"], [], function(params) { page_foreign_profile_loading(params.user); });
         $.mobile.paramsHandler.init();
 
         // register window events:
@@ -1084,6 +1085,171 @@
         });
     }
 
+    /*
+     * foreign profile page:
+     */
+    function page_foreign_profile_loading(user)
+    {
+      var cache = jCache["foreignProfile"];
+
+      if(!cache)
+      {
+        cache = {}
+
+        $(["#h1-foreign-profile-username", "#h2-foreign-profile-name", "#p-foreign-profile-protected", 
+           "#p-foreign-profile-following", "#span-foreign-profile-follow", "#select-foreign-profile-follow", 
+           "#image-foreign-profile", "#div-foreign-profile-following", "#p-foreign-profile-followed-users", 
+           "#foreign-profile-listview", "#p-foreign-profile-friendship"]).each(function(i, value)
+        {
+          cache[value] = $(value);
+        });
+
+        jCache["foreignProfile"] = cache;
+      }
+
+      cache["#image-foreign-profile"].attr("src", "images/image-loader.gif");
+      cache["#h1-foreign-profile-username"].text("");
+      cache["#h2-foreign-profile-name"].text("");
+      cache["#div-foreign-profile-following"].hide();
+      cache["#p-foreign-profile-friendship"].hide();
+      cache["#p-foreign-profile-following"].hide();
+
+      var ul = $("#foreign-profile-listview");
+
+      ul.find("li").remove();
+      ul.listview();
+
+      $.when(store.getOwnProfile(), store.getProfile(user))
+        .done(function(ownProfile, profile)
+        {
+          var fullname = Tools.buildDisplayUsername(profile);
+
+          if(!fullname || !fullname.length)
+          {
+            fullname = profile["username"];
+          }
+
+          cache["#h1-foreign-profile-username"].text(profile["username"]);
+          cache["#h2-foreign-profile-name"].text(fullname);
+
+          var text = profile["username"] + "'s profile is " + (profile["protected"] ? "protected" : "not protected") + ".";
+          cache["#p-foreign-profile-protected"].text(text);
+            
+          if(profile["username"].toLowerCase() != ownProfile["username"].toLowerCase())
+          {
+            text = profile["username"] + " is ";
+            var friendText = "not following you.";
+            var credentials = store.getCredentials();
+
+            if(profile["following"] && Tools.isFollowing(profile["following"], credentials.Username))
+            {
+              friendText = "following you.";
+            }
+
+            cache["#p-foreign-profile-following"].text(text + friendText);
+            cache["#span-foreign-profile-follow"].text(profile["username"]);
+
+            $("#select-foreign-profile-follow").off("change");
+
+            cache["#select-foreign-profile-follow"]
+             .val(Tools.isFollowing(ownProfile["following"], profile["username"]) ? "yes" : "no")
+             .flipswitch("refresh");
+
+            cache["#p-foreign-profile-friendship"].show();
+            cache["#p-foreign-profile-following"].show();
+          }
+          
+          cache["#select-foreign-profile-follow"].on("change", function(e)
+          {
+            var follow = cache["#select-foreign-profile-follow"].val() == "yes";
+
+            $(document).blockUI("show");
+
+            store.follow(user, follow)
+              .fail(function()
+              {
+                cache["#select-foreign-profile-follow"].val(follow ? "no" : "yes").flipswitch("refresh");
+              })
+              .always(function()
+              {
+                $(document).blockUI("hide");
+              });
+            });
+
+          if(profile["avatar"])
+          {
+            store.getAvatar(user)
+              .done(function(avatar)
+              {
+                cache["#image-foreign-profile"].attr("src", avatar).show();
+              })
+              .fail(function(result)
+              {
+                cache["#image-foreign-profile"].attr("src", "images/image-missing.png");
+              });
+          }
+          else
+          {
+            cache["#image-foreign-profile"].attr("src", "images/image-missing.png");
+          }
+
+          var following = profile["following"]
+
+          if(profile["username"].toLowerCase() == ownProfile["username"].toLowerCase())
+          {
+            following = ownProfile["following"];
+          }
+
+          if(following && following.length)
+          {
+            var client = store.createClient();
+
+            
+            cache["#div-foreign-profile-following"].show();
+            cache["#p-foreign-profile-followed-users"].text(profile["username"] + " is following...");
+
+            $.when.apply($, $.map(profile["following"], function(friend) { return store.getProfile(friend); }))
+            .done(function()
+            {
+              $(arguments).each(function(i, user)
+              {
+                var fullname = Tools.buildDisplayUsername(user);
+                var li = $('<li data-username="' + user["username"].escapeQuotes() + '">' +
+                           '<a href="#page-foreign-profile?user=' + encodeURIComponent(user["username"]).escapeQuotes() + '">' +
+                           '<img data-source="' + user["username"].escapeQuotes() + '" src="images/image-loader.gif" alt="">' +
+                           '<div style="float:left;"><h2>' + user["username"] + '</h2></div>' +
+                           '<div style="clear:both;"></div>' +
+                           fullname.escapeHTML() +
+                           '</a></li>');
+
+                ul.append(li);
+
+                // load avatar:
+                client.getAvatar(user["username"])
+                  .done(function(image)
+                  {
+                    $(li).find("img").attr("src", image);
+                  })
+                  .fail(function()
+                  {
+                    $(li).find("img").attr("src", "images/image-missing.png");
+                  });
+              });
+
+              ul.listview("refresh");
+            });
+          }
+
+        })
+        .fail(function(result)
+        {
+          // TODO
+        });
+    }
+
+    /*
+     * library utilities:
+     */
     function updateLibraries(ids, objects)
     {
       var cache = jCache["libraries"];
@@ -1812,6 +1978,10 @@
             id = id.split(",");
             openImage(id[0]);
           }
+          else if(type == "user")
+          {
+            $("body").pagecontainer("change", "#page-foreign-profile?user=" + encodeURIComponent(id));
+          }
         }
       };
 
@@ -2226,6 +2396,43 @@
     </form>
   </div>
 </div>
+
+<div data-role="page" id="page-foreign-profile">
+  <div data-role="header" data-position="fixed" data-theme="b">
+    <a data-rel="back" href="#" data-icon="back" data-iconpos="notext" data-direction="reverse"></a>
+    <h1 id="h1-foreign-profile-username"></h1>
+  </div>
+ 
+  <div role="main" data-role="content">
+    <div style="float:left; padding-top:15px;">
+      <img class="image" style="max-width:180px; max-height:180; min-width:66px;" id="image-foreign-profile" src="" alt="" />
+    </div>
+
+    <div style="margin-left:200px;">
+      <h2 id="h2-foreign-profile-name"></h2>
+
+      <p id="p-foreign-profile-protected"></p>
+      <p id="p-foreign-profile-following"></p>
+
+      <p id="p-foreign-profile-friendship">
+        Follow <span id="span-foreign-profile-follow"></span>?
+        <select id="select-foreign-profile-follow" data-role="flipswitch" data-mini="true">
+          <option value="no">No</option>' +
+          <option value="yes">Yes</option>' +
+        </select>
+      </p>
+    </div>
+
+    <div style="clear:left;"></div>
+
+    <div id="div-foreign-profile-following">
+      <p style="font-weight:bold;" id="p-foreign-profile-followed-users"></p>
+      <ul id="foreign-profile-listview" data-role="listview" data-inset="true">
+      </ul>
+    </div>
+  </div>
+</div>
+
 
 <div data-role="page" id="page-recommend">
   <div data-role="header" data-position="fixed" data-theme="b">
