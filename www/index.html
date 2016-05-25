@@ -1243,7 +1243,7 @@
         })
         .fail(function(result)
         {
-          // TODO
+          navigator.notification.alert("Couldn't load profile, please try again.", null, "Request failed", "Ok");
         });
     }
 
