@@ -1128,28 +1128,28 @@
           $("#p-foreign-profile-following").text(text + friendText);
           $("#span-foreign-profile-follow").text(profile["username"]);
 
+          $("#select-foreign-profile-follow").off("change");
+
           $("#select-foreign-profile-follow")
            .val(Tools.isFollowing(ownProfile["following"], profile["username"]) ? "yes" : "no")
            .flipswitch("refresh");
           
-          $("#select-foreign-profile-follow")
-            .off("change")
-            .on("change", function(e)
-            {
-              var follow = $("#select-foreign-profile-follow").val() == "yes";
+          $("#select-foreign-profile-follow").on("change", function(e)
+          {
+            var follow = $("#select-foreign-profile-follow").val() == "yes";
 
-              $(document).blockUI("show");
+            $(document).blockUI("show");
 
-              store.follow(user, follow)
-                .fail(function()
-                {
-                  $("#select-foreign-profile-follow").val(follow ? "no" : "yes").flipswitch("refresh");
-                })
-                .always(function()
-                {
-                  $(document).blockUI("hide");
-                });
+            store.follow(user, follow)
+              .fail(function()
+              {
+                $("#select-foreign-profile-follow").val(follow ? "no" : "yes").flipswitch("refresh");
+              })
+              .always(function()
+              {
+                $(document).blockUI("hide");
               });
+            });
 
           if(profile["avatar"])
           {
@@ -2373,7 +2373,7 @@
  
   <div role="main" data-role="content">
     <div style="float:left; padding-top:15px;">
-      <img class="image" style="max-width:180px; max-height:300px; min-width:180px;" id="image-foreign-profile" src="" alt="" />
+      <img class="image" style="max-width:180px; max-height:180; min-width:66px;" id="image-foreign-profile" src="" alt="" />
     </div>
 
     <div style="margin-left:200px;">

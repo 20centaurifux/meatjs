@@ -38,14 +38,20 @@
     var friend = Tools.isFollowing(profile["following"], user["username"]);
 
     var li = $('<li data-username="' + user["username"].escapeQuotes() + '">' +
-               '<a href="#"><img data-source="' + user["username"].escapeQuotes() + '" src="images/image-loader.gif" alt="">' +
-               '<div style="float:right;"><span style="font-size:smaller; font-weight:bold;">Follow</span> <select data-mini="true">' +
+               '<div style="float:right;">' +
+               '<span style="font-size:smaller;">Follow? </span>' +
+               '<select data-mini="true" style="font-size:smaller;">' +
                '<option value="no">No</option>' +
                '<option value="yes">Yes</option>' +
-               '</select></div>' +
-               '<div style="float:left;"><h2>' + user["username"] + '</h2></div>' +
-               '<div style="clear:both;"></div>' +
+               '</select>' +
+               '</div>' +
+               '<a href="#">' +
+               '<img data-source="' + user["username"].escapeQuotes() + '" src="images/image-loader.gif" alt="">' +
+               '<div style="float:left;">' +
+               '<h2>' + user["username"] + '</h2>' +
                fullname.escapeHTML() +
+               '</div>' +
+               '<div style="clear:both;"></div>' +
                '</a></li>');
 
     li.find("a").on("click", function()
