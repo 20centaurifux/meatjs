@@ -54,6 +54,8 @@
           client.getOwnProfile()
             .success(function(profile)
             {
+              Tools.sortICase(profile["following"]);
+
               cache.setJSON("user.Profile", profile, 300);
               d.resolve(profile);
             })
@@ -84,6 +86,11 @@
           client.getProfile(username)
             .success(function(profile)
             {
+              if(profile["following"])
+              {
+                Tools.sortICase(profile["following"]);
+              }
+
               cache.setJSON(key, profile, 300);
               d.resolve(profile);
             })
@@ -104,6 +111,7 @@
 
       p.done(function(profile)
       {
+        Tools.ICase(profile["following"]);
         cache.setJSON("user.Profile", profile, 300);
       });
 

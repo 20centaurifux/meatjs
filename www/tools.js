@@ -82,5 +82,15 @@ var Tools =
     }
 
     return false;
+  },
+  sortICase: function(arr)
+  {
+    arr.sort(function(a, b)
+    {
+      a = a.toLowerCase();
+      b = b.toLowerCase();
+
+      return a === b ? 0 : a > b ? 1 : -1;
+    });
   }
 };
