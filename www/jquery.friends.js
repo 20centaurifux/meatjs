@@ -199,7 +199,7 @@
           nofriends.hide();
 
           // get friends & insert found profiles:
-          $(document).blockUI("show");
+          setTimeout(function() { $.mobile.loading("show"); }, 1);
 
           $.when(opts.onGetProfile(), opts.onGetFriends())
             .done(function(profile, friends)
@@ -224,7 +224,7 @@
             })
             .always(function()
             {
-              $(document).blockUI("hide");
+              setTimeout(function() { $.mobile.loading("hide"); }, 1);
             });
         }
       }
