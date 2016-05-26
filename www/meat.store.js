@@ -72,6 +72,11 @@
 
     this.getProfile = function(username)
     {
+      if(storage.load("user.Username").toLowerCase() == username)
+      {
+        return this.getOwnProfile();
+      }
+
       var d = $.Deferred();
 
       setTimeout(function()
